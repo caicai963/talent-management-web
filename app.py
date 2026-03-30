@@ -122,6 +122,21 @@ def system_status():
         'users': users
     })
 
+@app.route('/api/system/reset-admin', methods=['POST'])
+def reset_admin():
+    """重置admin账号密码为admin123（紧急修复）"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'")
+    exists = cursor.fetchone()[0] > 0
+    if exists:
+        cursor.execute("UPDATE users SET password = 'admin123' WHERE username = 'admin'")
+    else:
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', 'admin123', 'admin'))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'admin/admin123 已重置'})
+
 @app.route('/api/system/setup', methods=['POST'])
 def system_setup():
     """初始化/重置系统账号（仅当账号数<=1时可用，防止误操作）"""
