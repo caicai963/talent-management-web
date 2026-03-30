@@ -1,0 +1,386 @@
+"""
+人才标签管理系统 - Flask 后端
+"""
+from flask import Flask, render_template, request, jsonify, send_file
+from flask_cors import CORS
+import sqlite3
+import os
+import pandas as pd
+from datetime import datetime
+import io
+
+app = Flask(__name__)
+CORS(app)
+DATABASE = 'talent.db'
+
+# 75个字段定义
+TALENT_FIELDS = [
+    # 模块一：基础信息（12列）
+    "name", "gender", "birth_date", "identity_tag", "city", "city_level",
+    "school", "major", "education", "graduate_year", "phone", "wechat",
+    # 模块二：人员评价（6列）
+    "project_count", "avg_rating", "month_rating", "overall_summary",
+    "detailed_review", "exam_score",
+    # 模块三：业务能力（22列）
+    "basic_test", "desktop_research", "issue_list", "insight_proposal",
+    "skills_debug", "agent_debug", "knowledge_base", "interview_selection",
+    "online_interview", "field_interview", "questionnaire_design",
+    "questionnaire_analysis", "lab_assist", "lab_leader",
+    # 模块四：工作经历（35列）
+    "company_1", "position_1", "duration_1", "description_1",
+    "company_2", "position_2", "duration_2", "description_2",
+    "company_3", "position_3", "duration_3", "description_3",
+    "company_4", "position_4", "duration_4", "description_4",
+    "company_5", "position_5", "duration_5", "description_5",
+    # 更多工作经历和标签
+    "skill_tags", "availability", "hourly_rate", "preferred_city",
+    "preferred_industry", "self_introduction", "source",
+    "registration_date", "last_update", "status", "remarks"
+]
+
+def get_db():
+    """获取数据库连接"""
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    """初始化数据库表"""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 创建人才表
+    columns = ["id INTEGER PRIMARY KEY AUTOINCREMENT"]
+    for field in TALENT_FIELDS:
+        columns.append(f"{field} TEXT")
+
+    columns.extend([
+        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    ])
+
+    create_sql = f"""
+    CREATE TABLE IF NOT EXISTS talents (
+        {', '.join(columns)}
+    )
+    """
+    cursor.execute(create_sql)
+
+    # 创建用户表（用于权限管理）
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'user',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 创建默认管理员账户（admin/admin123）
+    cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+            ('admin', 'admin123', 'admin')
+        )
+
+    conn.commit()
+    conn.close()
+
+# 初始化数据库
+init_db()
+
+# ========== API 端点 ==========
+
+@app.route('/')
+def index():
+    """渲染主页"""
+    return render_template('index.html')
+
+@app.route('/api/talents', methods=['GET'])
+def get_talents():
+    """获取人才列表（支持搜索/分页）"""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 查询参数
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    search = request.args.get('search', '')
+    filters = request.args.get('filters', '')
+
+    offset = (page - 1) * per_page
+
+    # 构建查询
+    query = "SELECT * FROM talents WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND (name LIKE ? OR school LIKE ? OR major LIKE ? OR phone LIKE ?)"
+        params.extend([f'%{search}%'] * 4)
+
+    if filters:
+        try:
+            filter_dict = eval(filters)
+            for key, value in filter_dict.items():
+                if value:
+                    query += f" AND {key} = ?"
+                    params.append(value)
+        except:
+            pass
+
+    # 获取总数
+    count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
+    cursor.execute(count_query, params)
+    total = cursor.fetchone()[0]
+
+    # 获取分页数据
+    query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+
+    # 转换为字典列表
+    talents = [dict(row) for row in rows]
+
+    return jsonify({
+        'data': talents,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'total_pages': (total + per_page - 1) // per_page
+    })
+
+@app.route('/api/talents/<int:talent_id>', methods=['GET'])
+def get_talent(talent_id):
+    """获取单个人才详情"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM talents WHERE id = ?", (talent_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return jsonify(dict(row))
+    return jsonify({'error': 'Not found'}), 404
+
+@app.route('/api/talents', methods=['POST'])
+def create_talent():
+    """新增人才"""
+    data = request.json
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 构建插入语句
+    fields = []
+    placeholders = []
+    values = []
+
+    for field in TALENT_FIELDS:
+        if field in data:
+            fields.append(field)
+            placeholders.append('?')
+            values.append(data[field])
+
+    if fields:
+        sql = f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})"
+        cursor.execute(sql, values)
+        talent_id = cursor.lastrowid
+        conn.commit()
+
+    conn.close()
+    return jsonify({'id': talent_id, 'message': '创建成功'})
+
+@app.route('/api/talents/<int:talent_id>', methods=['PUT'])
+def update_talent(talent_id):
+    """更新人才"""
+    data = request.json
+    conn = get_db()
+    cursor = conn.cursor()
+
+    updates = []
+    values = []
+
+    for field in TALENT_FIELDS:
+        if field in data:
+            updates.append(f"{field} = ?")
+            values.append(data[field])
+
+    if updates:
+        updates.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(talent_id)
+
+        sql = f"UPDATE talents SET {', '.join(updates)} WHERE id = ?"
+        cursor.execute(sql, values)
+        conn.commit()
+
+    conn.close()
+    return jsonify({'message': '更新成功'})
+
+@app.route('/api/talents/<int:talent_id>', methods=['DELETE'])
+def delete_talent(talent_id):
+    """删除人才"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM talents WHERE id = ?", (talent_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': '删除成功'})
+
+@app.route('/api/talents/import', methods=['POST'])
+def import_talents():
+    """批量导入Excel"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        return jsonify({'error': 'Please upload Excel file'}), 400
+
+    try:
+        df = pd.read_excel(file)
+        conn = get_db()
+        cursor = conn.cursor()
+
+        imported_count = 0
+        for _, row in df.iterrows():
+            fields = []
+            placeholders = []
+            values = []
+
+            for field in TALENT_FIELDS:
+                if field in row.index:
+                    value = row[field]
+                    if pd.notna(value):
+                        fields.append(field)
+                        placeholders.append('?')
+                        values.append(str(value))
+
+            if fields:
+                sql = f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})"
+                cursor.execute(sql, values)
+                imported_count += 1
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': f'成功导入 {imported_count} 条记录', 'count': imported_count})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/talents/export', methods=['GET'])
+def export_talents():
+    """导出Excel"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM talents ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return jsonify({'error': 'No data'}), 400
+
+    # 转换为DataFrame
+    data = [dict(row) for row in rows]
+    df = pd.DataFrame(data)
+
+    # 移除created_at和updated_at列
+    for col in ['created_at', 'updated_at']:
+        if col in df.columns:
+            df = df.drop(columns=[col])
+
+    # 写入Excel到内存
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='人才库')
+
+    output.seek(0)
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=f'人才库_{datetime.now().strftime("%Y%m%d")}.xlsx'
+    )
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """获取标签统计"""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    stats = {}
+
+    # 总人数
+    cursor.execute("SELECT COUNT(*) FROM talents")
+    stats['total'] = cursor.fetchone()[0]
+
+    # 学历分布
+    cursor.execute("SELECT education, COUNT(*) as count FROM talents WHERE education IS NOT NULL AND education != '' GROUP BY education")
+    stats['education'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # 身份标签分布
+    cursor.execute("SELECT identity_tag, COUNT(*) as count FROM talents WHERE identity_tag IS NOT NULL AND identity_tag != '' GROUP BY identity_tag")
+    stats['identity_tag'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # 城市分布
+    cursor.execute("SELECT city, COUNT(*) as count FROM talents WHERE city IS NOT NULL AND city != '' GROUP BY city ORDER BY count DESC LIMIT 10")
+    stats['city'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # 星级分布
+    cursor.execute("SELECT month_rating, COUNT(*) as count FROM talents WHERE month_rating IS NOT NULL AND month_rating != '' GROUP BY month_rating")
+    stats['month_rating'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # 业务能力统计（精通人数）
+    skill_fields = ['basic_test', 'desktop_research', 'issue_list', 'insight_proposal',
+                   'skills_debug', 'agent_debug', 'knowledge_base', 'interview_selection',
+                   'online_interview', 'field_interview', 'questionnaire_design',
+                   'questionnaire_analysis', 'lab_assist', 'lab_leader']
+
+    stats['skills'] = {}
+    for field in skill_fields:
+        cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
+        stats['skills'][field] = cursor.fetchone()[0]
+
+    conn.close()
+    return jsonify(stats)
+
+# ========== 权限管理 API ==========
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """用户登录"""
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user:
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'role': user['role']
+            }
+        })
+    return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    print("=" * 50)
+    print("人才标签管理系统")
+    print("=" * 50)
+    print(f"访问地址: http://0.0.0.0:{port}")
+    print("默认管理员: admin / admin123")
+    print("=" * 50)
+    app.run(debug=debug, port=port, host='0.0.0.0')
