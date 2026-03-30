@@ -487,10 +487,11 @@
         <div id="toast" class="toast">[[ toastMessage ]]</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script>
         const { createApp, ref, computed, onMounted, watch } = Vue;
 
-        createApp({
+        const app = createApp({
             setup() {
                 // 状态
                 const isLoggedIn = ref(false);
@@ -691,17 +692,10 @@
                     toastMessage
                 };
             }
-        }).mount('#app');
-    </script>
-    <script>
+        });
         // 改 Vue 分隔符，避免跟 Jinja2 冲突
-        const originalCreateApp = Vue.createApp;
-        Vue.createApp = function(...args) {
-            const app = originalCreateApp.apply(this, args);
-            app.config.delimiters = ['[[', ']]'];
-            return app;
-        };
+        app.config.delimiters = ['[[', ']]'];
+        app.mount('#app');
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 </body>
 </html>
