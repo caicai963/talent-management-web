@@ -172,17 +172,17 @@
                             </tr>
                             <tr v-for="talent in talents" :key="talent.id">
                                 <td>{{ talent.id }}</td>
-                                <td>{{ talent.name || '-' }}</td>
-                                <td>{{ talent.gender || '-' }}</td>
-                                <td>{{ talent.birth_date || '-' }}</td>
-                                <td>{{ talent.identity_tag || '-' }}</td>
-                                <td>{{ talent.city || '-' }}</td>
-                                <td>{{ talent.school || '-' }}</td>
-                                <td>{{ talent.major || '-' }}</td>
-                                <td>{{ talent.education || '-' }}</td>
-                                <td>{{ talent.graduate_year || '-' }}</td>
-                                <td>{{ talent.phone || '-' }}</td>
-                                <td>{{ talent.month_rating || '-' }}</td>
+                                <td>{{ talent.name | default('-') }}</td>
+                                <td>{{ talent.gender | default('-') }}</td>
+                                <td>{{ talent.birth_date | default('-') }}</td>
+                                <td>{{ talent.identity_tag | default('-') }}</td>
+                                <td>{{ talent.city | default('-') }}</td>
+                                <td>{{ talent.school | default('-') }}</td>
+                                <td>{{ talent.major | default('-') }}</td>
+                                <td>{{ talent.education | default('-') }}</td>
+                                <td>{{ talent.graduate_year | default('-') }}</td>
+                                <td>{{ talent.phone | default('-') }}</td>
+                                <td>{{ talent.month_rating | default('-') }}</td>
                                 <td class="actions">
                                     <button class="btn-primary" @click="openEditModal(talent)">编辑</button>
                                     <button class="btn-danger" @click="deleteTalent(talent.id)">删除</button>
@@ -206,7 +206,7 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h4>总人数</h4>
-                        <div class="value">{{ stats.total || 0 }}</div>
+                        <div class="value">{{ stats.total | default(0) }}</div>
                     </div>
                     <div class="stat-card">
                         <h4>学历分布</h4>
