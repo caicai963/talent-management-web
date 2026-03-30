@@ -77,19 +77,25 @@ def init_db():
     )
     """)
 
-    # 创建默认管理员账户（admin/admin123）
+    conn.commit()
+    conn.close()
+
+def ensure_admin():
+    """确保默认管理员账号存在"""
+    conn = get_db()
+    cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'")
     if cursor.fetchone()[0] == 0:
         cursor.execute(
             "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
             ('admin', 'admin123', 'admin')
         )
-
-    conn.commit()
+        conn.commit()
     conn.close()
 
-# 初始化数据库
+# 初始化数据库 + 确保管理员存在
 init_db()
+ensure_admin()
 
 # ========== API 端点 ==========
 
@@ -98,13 +104,141 @@ def index():
     """渲染主页"""
     return render_template('index.html')
 
+# ========== 系统初始化 API（用于首次设置账号）==========
+
+@app.route('/api/system/status', methods=['GET'])
+def system_status():
+    """检查系统状态：是否有账号"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+    cursor.execute("SELECT id, username, role FROM users")
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify({
+        'has_users': count > 0,
+        'user_count': count,
+        'users': users
+    })
+
+@app.route('/api/system/setup', methods=['POST'])
+def system_setup():
+    """初始化/重置系统账号（仅当账号数<=1时可用，防止误操作）"""
+    data = request.json
+    users_to_create = data.get('users', [])
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+
+    if count > 1:
+        conn.close()
+        return jsonify({'error': '系统已有多个账号，请联系管理员删除多余账号后再试'}), 403
+
+    if len(users_to_create) == 0:
+        conn.close()
+        return jsonify({'error': '请至少创建1个账号'}), 400
+
+    if len(users_to_create) > 5:
+        conn.close()
+        return jsonify({'error': '最多只能创建5个账号'}), 400
+
+    # 检查用户名重复
+    usernames = [u.get('username', '').strip() for u in users_to_create]
+    if len(usernames) != len(set(usernames)):
+        conn.close()
+        return jsonify({'error': '用户名不能重复'}), 400
+
+    for u in users_to_create:
+        username = u.get('username', '').strip()
+        password = u.get('password', '').strip()
+        role = u.get('role', 'user').strip()
+        if not username or not password:
+            conn.close()
+            return jsonify({'error': '用户名和密码不能为空'}), 400
+
+    # 删除除admin外的所有账号（如果有）
+    cursor.execute("DELETE FROM users WHERE username != 'admin'")
+    # 更新admin账号
+    for u in users_to_create:
+        username = u.get('username', '').strip()
+        password = u.get('password', '').strip()
+        role = u.get('role', 'user').strip()
+        cursor.execute(
+            "INSERT OR REPLACE INTO users (username, password, role) VALUES (?, ?, ?)",
+            (username, password, role)
+        )
+
+    conn.commit()
+    conn.close()
+    return jsonify({'message': f'成功创建 {len(users_to_create)} 个账号'})
+
+@app.route('/api/users', methods=['GET'])
+def list_users():
+    """获取所有账号（仅管理员）"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, role, created_at FROM users ORDER BY id")
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(users)
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    """新增账号（仅管理员，最多5个）"""
+    data = request.json
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    role = data.get('role', 'user').strip()
+
+    if not username or not password:
+        return jsonify({'error': '用户名和密码不能为空'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] >= 5:
+        conn.close()
+        return jsonify({'error': '最多只能创建5个账号'}), 400
+
+    try:
+        cursor.execute(
+            "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+            (username, password, role)
+        )
+        conn.commit()
+        user_id = cursor.lastrowid
+        conn.close()
+        return jsonify({'id': user_id, 'message': '账号创建成功'})
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'error': '用户名已存在'}), 400
+
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """删除账号（仅管理员）"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'error': '用户不存在'}), 404
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': '删除成功'})
+
+# ========== 人才管理 API ==========
+
 @app.route('/api/talents', methods=['GET'])
 def get_talents():
     """获取人才列表（支持搜索/分页）"""
     conn = get_db()
     cursor = conn.cursor()
 
-    # 查询参数
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     search = request.args.get('search', '')
@@ -112,7 +246,6 @@ def get_talents():
 
     offset = (page - 1) * per_page
 
-    # 构建查询
     query = "SELECT * FROM talents WHERE 1=1"
     params = []
 
@@ -130,12 +263,10 @@ def get_talents():
         except:
             pass
 
-    # 获取总数
     count_query = query.replace('SELECT *', 'SELECT COUNT(*)')
     cursor.execute(count_query, params)
     total = cursor.fetchone()[0]
 
-    # 获取分页数据
     query += " ORDER BY id DESC LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
@@ -143,7 +274,6 @@ def get_talents():
     rows = cursor.fetchall()
     conn.close()
 
-    # 转换为字典列表
     talents = [dict(row) for row in rows]
 
     return jsonify({
@@ -174,7 +304,6 @@ def create_talent():
     conn = get_db()
     cursor = conn.cursor()
 
-    # 构建插入语句
     fields = []
     placeholders = []
     values = []
@@ -283,16 +412,13 @@ def export_talents():
     if not rows:
         return jsonify({'error': 'No data'}), 400
 
-    # 转换为DataFrame
     data = [dict(row) for row in rows]
     df = pd.DataFrame(data)
 
-    # 移除created_at和updated_at列
     for col in ['created_at', 'updated_at']:
         if col in df.columns:
             df = df.drop(columns=[col])
 
-    # 写入Excel到内存
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='人才库')
@@ -313,27 +439,21 @@ def get_stats():
 
     stats = {}
 
-    # 总人数
     cursor.execute("SELECT COUNT(*) FROM talents")
     stats['total'] = cursor.fetchone()[0]
 
-    # 学历分布
     cursor.execute("SELECT education, COUNT(*) as count FROM talents WHERE education IS NOT NULL AND education != '' GROUP BY education")
     stats['education'] = {row[0]: row[1] for row in cursor.fetchall()}
 
-    # 身份标签分布
     cursor.execute("SELECT identity_tag, COUNT(*) as count FROM talents WHERE identity_tag IS NOT NULL AND identity_tag != '' GROUP BY identity_tag")
     stats['identity_tag'] = {row[0]: row[1] for row in cursor.fetchall()}
 
-    # 城市分布
     cursor.execute("SELECT city, COUNT(*) as count FROM talents WHERE city IS NOT NULL AND city != '' GROUP BY city ORDER BY count DESC LIMIT 10")
     stats['city'] = {row[0]: row[1] for row in cursor.fetchall()}
 
-    # 星级分布
     cursor.execute("SELECT month_rating, COUNT(*) as count FROM talents WHERE month_rating IS NOT NULL AND month_rating != '' GROUP BY month_rating")
     stats['month_rating'] = {row[0]: row[1] for row in cursor.fetchall()}
 
-    # 业务能力统计（精通人数）
     skill_fields = ['basic_test', 'desktop_research', 'issue_list', 'insight_proposal',
                    'skills_debug', 'agent_debug', 'knowledge_base', 'interview_selection',
                    'online_interview', 'field_interview', 'questionnaire_design',
@@ -382,5 +502,6 @@ if __name__ == '__main__':
     print("=" * 50)
     print(f"访问地址: http://0.0.0.0:{port}")
     print("默认管理员: admin / admin123")
+    print("初始化账号请访问: POST /api/system/setup")
     print("=" * 50)
     app.run(debug=debug, port=port, host='0.0.0.0')
