@@ -102,7 +102,7 @@
         <div v-if="!isLoggedIn" class="login-container">
             <div class="login-box">
                 <h2>人才标签管理系统</h2>
-                <div v-if="loginError" class="login-error">{{ loginError }}</div>
+                <div v-if="loginError" class="login-error">[[ loginError ]]</div>
                 <input v-model="loginForm.username" type="text" placeholder="用户名" @keyup.enter="handleLogin">
                 <input v-model="loginForm.password" type="password" placeholder="密码" @keyup.enter="handleLogin">
                 <button @click="handleLogin">登录</button>
@@ -114,7 +114,7 @@
             <div class="header">
                 <h1>人才标签管理系统</h1>
                 <div class="header-right">
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role }})</span>
+                    <span class="user-info">[[ currentUser.username ]] ([[ currentUser.role ]])</span>
                     <button class="logout-btn" @click="handleLogout">退出</button>
                 </div>
             </div>
@@ -171,18 +171,18 @@
                                 <td colspan="13" class="empty-state">暂无数据</td>
                             </tr>
                             <tr v-for="talent in talents" :key="talent.id">
-                                <td>{{ talent.id }}</td>
-                                <td>{{ talent.name | default('-') }}</td>
-                                <td>{{ talent.gender | default('-') }}</td>
-                                <td>{{ talent.birth_date | default('-') }}</td>
-                                <td>{{ talent.identity_tag | default('-') }}</td>
-                                <td>{{ talent.city | default('-') }}</td>
-                                <td>{{ talent.school | default('-') }}</td>
-                                <td>{{ talent.major | default('-') }}</td>
-                                <td>{{ talent.education | default('-') }}</td>
-                                <td>{{ talent.graduate_year | default('-') }}</td>
-                                <td>{{ talent.phone | default('-') }}</td>
-                                <td>{{ talent.month_rating | default('-') }}</td>
+                                <td>[[ talent.id ]]</td>
+                                <td>[[ talent.name | default('-') ]]</td>
+                                <td>[[ talent.gender | default('-') ]]</td>
+                                <td>[[ talent.birth_date | default('-') ]]</td>
+                                <td>[[ talent.identity_tag | default('-') ]]</td>
+                                <td>[[ talent.city | default('-') ]]</td>
+                                <td>[[ talent.school | default('-') ]]</td>
+                                <td>[[ talent.major | default('-') ]]</td>
+                                <td>[[ talent.education | default('-') ]]</td>
+                                <td>[[ talent.graduate_year | default('-') ]]</td>
+                                <td>[[ talent.phone | default('-') ]]</td>
+                                <td>[[ talent.month_rating | default('-') ]]</td>
                                 <td class="actions">
                                     <button class="btn-primary" @click="openEditModal(talent)">编辑</button>
                                     <button class="btn-danger" @click="deleteTalent(talent.id)">删除</button>
@@ -195,7 +195,7 @@
                 <div class="pagination">
                     <button @click="changePage(1)" :disabled="pagination.page === 1">首页</button>
                     <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一页</button>
-                    <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">{{ p }}</button>
+                    <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">[[ p ]]</button>
                     <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一页</button>
                     <button @click="changePage(pagination.total_pages)" :disabled="pagination.page >= pagination.total_pages">末页</button>
                 </div>
@@ -206,27 +206,27 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h4>总人数</h4>
-                        <div class="value">{{ stats.total | default(0) }}</div>
+                        <div class="value">[[ stats.total | default(0) ]]</div>
                     </div>
                     <div class="stat-card">
                         <h4>学历分布</h4>
                         <div v-for="(count, key) in stats.education" :key="key" class="stat-detail">
-                            <span>{{ key }}</span>
-                            <span>{{ count }}</span>
+                            <span>[[ key ]]</span>
+                            <span>[[ count ]]</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <h4>身份分布</h4>
                         <div v-for="(count, key) in stats.identity_tag" :key="key" class="stat-detail">
-                            <span>{{ key }}</span>
-                            <span>{{ count }}</span>
+                            <span>[[ key ]]</span>
+                            <span>[[ count ]]</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <h4>城市分布 (Top 10)</h4>
                         <div v-for="(count, key) in stats.city" :key="key" class="stat-detail">
-                            <span>{{ key }}</span>
-                            <span>{{ count }}</span>
+                            <span>[[ key ]]</span>
+                            <span>[[ count ]]</span>
                         </div>
                     </div>
                 </div>
@@ -484,7 +484,7 @@
         </div>
 
         <!-- Toast -->
-        <div id="toast" class="toast">{{ toastMessage }}</div>
+        <div id="toast" class="toast">[[ toastMessage ]]</div>
     </div>
 
     <script>
@@ -692,6 +692,15 @@
                 };
             }
         }).mount('#app');
+    </script>
+    <script>
+        // 改 Vue 分隔符，避免跟 Jinja2 冲突
+        const originalCreateApp = Vue.createApp;
+        Vue.createApp = function(...args) {
+            const app = originalCreateApp.apply(this, args);
+            app.config.delimiters = ['[[', ']]'];
+            return app;
+        };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 </body>
