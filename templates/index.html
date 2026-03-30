@@ -237,7 +237,7 @@
         <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
             <div class="modal">
                 <div class="modal-header">
-                    <h3>{{ editingTalent ? '编辑人才' : '新增人才' }}</h3>
+                    <h3>{% if editingTalent %}编辑人才{% else %}新增人才{% endif %}</h3>
                     <button class="modal-close" @click="showModal = false">&times;</button>
                 </div>
                 <div class="modal-body">
