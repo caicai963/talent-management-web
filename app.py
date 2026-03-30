@@ -127,12 +127,8 @@ def reset_admin():
     """重置admin账号密码为admin123（紧急修复）"""
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'")
-    exists = cursor.fetchone()[0] > 0
-    if exists:
-        cursor.execute("UPDATE users SET password = 'admin123' WHERE username = 'admin'")
-    else:
-        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', 'admin123', 'admin'))
+    cursor.execute("DELETE FROM users")
+    cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', 'admin123', 'admin'))
     conn.commit()
     conn.close()
     return jsonify({'message': 'admin/admin123 已重置'})
@@ -488,25 +484,35 @@ def get_stats():
 def login():
     """用户登录"""
     data = request.json
-    username = data.get('username')
-    password = data.get('password')
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+
+    print(f"[DEBUG] Login attempt: username='{username}', password='{password}'")
 
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
     user = cursor.fetchone()
-    conn.close()
 
     if user:
-        return jsonify({
+        result = {
             'success': True,
             'user': {
                 'id': user['id'],
                 'username': user['username'],
                 'role': user['role']
             }
-        })
-    return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+        }
+        conn.close()
+        return jsonify(result)
+
+    # 调试：看看库里有什么用户
+    cursor.execute("SELECT username, password, role FROM users")
+    all_users = [dict(row) for row in cursor.fetchall()]
+    print(f"[DEBUG] All users in DB: {all_users}")
+    conn.close()
+
+    return jsonify({'success': False, 'error': 'Invalid credentials', 'debug_received': {'username': username, 'password': password}}), 401
 
 if __name__ == '__main__':
     import os
