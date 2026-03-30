@@ -13,30 +13,90 @@ app = Flask(__name__)
 CORS(app)
 DATABASE = 'talent.db'
 
-# 75个字段定义
-TALENT_FIELDS = [
-    # 模块一：基础信息（12列）
-    "name", "gender", "birth_date", "identity_tag", "city", "city_level",
-    "school", "major", "education", "graduate_year", "phone", "wechat",
-    # 模块二：人员评价（6列）
-    "project_count", "avg_rating", "month_rating", "overall_summary",
-    "detailed_review", "exam_score",
-    # 模块三：业务能力（22列）
-    "basic_test", "desktop_research", "issue_list", "insight_proposal",
-    "skills_debug", "agent_debug", "knowledge_base", "interview_selection",
-    "online_interview", "field_interview", "questionnaire_design",
-    "questionnaire_analysis", "lab_assist", "lab_leader",
-    # 模块四：工作经历（35列）
-    "company_1", "position_1", "duration_1", "description_1",
-    "company_2", "position_2", "duration_2", "description_2",
-    "company_3", "position_3", "duration_3", "description_3",
-    "company_4", "position_4", "duration_4", "description_4",
-    "company_5", "position_5", "duration_5", "description_5",
-    # 更多工作经历和标签
-    "skill_tags", "availability", "hourly_rate", "preferred_city",
-    "preferred_industry", "self_introduction", "source",
-    "registration_date", "last_update", "status", "remarks"
-]
+# 字段映射：数据库字段名 -> Excel列名
+COLUMN_MAP = {
+    # 模块一：基础信息
+    "name": "姓名",
+    "gender": "性别",
+    "birth_date": "出生年月",
+    "identity_tag": "身份标签",
+    "city": "常住城市",
+    "city_level": "城市级别",
+    "school": "学校",
+    "major": "专业",
+    "education": "在读学历",
+    "graduate_year": "预计毕业年份",
+    "phone": "手机号",
+    "wechat": "微信号",
+    # 模块二：人员评价
+    "project_count": "业务次数",
+    "avg_rating": "历史平均星级",
+    "month_rating": "当月星级",
+    "overall_summary": "整体评价摘要",
+    "detailed_review": "详细业务评价",
+    "exam_score": "兼职考试得分",
+    # 模块三：业务能力
+    "basic_test": "日常跑测/基础测评",
+    "desktop_research": "桌面研究（竞品/舆情/资料整理）",
+    "issue_list": "问题清单执行",
+    "insight_proposal": "洞察提案能力",
+    "skills_debug": "Skills生成/调试（AI工具）",
+    "agent_debug": "Agent生成/调试",
+    "knowledge_base": "AI知识库建设",
+    "interview_selection": "访谈执行-玩家甄选",
+    "online_interview": "访谈执行-线上访谈",
+    "field_interview": "访谈执行-田野调查/外访",
+    "questionnaire_design": "访谈提纲/问卷设计",
+    "questionnaire_analysis": "问卷调研（录入/整理/分析）",
+    "lab_assist": "实验室测试-协助执行",
+    "lab_leader": "实验室测试-主负责/主持",
+    "data_warehouse": "数仓工作（日志/报表）",
+    "data_query": "数据查询/报表开发",
+    "web_crawl": "爬虫/数据收集",
+    "deep_assessment": "深度测评能力",
+    "commercial_research": "商业化研究与分析",
+    "excel_level": "Excel技能等级",
+    "spss_level": "SPSS技能等级",
+    "language_ability": "语言能力",
+    # 模块四：游戏品类
+    "category_moba": "品类-MOBA类（英雄联盟、王者荣耀等）",
+    "category_mmorgp": "品类-MMORPG（逆水寒、梦幻西游等）",
+    "category_openworld_rpg": "品类-开放世界RPG（塞尔达、原神等）",
+    "category_card_rpg": "品类-卡牌RPG类（阴阳师、崩坏：星穹铁道等）",
+    "category_tactical": "品类-战术竞技类（PUBG、和平精英等）",
+    "category_shooter": "品类-射击类（穿越火线、CODM等）",
+    "category_strategy_slg": "品类-策略/SLG类（文明、率土之滨等）",
+    "category_action_fight": "品类-动作/格斗类（只狼、崩坏3等）",
+    "category_sandbox_survival": "品类-沙盒/生存类（我的世界、明日之后等）",
+    "category_autochess": "品类-自走棋类（金铲铲、多多自走棋等）",
+    "category_casual_puzzle": "品类-休闲益智类（羊了个羊、消消乐等）",
+    "category_party": "品类-休闲竞技/派对类（蛋仔派对、鹅鸭杀等）",
+    "category_etc": "品类-其他（自填）",
+    # 模块五：重点游戏
+    "key_game_1": "重点游戏-逆水寒",
+    "key_game_2": "重点游戏-燕云十六声",
+    "key_game_3": "重点游戏-一梦江湖",
+    "key_game_4": "重点游戏-阴阳师",
+    "key_game_5": "重点游戏-金铲铲之战",
+    "key_game_6": "重点游戏-蛋仔派对",
+    "key_game_7": "重点游戏-无尽冬日",
+    "key_game_8": "重点游戏-率土之滨",
+    "key_game_9": "重点游戏-王者荣耀",
+    "key_game_10": "重点游戏-英雄联盟",
+    "key_game_11": "重点游戏-明日之后",
+    "key_game_12": "重点游戏-萤火突击",
+    "key_game_13": "重点游戏-三角洲行动",
+    # 模块六：深度游戏
+    "deep_game_1": "深度游戏1",
+    "deep_game_2": "深度游戏2",
+    "deep_game_3": "深度游戏3",
+    # 模块七：其他
+    "proficient_products": "精通产品（1000h+）",
+    "familiar_products": "熟悉产品（500h+）",
+    "other_game_experience": "其他游戏经历补充",
+}
+
+TALENT_FIELDS = list(COLUMN_MAP.keys())
 
 def get_db():
     """获取数据库连接"""
@@ -386,28 +446,43 @@ def import_talents():
         cursor = conn.cursor()
 
         imported_count = 0
-        for _, row in df.iterrows():
+        error_rows = []
+        for idx, row in df.iterrows():
             fields = []
             placeholders = []
             values = []
 
-            for field in TALENT_FIELDS:
-                if field in row.index:
-                    value = row[field]
+            for col_name in df.columns:
+                # 尝试用Excel列名匹配
+                field = None
+                col_str = str(col_name).strip()
+                if col_str in COLUMN_MAP.values():
+                    field = [k for k, v in COLUMN_MAP.items() if v == col_str][0]
+                elif col_str in COLUMN_MAP:
+                    field = col_str
+
+                if field:
+                    value = row[col_name]
                     if pd.notna(value):
                         fields.append(field)
                         placeholders.append('?')
                         values.append(str(value))
 
             if fields:
-                sql = f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})"
-                cursor.execute(sql, values)
-                imported_count += 1
+                try:
+                    sql = f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})"
+                    cursor.execute(sql, values)
+                    imported_count += 1
+                except Exception as e:
+                    error_rows.append(f"第{idx+2}行: {str(e)}")
 
         conn.commit()
         conn.close()
 
-        return jsonify({'message': f'成功导入 {imported_count} 条记录', 'count': imported_count})
+        msg = f'成功导入 {imported_count} 条记录'
+        if error_rows:
+            msg += f'，{len(error_rows)} 行失败'
+        return jsonify({'message': msg, 'count': imported_count, 'errors': error_rows[:10]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
