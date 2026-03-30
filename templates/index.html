@@ -122,6 +122,7 @@
             <div class="tabs">
                 <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">人才列表</button>
                 <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
+                <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
             </div>
 
             <!-- 人才列表 -->
@@ -227,6 +228,62 @@
                         <div v-for="(count, key) in stats.city" :key="key" class="stat-detail">
                             <span>[[ key ]]</span>
                             <span>[[ count ]]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 账号管理页面 -->
+            <div v-if="activeTab === 'users'" style="background: white; padding: 24px; border-radius: 8px;">
+                <h3 style="margin-bottom: 20px;">账号管理</h3>
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>[[ systemUsers.length ]]</strong> 个账号（最多5个）</p>
+
+                <div class="table-container" style="margin-bottom: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>角色</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="u in systemUsers" :key="u.id">
+                                <td>[[ u.id ]]</td>
+                                <td>[[ u.username ]]</td>
+                                <td>[[ u.role ]]</td>
+                                <td>[[ u.created_at | default('-') ]]</td>
+                                <td><button class="btn-danger" @click="deleteUser(u.id)">删除</button></td>
+                            </tr>
+                            <tr v-if="systemUsers.length === 0">
+                                <td colspan="5" class="empty-state">暂无账号</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+                    <h4 style="margin-bottom: 16px;">新增账号</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input v-model="newUser.username" type="text" placeholder="输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input v-model="newUser.password" type="password" placeholder="输入密码">
+                        </div>
+                        <div class="form-group">
+                            <label>角色</label>
+                            <select v-model="newUser.role">
+                                <option value="user">普通用户</option>
+                                <option value="admin">管理员</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 5">添加账号</button>
                         </div>
                     </div>
                 </div>
@@ -516,6 +573,9 @@
                 const activeTab = ref('list');
                 const stats = ref({});
 
+                const systemUsers = ref([]);
+                const newUser = ref({ username: '', password: '', role: 'user' });
+
                 const toastMessage = ref('');
 
                 // 计算可见页码
@@ -662,6 +722,37 @@
                     stats.value = res.data;
                 };
 
+                const loadUsers = async () => {
+                    const res = await api.get('/api/users');
+                    systemUsers.value = res.data;
+                };
+
+                const addUser = async () => {
+                    if (!newUser.value.username || !newUser.value.password) {
+                        showToast('请填写用户名和密码');
+                        return;
+                    }
+                    try {
+                        const res = await api.post('/api/users', newUser.value);
+                        showToast('账号创建成功');
+                        newUser.value = { username: '', password: '', role: 'user' };
+                        loadUsers();
+                    } catch (e) {
+                        showToast(e.response?.data?.error || '创建失败');
+                    }
+                };
+
+                const deleteUser = async (id) => {
+                    if (!confirm('确定要删除这个账号吗？')) return;
+                    try {
+                        await api.delete(`/api/users/${id}`);
+                        showToast('删除成功');
+                        loadUsers();
+                    } catch (e) {
+                        showToast(e.response?.data?.error || '删除失败');
+                    }
+                };
+
                 const showToast = (msg) => {
                     toastMessage.value = msg;
                     const toast = document.getElementById('toast');
@@ -689,6 +780,7 @@
                     showImportModal, importFile, handleFileSelect, importTalents,
                     exportTalents,
                     activeTab, stats, loadStats,
+                    systemUsers, newUser, loadUsers, addUser, deleteUser,
                     toastMessage
                 };
             }
