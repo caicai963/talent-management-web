@@ -11,6 +11,11 @@ import io
 
 app = Flask(__name__)
 CORS(app)
+
+# 配置 Jinja2 使用 <% %> 替代 {{ }}，避免与 Vue 冲突
+app.jinja_env.variable_start_string = '<%'
+app.jinja_env.variable_end_string = '%>'
+
 DATABASE = '/tmp/talent.db'
 
 # 字段映射：数据库字段名 -> Excel列名
