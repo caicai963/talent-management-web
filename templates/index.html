@@ -20,7 +20,7 @@
         .user-info { color: #666; font-size: 14px; }
         .logout-btn { padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-        /* 登录页 */
+        /* 登录�?*/
         .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); width: 360px; }
         .login-box h2 { text-align: center; margin-bottom: 24px; color: #333; }
@@ -29,7 +29,7 @@
         .login-box button:hover { background: #357abd; }
         .login-error { color: #f44336; text-align: center; margin-bottom: 16px; }
 
-        /* 操作栏 */
+        /* 操作�?*/
         .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
         .toolbar input[type="text"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; }
         .toolbar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
@@ -81,7 +81,7 @@
         .stat-detail { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
         .stat-detail span:last-child { font-weight: 600; }
 
-        /* 标签页 */
+        /* 标签�?*/
         .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 4px; border-radius: 8px; }
         .tab { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 4px; font-size: 14px; }
         .tab.active { background: #4a90d9; color: white; }
@@ -90,7 +90,7 @@
         .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #4CAF50; color: white; border-radius: 4px; z-index: 2000; display: none; }
         .toast.show { display: block; }
 
-        /* 空状态 */
+        /* 空状�?*/
         .empty-state { text-align: center; padding: 60px 20px; color: #999; }
 
         /* 加载 */
@@ -99,24 +99,24 @@
 </head>
 <body>
     <div id="app">
-        <!-- 登录页 -->
+        <!-- 登录�?-->
         <div v-if="!isLoggedIn" class="login-container">
             <div class="login-box">
                 <h2>人才标签管理系统</h2>
                 <div v-if="loginError" class="login-error">[[ loginError ]]</div>
-                <input v-model="loginForm.username" type="text" placeholder="用户名" @keyup.enter="handleLogin">
+                <input v-model="loginForm.username" type="text" placeholder="用户�? @keyup.enter="handleLogin">
                 <input v-model="loginForm.password" type="password" placeholder="密码" @keyup.enter="handleLogin">
                 <button @click="handleLogin">登录</button>
             </div>
         </div>
 
-        <!-- 主应用 -->
+        <!-- 主应�?-->
         <div v-else class="app-container">
             <div class="header">
                 <h1>人才标签管理系统</h1>
                 <div class="header-right">
                     <span class="user-info">[[ currentUser.username ]] ([[ currentUser.role ]])</span>
-                    <button class="logout-btn" @click="handleLogout">退出</button>
+                    <button class="logout-btn" @click="handleLogout">退�?/button>
                 </div>
             </div>
 
@@ -129,7 +129,7 @@
             <!-- 人才列表 -->
             <div v-if="activeTab === 'list'">
                 <div class="toolbar">
-                    <input v-model="searchQuery" type="text" placeholder="搜索姓名/学校/专业/手机号..." @input="debouncedSearch">
+                    <input v-model="searchQuery" type="text" placeholder="搜索姓名/学校/专业/手机�?.." @input="debouncedSearch">
                     <select v-model="filterEducation" @change="loadTalents">
                         <option value="">全部学历</option>
                         <option value="本科">本科</option>
@@ -138,7 +138,7 @@
                     </select>
                     <select v-model="filterIdentity" @change="loadTalents">
                         <option value="">全部身份</option>
-                        <option value="实习生">实习生</option>
+                        <option value="实习�?>实习�?/option>
                         <option value="兼职">兼职</option>
                     </select>
                     <button class="btn-primary" @click="openAddModal">+ 新增人才</button>
@@ -158,29 +158,29 @@
                                 <th>学校</th>
                                 <th>专业</th>
                                 <th>学历</th>
-                                <th>手机号</th>
+                                <th>手机�?/th>
                                 <th>当月星级</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loading">
-                                <td colspan="11" class="loading">加载中...</td>
+                                <td colspan="11" class="loading">加载�?..</td>
                             </tr>
                             <tr v-else-if="talents.length === 0">
                                 <td colspan="11" class="empty-state">暂无数据</td>
                             </tr>
                             <tr v-for="talent in talents" :key="talent.id">
                                 <td>[[ talent.id ]]</td>
-                                <td>[[ talent.name | default('-') ]]</td>
-                                <td>[[ talent.gender | default('-') ]]</td>
-                                <td>[[ talent.identity_tag | default('-') ]]</td>
-                                <td>[[ talent.city | default('-') ]]</td>
-                                <td>[[ talent.school | default('-') ]]</td>
-                                <td>[[ talent.major | default('-') ]]</td>
-                                <td>[[ talent.education | default('-') ]]</td>
-                                <td>[[ talent.phone | default('-') ]]</td>
-                                <td>[[ talent.month_rating | default('-') ]]</td>
+                                <td>[[ talent.name || '-' ]]</td>
+                                <td>[[ talent.gender || '-' ]]</td>
+                                <td>[[ talent.identity_tag || '-' ]]</td>
+                                <td>[[ talent.city || '-' ]]</td>
+                                <td>[[ talent.school || '-' ]]</td>
+                                <td>[[ talent.major || '-' ]]</td>
+                                <td>[[ talent.education || '-' ]]</td>
+                                <td>[[ talent.phone || '-' ]]</td>
+                                <td>[[ talent.month_rating || '-' ]]</td>
                                 <td class="actions">
                                     <button class="btn-primary" @click="openDetailModal(talent)">详情</button>
                                     <button class="btn-warning" @click="openEditModal(talent)">编辑</button>
@@ -193,9 +193,9 @@
 
                 <div class="pagination">
                     <button @click="changePage(1)" :disabled="pagination.page === 1">首页</button>
-                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一页</button>
+                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一�?/button>
                     <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">[[ p ]]</button>
-                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一页</button>
+                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一�?/button>
                     <button @click="changePage(pagination.total_pages)" :disabled="pagination.page >= pagination.total_pages">末页</button>
                 </div>
             </div>
@@ -204,7 +204,7 @@
             <div v-if="activeTab === 'stats'">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <h4>总人数</h4>
+                        <h4>总人�?/h4>
                         <div class="value">[[ stats.total | default(0) ]]</div>
                     </div>
                     <div class="stat-card">
@@ -234,14 +234,14 @@
             <!-- 账号管理页面 -->
             <div v-if="activeTab === 'users'" style="background: white; padding: 24px; border-radius: 8px;">
                 <h3 style="margin-bottom: 20px;">账号管理</h3>
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>[[ systemUsers.length ]]</strong> 个账号（最多5个）</p>
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>[[ systemUsers.length ]]</strong> 个账号（最�?个）</p>
 
                 <div class="table-container" style="margin-bottom: 20px;">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>用户名</th>
+                                <th>用户�?/th>
                                 <th>角色</th>
                                 <th>创建时间</th>
                                 <th>操作</th>
@@ -252,7 +252,7 @@
                                 <td>[[ u.id ]]</td>
                                 <td>[[ u.username ]]</td>
                                 <td>[[ u.role ]]</td>
-                                <td>[[ u.created_at | default('-') ]]</td>
+                                <td>[[ u.created_at || '-' ]]</td>
                                 <td><button class="btn-danger" @click="deleteUser(u.id)">删除</button></td>
                             </tr>
                             <tr v-if="systemUsers.length === 0">
@@ -266,8 +266,8 @@
                     <h4 style="margin-bottom: 16px;">新增账号</h4>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>用户名</label>
-                            <input v-model="newUser.username" type="text" placeholder="输入用户名">
+                            <label>用户�?/label>
+                            <input v-model="newUser.username" type="text" placeholder="输入用户�?>
                         </div>
                         <div class="form-group">
                             <label>密码</label>
@@ -276,8 +276,8 @@
                         <div class="form-group">
                             <label>角色</label>
                             <select v-model="newUser.role">
-                                <option value="user">普通用户</option>
-                                <option value="admin">管理员</option>
+                                <option value="user">普通用�?/option>
+                                <option value="admin">管理�?/option>
                             </select>
                         </div>
                         <div class="form-group" style="display: flex; align-items: flex-end;">
@@ -307,8 +307,8 @@
                                 <label>性别</label>
                                 <select v-model="talentForm.gender">
                                     <option value="">请选择</option>
-                                    <option value="男">男</option>
-                                    <option value="女">女</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -319,21 +319,21 @@
                                 <label>身份标签</label>
                                 <select v-model="talentForm.identity_tag">
                                     <option value="">请选择</option>
-                                    <option value="实习生">实习生</option>
+                                    <option value="实习�?>实习�?/option>
                                     <option value="兼职">兼职</option>
                                     <option value="其他">其他</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>常住城市</label>
-                                <input v-model="talentForm.city" type="text" placeholder="省-市">
+                                <input v-model="talentForm.city" type="text" placeholder="�?�?>
                             </div>
                             <div class="form-group">
                                 <label>城市级别</label>
                                 <select v-model="talentForm.city_level">
                                     <option value="">请选择</option>
-                                    <option value="一线">一线</option>
-                                    <option value="新一线">新一线</option>
+                                    <option value="一�?>一�?/option>
+                                    <option value="新一�?>新一�?/option>
                                     <option value="二线">二线</option>
                                     <option value="其他">其他</option>
                                 </select>
@@ -357,14 +357,14 @@
                             </div>
                             <div class="form-group">
                                 <label>预计毕业年份</label>
-                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY年">
+                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY�?>
                             </div>
                             <div class="form-group">
-                                <label>手机号</label>
+                                <label>手机�?/label>
                                 <input v-model="talentForm.phone" type="text">
                             </div>
                             <div class="form-group">
-                                <label>微信号</label>
+                                <label>微信�?/label>
                                 <input v-model="talentForm.wechat" type="text">
                             </div>
                         </div>
@@ -397,112 +397,112 @@
                     </div>
 
                     <div class="form-section">
-                        <div class="form-section-title">业务能力 (程度类)</div>
+                        <div class="form-section-title">业务能力 (程度�?</div>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>日常跑测/基础测评</label>
                                 <select v-model="talentForm.basic_test">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>桌面研究</label>
                                 <select v-model="talentForm.desktop_research">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>问题清单执行</label>
                                 <select v-model="talentForm.issue_list">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>洞察提案能力</label>
                                 <select v-model="talentForm.insight_proposal">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>访谈执行-线上访谈</label>
                                 <select v-model="talentForm.online_interview">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>问卷调研</label>
                                 <select v-model="talentForm.questionnaire_analysis">
                                     <option value="">请选择</option>
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
                                     <option value="进阶">进阶</option>
                                     <option value="基础">基础</option>
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <div class="form-section-title">业务能力 (是否类)</div>
+                        <div class="form-section-title">业务能力 (是否�?</div>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Skills生成/调试</label>
                                 <select v-model="talentForm.skills_debug">
                                     <option value="">请选择</option>
-                                    <option value="是">是</option>
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Agent生成/调试</label>
                                 <select v-model="talentForm.agent_debug">
                                     <option value="">请选择</option>
-                                    <option value="是">是</option>
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>AI知识库建设</label>
+                                <label>AI知识库建�?/label>
                                 <select v-model="talentForm.knowledge_base">
                                     <option value="">请选择</option>
-                                    <option value="是">是</option>
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>实验室测试-协助执行</label>
+                                <label>实验室测�?协助执行</label>
                                 <select v-model="talentForm.lab_assist">
                                     <option value="">请选择</option>
-                                    <option value="是">是</option>
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>实验室测试-主负责</label>
+                                <label>实验室测�?主负�?/label>
                                 <select v-model="talentForm.lab_leader">
                                     <option value="">请选择</option>
-                                    <option value="是">是</option>
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
+                                    <option value="�?>�?/option>
                                 </select>
                             </div>
                         </div>
@@ -528,7 +528,7 @@
                         <input type="file" accept=".xlsx,.xls" @change="handleFileSelect">
                     </div>
                     <p style="color: #666; font-size: 13px; margin-top: 12px;">
-                        请确保 Excel 文件的列名与系统字段对应。列名可以是中文或英文。
+                        请确�?Excel 文件的列名与系统字段对应。列名可以是中文或英文�?
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -545,110 +545,110 @@
         <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
             <div class="modal" style="max-width: 1000px;">
                 <div class="modal-header">
-                    <h3>人才详情 - [[ detailTalent.name | default('-') ]]</h3>
+                    <h3>人才详情 - [[ detailTalent.name || '-' ]]</h3>
                     <button class="modal-close" @click="showDetailModal = false">&times;</button>
                 </div>
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     <div class="form-section">
                         <div class="form-section-title">基础信息</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>姓名</label><div>[[ detailTalent.name | default('-') ]]</div></div>
-                            <div class="form-group"><label>性别</label><div>[[ detailTalent.gender | default('-') ]]</div></div>
-                            <div class="form-group"><label>出生年月</label><div>[[ detailTalent.birth_date | default('-') ]]</div></div>
-                            <div class="form-group"><label>身份标签</label><div>[[ detailTalent.identity_tag | default('-') ]]</div></div>
-                            <div class="form-group"><label>常住城市</label><div>[[ detailTalent.city | default('-') ]]</div></div>
-                            <div class="form-group"><label>城市级别</label><div>[[ detailTalent.city_level | default('-') ]]</div></div>
-                            <div class="form-group"><label>学校</label><div>[[ detailTalent.school | default('-') ]]</div></div>
-                            <div class="form-group"><label>专业</label><div>[[ detailTalent.major | default('-') ]]</div></div>
-                            <div class="form-group"><label>在读学历</label><div>[[ detailTalent.education | default('-') ]]</div></div>
-                            <div class="form-group"><label>预计毕业年份</label><div>[[ detailTalent.graduate_year | default('-') ]]</div></div>
-                            <div class="form-group"><label>手机号</label><div>[[ detailTalent.phone | default('-') ]]</div></div>
-                            <div class="form-group"><label>微信号</label><div>[[ detailTalent.wechat | default('-') ]]</div></div>
+                            <div class="form-group"><label>姓名</label><div>[[ detailTalent.name || '-' ]]</div></div>
+                            <div class="form-group"><label>性别</label><div>[[ detailTalent.gender || '-' ]]</div></div>
+                            <div class="form-group"><label>出生年月</label><div>[[ detailTalent.birth_date || '-' ]]</div></div>
+                            <div class="form-group"><label>身份标签</label><div>[[ detailTalent.identity_tag || '-' ]]</div></div>
+                            <div class="form-group"><label>常住城市</label><div>[[ detailTalent.city || '-' ]]</div></div>
+                            <div class="form-group"><label>城市级别</label><div>[[ detailTalent.city_level || '-' ]]</div></div>
+                            <div class="form-group"><label>学校</label><div>[[ detailTalent.school || '-' ]]</div></div>
+                            <div class="form-group"><label>专业</label><div>[[ detailTalent.major || '-' ]]</div></div>
+                            <div class="form-group"><label>在读学历</label><div>[[ detailTalent.education || '-' ]]</div></div>
+                            <div class="form-group"><label>预计毕业年份</label><div>[[ detailTalent.graduate_year || '-' ]]</div></div>
+                            <div class="form-group"><label>手机�?/label><div>[[ detailTalent.phone || '-' ]]</div></div>
+                            <div class="form-group"><label>微信�?/label><div>[[ detailTalent.wechat || '-' ]]</div></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title">人员评价</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>业务次数</label><div>[[ detailTalent.project_count | default('-') ]]</div></div>
-                            <div class="form-group"><label>历史平均星级</label><div>[[ detailTalent.avg_rating | default('-') ]]</div></div>
-                            <div class="form-group"><label>当月星级</label><div>[[ detailTalent.month_rating | default('-') ]]</div></div>
-                            <div class="form-group"><label>兼职考试得分</label><div>[[ detailTalent.exam_score | default('-') ]]</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>整体评价摘要</label><div>[[ detailTalent.overall_summary | default('-') ]]</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>详细业务评价</label><div>[[ detailTalent.detailed_review | default('-') ]]</div></div>
+                            <div class="form-group"><label>业务次数</label><div>[[ detailTalent.project_count || '-' ]]</div></div>
+                            <div class="form-group"><label>历史平均星级</label><div>[[ detailTalent.avg_rating || '-' ]]</div></div>
+                            <div class="form-group"><label>当月星级</label><div>[[ detailTalent.month_rating || '-' ]]</div></div>
+                            <div class="form-group"><label>兼职考试得分</label><div>[[ detailTalent.exam_score || '-' ]]</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>整体评价摘要</label><div>[[ detailTalent.overall_summary || '-' ]]</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>详细业务评价</label><div>[[ detailTalent.detailed_review || '-' ]]</div></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title">业务能力</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>日常跑测/基础测评</label><div>[[ detailTalent.basic_test | default('-') ]]</div></div>
-                            <div class="form-group"><label>桌面研究</label><div>[[ detailTalent.desktop_research | default('-') ]]</div></div>
-                            <div class="form-group"><label>问题清单执行</label><div>[[ detailTalent.issue_list | default('-') ]]</div></div>
-                            <div class="form-group"><label>洞察提案能力</label><div>[[ detailTalent.insight_proposal | default('-') ]]</div></div>
-                            <div class="form-group"><label>Skills生成/调试</label><div>[[ detailTalent.skills_debug | default('-') ]]</div></div>
-                            <div class="form-group"><label>Agent生成/调试</label><div>[[ detailTalent.agent_debug | default('-') ]]</div></div>
-                            <div class="form-group"><label>AI知识库建设</label><div>[[ detailTalent.knowledge_base | default('-') ]]</div></div>
-                            <div class="form-group"><label>访谈执行-玩家甄选</label><div>[[ detailTalent.interview_selection | default('-') ]]</div></div>
-                            <div class="form-group"><label>访谈执行-线上访谈</label><div>[[ detailTalent.online_interview | default('-') ]]</div></div>
-                            <div class="form-group"><label>访谈执行-田野调查/外访</label><div>[[ detailTalent.field_interview | default('-') ]]</div></div>
-                            <div class="form-group"><label>访谈提纲/问卷设计</label><div>[[ detailTalent.questionnaire_design | default('-') ]]</div></div>
-                            <div class="form-group"><label>问卷调研</label><div>[[ detailTalent.questionnaire_analysis | default('-') ]]</div></div>
-                            <div class="form-group"><label>实验室测试-协助执行</label><div>[[ detailTalent.lab_assist | default('-') ]]</div></div>
-                            <div class="form-group"><label>实验室测试-主负责/主持</label><div>[[ detailTalent.lab_leader | default('-') ]]</div></div>
-                            <div class="form-group"><label>数仓工作（日志/报表）</label><div>[[ detailTalent.data_warehouse | default('-') ]]</div></div>
-                            <div class="form-group"><label>数据查询/报表开发</label><div>[[ detailTalent.data_query | default('-') ]]</div></div>
-                            <div class="form-group"><label>爬虫/数据收集</label><div>[[ detailTalent.web_crawl | default('-') ]]</div></div>
-                            <div class="form-group"><label>深度测评能力</label><div>[[ detailTalent.deep_assessment | default('-') ]]</div></div>
-                            <div class="form-group"><label>商业化研究与分析</label><div>[[ detailTalent.commercial_research | default('-') ]]</div></div>
-                            <div class="form-group"><label>Excel技能等级</label><div>[[ detailTalent.excel_level | default('-') ]]</div></div>
-                            <div class="form-group"><label>SPSS技能等级</label><div>[[ detailTalent.spss_level | default('-') ]]</div></div>
-                            <div class="form-group"><label>语言能力</label><div>[[ detailTalent.language_ability | default('-') ]]</div></div>
+                            <div class="form-group"><label>日常跑测/基础测评</label><div>[[ detailTalent.basic_test || '-' ]]</div></div>
+                            <div class="form-group"><label>桌面研究</label><div>[[ detailTalent.desktop_research || '-' ]]</div></div>
+                            <div class="form-group"><label>问题清单执行</label><div>[[ detailTalent.issue_list || '-' ]]</div></div>
+                            <div class="form-group"><label>洞察提案能力</label><div>[[ detailTalent.insight_proposal || '-' ]]</div></div>
+                            <div class="form-group"><label>Skills生成/调试</label><div>[[ detailTalent.skills_debug || '-' ]]</div></div>
+                            <div class="form-group"><label>Agent生成/调试</label><div>[[ detailTalent.agent_debug || '-' ]]</div></div>
+                            <div class="form-group"><label>AI知识库建�?/label><div>[[ detailTalent.knowledge_base || '-' ]]</div></div>
+                            <div class="form-group"><label>访谈执行-玩家甄�?/label><div>[[ detailTalent.interview_selection || '-' ]]</div></div>
+                            <div class="form-group"><label>访谈执行-线上访谈</label><div>[[ detailTalent.online_interview || '-' ]]</div></div>
+                            <div class="form-group"><label>访谈执行-田野调查/外访</label><div>[[ detailTalent.field_interview || '-' ]]</div></div>
+                            <div class="form-group"><label>访谈提纲/问卷设计</label><div>[[ detailTalent.questionnaire_design || '-' ]]</div></div>
+                            <div class="form-group"><label>问卷调研</label><div>[[ detailTalent.questionnaire_analysis || '-' ]]</div></div>
+                            <div class="form-group"><label>实验室测�?协助执行</label><div>[[ detailTalent.lab_assist || '-' ]]</div></div>
+                            <div class="form-group"><label>实验室测�?主负�?主持</label><div>[[ detailTalent.lab_leader || '-' ]]</div></div>
+                            <div class="form-group"><label>数仓工作（日�?报表�?/label><div>[[ detailTalent.data_warehouse || '-' ]]</div></div>
+                            <div class="form-group"><label>数据查询/报表开�?/label><div>[[ detailTalent.data_query || '-' ]]</div></div>
+                            <div class="form-group"><label>爬虫/数据收集</label><div>[[ detailTalent.web_crawl || '-' ]]</div></div>
+                            <div class="form-group"><label>深度测评能力</label><div>[[ detailTalent.deep_assessment || '-' ]]</div></div>
+                            <div class="form-group"><label>商业化研究与分析</label><div>[[ detailTalent.commercial_research || '-' ]]</div></div>
+                            <div class="form-group"><label>Excel技能等�?/label><div>[[ detailTalent.excel_level || '-' ]]</div></div>
+                            <div class="form-group"><label>SPSS技能等�?/label><div>[[ detailTalent.spss_level || '-' ]]</div></div>
+                            <div class="form-group"><label>语言能力</label><div>[[ detailTalent.language_ability || '-' ]]</div></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title">游戏品类</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>MOBA类</label><div>[[ detailTalent.category_moba | default('-') ]]</div></div>
-                            <div class="form-group"><label>MMORPG</label><div>[[ detailTalent.category_mmorgp | default('-') ]]</div></div>
-                            <div class="form-group"><label>开放世界RPG</label><div>[[ detailTalent.category_openworld_rpg | default('-') ]]</div></div>
-                            <div class="form-group"><label>卡牌RPG类</label><div>[[ detailTalent.category_card_rpg | default('-') ]]</div></div>
-                            <div class="form-group"><label>战术竞技类</label><div>[[ detailTalent.category_tactical | default('-') ]]</div></div>
-                            <div class="form-group"><label>射击类</label><div>[[ detailTalent.category_shooter | default('-') ]]</div></div>
-                            <div class="form-group"><label>策略/SLG类</label><div>[[ detailTalent.category_strategy_slg | default('-') ]]</div></div>
-                            <div class="form-group"><label>动作/格斗类</label><div>[[ detailTalent.category_action_fight | default('-') ]]</div></div>
-                            <div class="form-group"><label>沙盒/生存类</label><div>[[ detailTalent.category_sandbox_survival | default('-') ]]</div></div>
-                            <div class="form-group"><label>自走棋类</label><div>[[ detailTalent.category_autochess | default('-') ]]</div></div>
-                            <div class="form-group"><label>休闲益智类</label><div>[[ detailTalent.category_casual_puzzle | default('-') ]]</div></div>
-                            <div class="form-group"><label>休闲竞技/派对类</label><div>[[ detailTalent.category_party | default('-') ]]</div></div>
-                            <div class="form-group"><label>其他品类</label><div>[[ detailTalent.category_etc | default('-') ]]</div></div>
+                            <div class="form-group"><label>MOBA�?/label><div>[[ detailTalent.category_moba || '-' ]]</div></div>
+                            <div class="form-group"><label>MMORPG</label><div>[[ detailTalent.category_mmorgp || '-' ]]</div></div>
+                            <div class="form-group"><label>开放世界RPG</label><div>[[ detailTalent.category_openworld_rpg || '-' ]]</div></div>
+                            <div class="form-group"><label>卡牌RPG�?/label><div>[[ detailTalent.category_card_rpg || '-' ]]</div></div>
+                            <div class="form-group"><label>战术竞技�?/label><div>[[ detailTalent.category_tactical || '-' ]]</div></div>
+                            <div class="form-group"><label>射击�?/label><div>[[ detailTalent.category_shooter || '-' ]]</div></div>
+                            <div class="form-group"><label>策略/SLG�?/label><div>[[ detailTalent.category_strategy_slg || '-' ]]</div></div>
+                            <div class="form-group"><label>动作/格斗�?/label><div>[[ detailTalent.category_action_fight || '-' ]]</div></div>
+                            <div class="form-group"><label>沙盒/生存�?/label><div>[[ detailTalent.category_sandbox_survival || '-' ]]</div></div>
+                            <div class="form-group"><label>自走棋类</label><div>[[ detailTalent.category_autochess || '-' ]]</div></div>
+                            <div class="form-group"><label>休闲益智�?/label><div>[[ detailTalent.category_casual_puzzle || '-' ]]</div></div>
+                            <div class="form-group"><label>休闲竞技/派对�?/label><div>[[ detailTalent.category_party || '-' ]]</div></div>
+                            <div class="form-group"><label>其他品类</label><div>[[ detailTalent.category_etc || '-' ]]</div></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title">重点游戏</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>逆水寒</label><div>[[ detailTalent.key_game_1 | default('-') ]]</div></div>
-                            <div class="form-group"><label>燕云十六声</label><div>[[ detailTalent.key_game_2 | default('-') ]]</div></div>
-                            <div class="form-group"><label>一梦江湖</label><div>[[ detailTalent.key_game_3 | default('-') ]]</div></div>
-                            <div class="form-group"><label>阴阳师</label><div>[[ detailTalent.key_game_4 | default('-') ]]</div></div>
-                            <div class="form-group"><label>金铲铲之战</label><div>[[ detailTalent.key_game_5 | default('-') ]]</div></div>
-                            <div class="form-group"><label>蛋仔派对</label><div>[[ detailTalent.key_game_6 | default('-') ]]</div></div>
-                            <div class="form-group"><label>无尽冬日</label><div>[[ detailTalent.key_game_7 | default('-') ]]</div></div>
-                            <div class="form-group"><label>率土之滨</label><div>[[ detailTalent.key_game_8 | default('-') ]]</div></div>
-                            <div class="form-group"><label>王者荣耀</label><div>[[ detailTalent.key_game_9 | default('-') ]]</div></div>
-                            <div class="form-group"><label>英雄联盟</label><div>[[ detailTalent.key_game_10 | default('-') ]]</div></div>
-                            <div class="form-group"><label>明日之后</label><div>[[ detailTalent.key_game_11 | default('-') ]]</div></div>
-                            <div class="form-group"><label>萤火突击</label><div>[[ detailTalent.key_game_12 | default('-') ]]</div></div>
-                            <div class="form-group"><label>三角洲行动</label><div>[[ detailTalent.key_game_13 | default('-') ]]</div></div>
+                            <div class="form-group"><label>逆水�?/label><div>[[ detailTalent.key_game_1 || '-' ]]</div></div>
+                            <div class="form-group"><label>燕云十六�?/label><div>[[ detailTalent.key_game_2 || '-' ]]</div></div>
+                            <div class="form-group"><label>一梦江�?/label><div>[[ detailTalent.key_game_3 || '-' ]]</div></div>
+                            <div class="form-group"><label>阴阳�?/label><div>[[ detailTalent.key_game_4 || '-' ]]</div></div>
+                            <div class="form-group"><label>金铲铲之�?/label><div>[[ detailTalent.key_game_5 || '-' ]]</div></div>
+                            <div class="form-group"><label>蛋仔派对</label><div>[[ detailTalent.key_game_6 || '-' ]]</div></div>
+                            <div class="form-group"><label>无尽冬日</label><div>[[ detailTalent.key_game_7 || '-' ]]</div></div>
+                            <div class="form-group"><label>率土之滨</label><div>[[ detailTalent.key_game_8 || '-' ]]</div></div>
+                            <div class="form-group"><label>王者荣耀</label><div>[[ detailTalent.key_game_9 || '-' ]]</div></div>
+                            <div class="form-group"><label>英雄联盟</label><div>[[ detailTalent.key_game_10 || '-' ]]</div></div>
+                            <div class="form-group"><label>明日之后</label><div>[[ detailTalent.key_game_11 || '-' ]]</div></div>
+                            <div class="form-group"><label>萤火突击</label><div>[[ detailTalent.key_game_12 || '-' ]]</div></div>
+                            <div class="form-group"><label>三角洲行�?/label><div>[[ detailTalent.key_game_13 || '-' ]]</div></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title">其他信息</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>深度游戏1</label><div>[[ detailTalent.deep_game_1 | default('-') ]]</div></div>
-                            <div class="form-group"><label>深度游戏2</label><div>[[ detailTalent.deep_game_2 | default('-') ]]</div></div>
-                            <div class="form-group"><label>深度游戏3</label><div>[[ detailTalent.deep_game_3 | default('-') ]]</div></div>
-                            <div class="form-group"><label>精通产品（1000h+）</label><div>[[ detailTalent.proficient_products | default('-') ]]</div></div>
-                            <div class="form-group"><label>熟悉产品（500h+）</label><div>[[ detailTalent.familiar_products | default('-') ]]</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>其他游戏经历补充</label><div>[[ detailTalent.other_game_experience | default('-') ]]</div></div>
+                            <div class="form-group"><label>深度游戏1</label><div>[[ detailTalent.deep_game_1 || '-' ]]</div></div>
+                            <div class="form-group"><label>深度游戏2</label><div>[[ detailTalent.deep_game_2 || '-' ]]</div></div>
+                            <div class="form-group"><label>深度游戏3</label><div>[[ detailTalent.deep_game_3 || '-' ]]</div></div>
+                            <div class="form-group"><label>精通产品（1000h+�?/label><div>[[ detailTalent.proficient_products || '-' ]]</div></div>
+                            <div class="form-group"><label>熟悉产品�?00h+�?/label><div>[[ detailTalent.familiar_products || '-' ]]</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>其他游戏经历补充</label><div>[[ detailTalent.other_game_experience || '-' ]]</div></div>
                         </div>
                     </div>
                 </div>
@@ -666,7 +666,7 @@
 
         const app = createApp({
             setup() {
-                // 状态
+                // 状�?
                 const isLoggedIn = ref(false);
                 const currentUser = ref(null);
                 const loginForm = ref({ username: '', password: '' });
@@ -798,7 +798,7 @@
                 };
 
                 const deleteTalent = async (id) => {
-                    if (!confirm('确定要删除这条记录吗？')) return;
+                    if (!confirm('确定要删除这条记录吗�?)) return;
                     try {
                         await api.delete(`/api/talents/${id}`);
                         showToast('删除成功');
@@ -852,7 +852,7 @@
 
                 const addUser = async () => {
                     if (!newUser.value.username || !newUser.value.password) {
-                        showToast('请填写用户名和密码');
+                        showToast('请填写用户名和密�?);
                         return;
                     }
                     try {
@@ -866,7 +866,7 @@
                 };
 
                 const deleteUser = async (id) => {
-                    if (!confirm('确定要删除这个账号吗？')) return;
+                    if (!confirm('确定要删除这个账号吗�?)) return;
                     try {
                         await api.delete(`/api/users/${id}`);
                         showToast('删除成功');
@@ -883,7 +883,7 @@
                     setTimeout(() => toast.classList.remove('show'), 2000);
                 };
 
-                // 检查登录状态
+                // 检查登录状�?
                 onMounted(() => {
                     const savedUser = localStorage.getItem('user');
                     if (savedUser) {
@@ -909,7 +909,7 @@
                 };
             }
         });
-        // 改 Vue 分隔符，避免跟 Jinja2 冲突
+        // �?Vue 分隔符，避免�?Jinja2 冲突
         app.config.delimiters = ['[[', ']]'];
         app.mount('#app');
     </script>
