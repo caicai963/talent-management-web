@@ -798,7 +798,7 @@
                 };
 
                 const deleteTalent = async (id) => {
-                    if (!confirm('确定要删除这条记录吗�?)) return;
+                    if (!confirm('确定要删除这条记录吗？')) return;
                     try {
                         await api.delete(`/api/talents/${id}`);
                         showToast('删除成功');
@@ -866,7 +866,7 @@
                 };
 
                 const deleteUser = async (id) => {
-                    if (!confirm('确定要删除这个账号吗�?)) return;
+                    if (!confirm('确定要删除这个账号吗？')) return;
                     try {
                         await api.delete(`/api/users/${id}`);
                         showToast('删除成功');
