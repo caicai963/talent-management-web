@@ -206,7 +206,7 @@
 
                 <h2>人才标签管理系统</h2>
 
-                <div v-if="loginError" class="login-error">[[ loginError ]]</div>
+                <div v-if="loginError" class="login-error">{{ loginError }}</div>
 
                 <input v-model="loginForm.username" type="text" placeholder="用户名" @keyup.enter="handleLogin">
 
@@ -230,7 +230,7 @@
 
                 <div class="header-right">
 
-                    <span class="user-info">[[ currentUser.username ]] ([[ currentUser.role ]])</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role }})</span>
 
                     <button class="logout-btn" @click="handleLogout">退出</button>
 
@@ -346,29 +346,29 @@
 
                             <tr v-for="talent in talents" :key="talent.id">
 
-                                <td>[[ talent.id ]]</td>
+                                <td>{{ talent.id }}</td>
 
-                                <td>[[ talent.name || '-' ]]</td>
+                                <td>{{ talent.name || '-' }}</td>
 
-                                <td>[[ talent.gender || '-' ]]</td>
+                                <td>{{ talent.gender || '-' }}</td>
 
-                                <td>[[ talent.birth_date || '-' ]]</td>
+                                <td>{{ talent.birth_date || '-' }}</td>
 
-                                <td>[[ talent.identity_tag || '-' ]]</td>
+                                <td>{{ talent.identity_tag || '-' }}</td>
 
-                                <td>[[ talent.city || '-' ]]</td>
+                                <td>{{ talent.city || '-' }}</td>
 
-                                <td>[[ talent.school || '-' ]]</td>
+                                <td>{{ talent.school || '-' }}</td>
 
-                                <td>[[ talent.major || '-' ]]</td>
+                                <td>{{ talent.major || '-' }}</td>
 
-                                <td>[[ talent.education || '-' ]]</td>
+                                <td>{{ talent.education || '-' }}</td>
 
-                                <td>[[ talent.graduate_year || '-' ]]</td>
+                                <td>{{ talent.graduate_year || '-' }}</td>
 
-                                <td>[[ talent.phone || '-' ]]</td>
+                                <td>{{ talent.phone || '-' }}</td>
 
-                                <td>[[ talent.month_rating || '-' ]]</td>
+                                <td>{{ talent.month_rating || '-' }}</td>
 
                                 <td class="actions">
 
@@ -394,7 +394,7 @@
 
                     <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一页</button>
 
-                    <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">[[ p ]]</button>
+                    <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">{{ p }}</button>
 
                     <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一页</button>
 
@@ -416,7 +416,7 @@
 
                         <h4>总人数</h4>
 
-                        <div class="value">[[ stats.total || 0 ]]</div>
+                        <div class="value">{{ stats.total || 0 }}</div>
 
                     </div>
 
@@ -426,9 +426,9 @@
 
                         <div v-for="(count, key) in stats.education" :key="key" class="stat-detail">
 
-                            <span>[[ key ]]</span>
+                            <span>{{ key }}</span>
 
-                            <span>[[ count ]]</span>
+                            <span>{{ count }}</span>
 
                         </div>
 
@@ -440,9 +440,9 @@
 
                         <div v-for="(count, key) in stats.identity_tag" :key="key" class="stat-detail">
 
-                            <span>[[ key ]]</span>
+                            <span>{{ key }}</span>
 
-                            <span>[[ count ]]</span>
+                            <span>{{ count }}</span>
 
                         </div>
 
@@ -454,9 +454,9 @@
 
                         <div v-for="(count, key) in stats.city" :key="key" class="stat-detail">
 
-                            <span>[[ key ]]</span>
+                            <span>{{ key }}</span>
 
-                            <span>[[ count ]]</span>
+                            <span>{{ count }}</span>
 
                         </div>
 
@@ -474,7 +474,7 @@
 
                 <h3 style="margin-bottom: 20px;">账号管理</h3>
 
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>[[ systemUsers.length ]]</strong> 个账号（最多5个）</p>
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多5个）</p>
 
 
 
@@ -504,13 +504,13 @@
 
                             <tr v-for="u in systemUsers" :key="u.id">
 
-                                <td>[[ u.id ]]</td>
+                                <td>{{ u.id }}</td>
 
-                                <td>[[ u.username ]]</td>
+                                <td>{{ u.username }}</td>
 
-                                <td>[[ u.role ]]</td>
+                                <td>{{ u.role }}</td>
 
-                                <td>[[ u.created_at || '-' ]]</td>
+                                <td>{{ u.created_at || '-' }}</td>
 
                                 <td><button class="btn-danger" @click="deleteUser(u.id)">删除</button></td>
 
@@ -590,7 +590,7 @@
 
                 <div class="modal-header">
 
-                    <h3>[[ editingTalent ? '编辑人才' : '新增人才' ]]</h3>
+                    <h3>{{ editingTalent ? '编辑人才' : '新增人才' }}</h3>
 
                     <button class="modal-close" @click="showModal = false">&times;</button>
 
@@ -1084,7 +1084,7 @@
 
         <!-- Toast -->
 
-        <div id="toast" class="toast">[[ toastMessage ]]</div>
+        <div id="toast" class="toast">{{ toastMessage }}</div>
 
     </div>
 
@@ -1574,9 +1574,7 @@
 
         // 改 Vue 分隔符，避免跟 Jinja2 冲突
 
-        app.config.delimiters = ['[[', ']]'];
-
-        app.mount('#app');
+                app.mount('#app');
 
     </script>
 
