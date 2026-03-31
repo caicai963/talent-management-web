@@ -11,7 +11,11 @@ import io
 
 app = Flask(__name__)
 CORS(app)
-DATABASE = 'talent.db'
+
+# 使用内存数据库（Render 免费服务无持久化存储）
+# 每次重启会重新创建数据库和默认管理员账号
+DATABASE = ':memory:'
+_db_initialized = False
 
 # 字段映射：数据库字段名 -> Excel列名
 COLUMN_MAP = {
@@ -153,9 +157,10 @@ def ensure_admin():
         conn.commit()
     conn.close()
 
-# 初始化数据库 + 确保管理员存在
-init_db()
-ensure_admin()
+# 初始化数据库 + 确保管理员存在（每次启动时）
+with app.app_context():
+    init_db()
+    ensure_admin()
 
 # ========== API 端点 ==========
 
