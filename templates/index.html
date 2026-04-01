@@ -192,7 +192,10 @@
 
     </style>
 
-</head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    </head>
 
 <body>
 
@@ -1468,6 +1471,11 @@
                     </div>
                 </div>
             </div>
+            <!-- 紧急关闭按钮（右下角） -->
+            <button v-if="currentModal" @click="closeModal()" 
+                style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#f44336;color:white;border:none;border-radius:50%;width:50px;height:50px;font-size:24px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);"
+                title="紧急关闭所有弹窗">&times;</button>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
@@ -2046,6 +2054,8 @@
 
                 // ---- 初始化 ----
                 onMounted(() => { 
+                    // 强制关闭所有弹窗（防止卡住）
+                    currentModal.value = null;
                     loadDemandMeta(); 
                     // ESC key closes modals
                     document.addEventListener('keydown', (e) => {
