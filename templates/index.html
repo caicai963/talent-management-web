@@ -1472,9 +1472,7 @@
                 </div>
             </div>
             <!-- 紧急关闭按钮（右下角） -->
-            <button id="emergencyCloseBtn" onclick="emergencyCloseAll()" 
-                style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#f44336;color:white;border:none;border-radius:50%;width:50px;height:50px;font-size:24px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:none;"
-                title="紧急关闭所有弹窗">&times;</button>
+            
 
 
 
@@ -2139,38 +2137,7 @@
 
         })
         // Emergency function to close all modals
-        function emergencyCloseAll() {
-            // Try Vue method first
-            if (typeof closeModal === 'function') {
-                closeModal();
-            }
-            // Force hide all possible modal divs
-            var modalDivs = document.querySelectorAll('[id^='modal-'], [class*='modal']');
-            modalDivs.forEach(function(div) {
-                div.style.display = 'none';
-            });
-            // Hide all divs with position:fixed that look like modals
-            var allFixed = document.querySelectorAll('div[style*="position:fixed"]');
-            allFixed.forEach(function(div) {
-                if (div.style.background && div.style.background.indexOf('rgba(0,0,0,0.5)') !== -1) {
-                    div.style.display = 'none';
-                }
-            });
-            console.log('Emergency close triggered');
-        }
-
-        // Also check every 2 seconds for stuck modals
-        setInterval(function() {
-            var fixedDivs = document.querySelectorAll('div[style*="position:fixed"]');
-            fixedDivs.forEach(function(div) {
-                if (div.style.background && div.style.background.indexOf('rgba(0,0,0,0.5)') !== -1 && div.style.display !== 'none') {
-                    // Check if this is a modal backdrop
-                    var btn = document.getElementById('emergencyCloseBtn');
-                    if (btn) btn.style.display = 'block';
-                }
-            });
-        }, 2000);
-    
+            
 ;
 
         // 改 Vue 分隔符，避免跟 Jinja2 冲突
@@ -2179,7 +2146,40 @@
 
     </script>
 
+
+    <script>
+    // Emergency function to close all modals
+    function emergencyCloseAll() {
+        try {
+            var allFixed = document.querySelectorAll('div[style*="position:fixed"]');
+            for (var i = 0; i < allFixed.length; i++) {
+                var div = allFixed[i];
+                if (div.style.background && div.style.background.indexOf('rgba') !== -1) {
+                    div.style.display = 'none';
+                }
+            }
+        } catch(e) { console.log(e); }
+    }
+    // Auto-show the emergency button if any modal backdrop is visible
+    setInterval(function() {
+        try {
+            var allFixed = document.querySelectorAll('div[style*="position:fixed"]');
+            var hasModal = false;
+            for (var i = 0; i < allFixed.length; i++) {
+                var div = allFixed[i];
+                if (div.style.background && div.style.background.indexOf('rgba') !== -1 && div.style.display !== 'none') {
+                    hasModal = true;
+                    break;
+                }
+            }
+            var btn = document.getElementById('emergencyCloseBtn');
+            if (btn) btn.style.display = hasModal ? 'block' : 'none';
+        } catch(e) {}
+    }, 1000);
+    </script>
+
 </body>
 
 </html>
 
+<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</button>
