@@ -1,0 +1,3400 @@
+<!DOCTYPE html>
+
+
+
+<html lang="zh-CN">
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>浜烘墠鏍囩绠＄悊绯荤粺</title>
+
+
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+
+    <style>
+
+
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+
+
+
+
+
+
+
+        /* 甯冨眬 */
+
+
+
+        .app-container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+
+
+
+
+
+
+
+        /* 澶撮儴 */
+
+
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px 24px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+
+
+        .header h1 { color: #333; font-size: 24px; }
+
+
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+
+
+
+        .user-info { color: #666; font-size: 14px; }
+
+
+
+        .logout-btn { padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+
+
+
+
+
+
+        /* 鐧诲綍椤?*/
+
+
+
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+
+
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); width: 360px; }
+
+
+
+        .login-box h2 { text-align: center; margin-bottom: 24px; color: #333; }
+
+
+
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+
+
+
+        .login-box button { width: 100%; padding: 12px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+
+
+
+        .login-box button:hover { background: #357abd; }
+
+
+
+        .login-error { color: #f44336; text-align: center; margin-bottom: 16px; }
+
+
+
+
+
+
+
+        /* 鎿嶄綔鏍?*/
+
+
+
+        .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+
+
+
+        .toolbar input[type="text"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; }
+
+
+
+        .toolbar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+
+
+
+        .toolbar button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+
+
+
+        .btn-primary { background: #4a90d9; color: white; }
+
+
+
+        .btn-success { background: #4CAF50; color: white; }
+
+
+
+        .btn-warning { background: #ff9800; color: white; }
+
+
+
+        .btn-danger { background: #f44336; color: white; }
+
+
+
+        .btn-secondary { background: #999; color: white; }
+
+
+
+
+
+
+
+        /* 琛ㄦ牸 */
+
+
+
+        .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+
+
+        .data-table th { background: #4a90d9; color: white; padding: 12px; text-align: left; font-weight: 600; white-space: nowrap; position: sticky; top: 0; }
+
+
+
+        .data-table td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+
+
+
+        .data-table tr:hover { background: #f8f9fa; }
+
+
+
+        .data-table .actions { display: flex; gap: 4px; }
+
+
+
+        .data-table .actions button { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+
+
+
+
+
+
+        /* 鍒嗛〉 */
+
+
+
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; }
+
+
+
+        .pagination button { padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
+
+
+
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+
+        .pagination button.active { background: #4a90d9; color: white; border-color: #4a90d9; }
+
+
+
+
+
+
+
+        /* 妯℃€佹 */
+
+
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+
+
+
+        .modal { background: white; border-radius: 8px; width: 90%; max-width: 900px; max-height: 90vh; overflow: auto; }
+
+
+
+        .modal-header { padding: 16px 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+
+
+
+        .modal-header h3 { color: #333; }
+
+
+
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+
+
+
+        .modal-body { padding: 24px; }
+
+
+
+        .modal-footer { padding: 16px 24px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px; }
+
+
+
+
+
+
+
+        /* 琛ㄥ崟 */
+
+
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+
+
+
+        .form-group { margin-bottom: 12px; }
+
+
+
+        .form-group label { display: block; margin-bottom: 4px; color: #666; font-size: 13px; }
+
+
+
+        .form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+
+
+
+        .form-section { margin-bottom: 24px; }
+
+
+
+        .form-section-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #4a90d9; }
+
+
+
+
+
+
+
+        /* 缁熻鍗＄墖 */
+
+
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+
+
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+
+
+        .stat-card h4 { color: #666; font-size: 14px; margin-bottom: 12px; }
+
+
+
+        .stat-card .value { font-size: 32px; font-weight: 600; color: #4a90d9; }
+
+
+
+        .stat-detail { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+
+
+
+        .stat-detail span:last-child { font-weight: 600; }
+
+
+
+
+
+
+
+        /* 鏍囩椤?*/
+
+
+
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 4px; border-radius: 8px; }
+
+
+
+        .tab { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 4px; font-size: 14px; }
+
+
+
+        .tab.active { background: #4a90d9; color: white; }
+
+
+
+
+
+
+
+        /* Toast */
+
+
+
+        .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #4CAF50; color: white; border-radius: 4px; z-index: 2000; display: none; }
+
+
+
+        .toast.show { display: block; }
+
+
+
+
+
+
+
+        /* 绌虹姸鎬?*/
+
+
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+
+
+
+
+
+
+
+        /* 鍔犺浇 */
+
+
+
+        .loading { text-align: center; padding: 40px; color: #999; }
+
+
+
+    </style>
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <div id="app">
+
+
+
+        <!-- 鐧诲綍椤?-->
+
+
+
+        <div v-if="!isLoggedIn" class="login-container">
+
+
+
+            <div class="login-box">
+
+
+
+                <h2>浜烘墠鏍囩绠＄悊绯荤粺</h2>
+
+
+
+                <div v-if="loginError" class="login-error">{{ loginError }}</div>
+
+
+
+                <input v-model="loginForm.username" type="text" placeholder="鐢ㄦ埛鍚? @keyup.enter="handleLogin">
+
+
+
+                <input v-model="loginForm.password" type="password" placeholder="瀵嗙爜" @keyup.enter="handleLogin">
+
+
+
+                <button @click="handleLogin">鐧诲綍</button>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <!-- 涓诲簲鐢?-->
+
+
+
+        <div v-else class="app-container">
+
+
+
+            <div class="header">
+
+
+
+                <h1>浜烘墠鏍囩绠＄悊绯荤粺</h1>
+
+
+
+                <div class="header-right">
+
+
+
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role }})</span>
+
+
+
+                    <button class="logout-btn" @click="handleLogout">閫€鍑?/button>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div class="tabs">
+
+
+
+                <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">浜烘墠鍒楄〃</button>
+
+
+
+                <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">鏁版嵁缁熻</button>
+
+
+
+                <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">璐﹀彿绠＄悊</button>
+                <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <!-- 浜烘墠鍒楄〃 -->
+
+
+
+            <div v-if="activeTab === 'list'">
+
+
+
+                <div class="toolbar">
+
+
+
+                    <input v-model="searchQuery" type="text" placeholder="鎼滅储濮撳悕/瀛︽牎/涓撲笟/鎵嬫満鍙?.." @input="debouncedSearch">
+
+
+
+                    <select v-model="filterEducation" @change="loadTalents">
+
+
+
+                        <option value="">鍏ㄩ儴瀛﹀巻</option>
+
+
+
+                        <option value="鏈">鏈</option>
+
+
+
+                        <option value="纭曞＋">纭曞＋</option>
+
+
+
+                        <option value="鍗氬＋">鍗氬＋</option>
+
+
+
+                    </select>
+
+
+
+                    <select v-model="filterIdentity" @change="loadTalents">
+
+
+
+                        <option value="">鍏ㄩ儴韬唤</option>
+
+
+
+                        <option value="瀹炰範鐢?>瀹炰範鐢?/option>
+
+
+
+                        <option value="鍏艰亴">鍏艰亴</option>
+
+
+
+                    </select>
+
+
+
+                    <button class="btn-primary" @click="openAddModal">+ 鏂板浜烘墠</button>
+
+
+
+                    <button class="btn-success" @click="showImportModal = true">鎵归噺瀵煎叆</button>
+
+
+
+                    <button class="btn-warning" @click="exportTalents">瀵煎嚭Excel</button>
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <div class="table-container">
+
+
+
+                    <table class="data-table">
+
+
+
+                        <thead>
+
+
+
+                            <tr>
+
+
+
+                                <th>ID</th>
+
+
+
+                                <th>濮撳悕</th>
+
+
+
+                                <th>鎬у埆</th>
+
+
+
+                                <th>骞撮緞</th>
+
+
+
+                                <th>韬唤</th>
+
+
+
+                                <th>鍩庡競</th>
+
+
+
+                                <th>瀛︽牎</th>
+
+
+
+                                <th>涓撲笟</th>
+
+
+
+                                <th>瀛﹀巻</th>
+
+
+
+                                <th>姣曚笟骞?/th>
+
+
+
+                                <th>鎵嬫満鍙?/th>
+
+
+
+                                <th>褰撴湀鏄熺骇</th>
+
+
+
+                                <th>鎿嶄綔</th>
+
+
+
+                            </tr>
+
+
+
+                        </thead>
+
+
+
+                        <tbody>
+
+
+
+                            <tr v-if="loading">
+
+
+
+                                <td colspan="13" class="loading">鍔犺浇涓?..</td>
+
+
+
+                            </tr>
+
+
+
+                            <tr v-else-if="talents.length === 0">
+
+
+
+                                <td colspan="13" class="empty-state">鏆傛棤鏁版嵁</td>
+
+
+
+                            </tr>
+
+
+
+                            <tr v-for="talent in talents" :key="talent.id">
+
+
+
+                                <td>{{ talent.id }}</td>
+
+
+
+                                <td>{{ talent.name || '-' }}</td>
+
+
+
+                                <td>{{ talent.gender || '-' }}</td>
+
+
+
+                                <td>{{ talent.birth_date || '-' }}</td>
+
+
+
+                                <td>{{ talent.identity_tag || '-' }}</td>
+
+
+
+                                <td>{{ talent.city || '-' }}</td>
+
+
+
+                                <td>{{ talent.school || '-' }}</td>
+
+
+
+                                <td>{{ talent.major || '-' }}</td>
+
+
+
+                                <td>{{ talent.education || '-' }}</td>
+
+
+
+                                <td>{{ talent.graduate_year || '-' }}</td>
+
+
+
+                                <td>{{ talent.phone || '-' }}</td>
+
+
+
+                                <td>{{ talent.month_rating || '-' }}</td>
+
+
+
+                                <td class="actions">
+
+
+
+                                    <button class="btn-primary" @click="openEditModal(talent)">缂栬緫</button>
+
+
+
+                                    <button class="btn-danger" @click="deleteTalent(talent.id)">鍒犻櫎</button>
+
+
+
+                                </td>
+
+
+
+                            </tr>
+
+
+
+                        </tbody>
+
+
+
+                    </table>
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <div class="pagination">
+
+
+
+                    <button @click="changePage(1)" :disabled="pagination.page === 1">棣栭〉</button>
+
+
+
+                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">涓婁竴椤?/button>
+
+
+
+                    <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">{{ p }}</button>
+
+
+
+                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">涓嬩竴椤?/button>
+
+
+
+                    <button @click="changePage(pagination.total_pages)" :disabled="pagination.page >= pagination.total_pages">鏈〉</button>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <!-- 缁熻椤甸潰 -->
+
+
+
+            <div v-if="activeTab === 'stats'">
+
+
+
+                <div class="stats-grid">
+
+
+
+                    <div class="stat-card">
+
+
+
+                        <h4>鎬讳汉鏁?/h4>
+
+
+
+                        <div class="value">{{ stats.total || 0 }}</div>
+
+
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+
+
+                        <h4>瀛﹀巻鍒嗗竷</h4>
+
+
+
+                        <div v-for="(count, key) in stats.education" :key="key" class="stat-detail">
+
+
+
+                            <span>{{ key }}</span>
+
+
+
+                            <span>{{ count }}</span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+
+
+                        <h4>韬唤鍒嗗竷</h4>
+
+
+
+                        <div v-for="(count, key) in stats.identity_tag" :key="key" class="stat-detail">
+
+
+
+                            <span>{{ key }}</span>
+
+
+
+                            <span>{{ count }}</span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                    <div class="stat-card">
+
+
+
+                        <h4>鍩庡競鍒嗗竷 (Top 10)</h4>
+
+
+
+                        <div v-for="(count, key) in stats.city" :key="key" class="stat-detail">
+
+
+
+                            <span>{{ key }}</span>
+
+
+
+                            <span>{{ count }}</span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <!-- 璐﹀彿绠＄悊椤甸潰 -->
+
+
+
+            <div v-if="activeTab === 'users'" style="background: white; padding: 24px; border-radius: 8px;">
+
+
+
+                <h3 style="margin-bottom: 20px;">璐﹀彿绠＄悊</h3>
+
+
+
+                <p style="color: #666; margin-bottom: 16px;">褰撳墠鍏辨湁 <strong>{{ systemUsers.length }}</strong> 涓处鍙凤紙鏈€澶?涓級</p>
+
+
+
+
+
+
+
+                <div class="table-container" style="margin-bottom: 20px;">
+
+
+
+                    <table class="data-table">
+
+
+
+                        <thead>
+
+
+
+                            <tr>
+
+
+
+                                <th>ID</th>
+
+
+
+                                <th>鐢ㄦ埛鍚?/th>
+
+
+
+                                <th>瑙掕壊</th>
+
+
+
+                                <th>鍒涘缓鏃堕棿</th>
+
+
+
+                                <th>鎿嶄綔</th>
+
+
+
+                            </tr>
+
+
+
+                        </thead>
+
+
+
+                        <tbody>
+
+
+
+                            <tr v-for="u in systemUsers" :key="u.id">
+
+
+
+                                <td>{{ u.id }}</td>
+
+
+
+                                <td>{{ u.username }}</td>
+
+
+
+                                <td>{{ u.role }}</td>
+
+
+
+                                <td>{{ u.created_at || '-' }}</td>
+
+
+
+                                <td><button class="btn-danger" @click="deleteUser(u.id)">鍒犻櫎</button></td>
+
+
+
+                            </tr>
+
+
+
+                            <tr v-if="systemUsers.length === 0">
+
+
+
+                                <td colspan="5" class="empty-state">鏆傛棤璐﹀彿</td>
+
+
+
+                            </tr>
+
+
+
+                        </tbody>
+
+
+
+                    </table>
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <div style="border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+
+
+
+                    <h4 style="margin-bottom: 16px;">鏂板璐﹀彿</h4>
+
+
+
+                    <div class="form-grid">
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label>鐢ㄦ埛鍚?/label>
+
+
+
+                            <input v-model="newUser.username" type="text" placeholder="杈撳叆鐢ㄦ埛鍚?>
+
+
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label>瀵嗙爜</label>
+
+
+
+                            <input v-model="newUser.password" type="password" placeholder="杈撳叆瀵嗙爜">
+
+
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label>瑙掕壊</label>
+
+
+
+                            <select v-model="newUser.role">
+
+
+
+                                <option value="user">鏅€氱敤鎴?/option>
+
+
+
+                                <option value="admin">绠＄悊鍛?/option>
+
+
+
+                            </select>
+
+
+
+                        </div>
+
+
+
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+
+
+
+                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 5">娣诲姞璐﹀彿</button>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <!-- 鏂板/缂栬緫妯℃€佹 -->
+
+
+
+        <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+
+
+
+            <div class="modal">
+
+
+
+                <div class="modal-header">
+
+
+
+                    <h3>{{ editingTalent ? '缂栬緫浜烘墠' : '鏂板浜烘墠' }}</h3>
+
+
+
+                    <button class="modal-close" @click="showModal = false">&times;</button>
+
+
+
+                </div>
+
+
+
+                <div class="modal-body">
+
+
+
+                    <div class="form-section">
+
+
+
+                        <div class="form-section-title">鍩虹淇℃伅</div>
+
+
+
+                        <div class="form-grid">
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>濮撳悕 *</label>
+
+
+
+                                <input v-model="talentForm.name" type="text">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鎬у埆</label>
+
+
+
+                                <select v-model="talentForm.gender">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鐢?>鐢?/option>
+
+
+
+                                    <option value="濂?>濂?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鍑虹敓骞存湀</label>
+
+
+
+                                <input v-model="talentForm.birth_date" type="text" placeholder="YYYY.MM">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>韬唤鏍囩</label>
+
+
+
+                                <select v-model="talentForm.identity_tag">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="瀹炰範鐢?>瀹炰範鐢?/option>
+
+
+
+                                    <option value="鍏艰亴">鍏艰亴</option>
+
+
+
+                                    <option value="鍏朵粬">鍏朵粬</option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>甯镐綇鍩庡競</label>
+
+
+
+                                <input v-model="talentForm.city" type="text" placeholder="鐪?甯?>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鍩庡競绾у埆</label>
+
+
+
+                                <select v-model="talentForm.city_level">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="涓€绾?>涓€绾?/option>
+
+
+
+                                    <option value="鏂颁竴绾?>鏂颁竴绾?/option>
+
+
+
+                                    <option value="浜岀嚎">浜岀嚎</option>
+
+
+
+                                    <option value="鍏朵粬">鍏朵粬</option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>瀛︽牎</label>
+
+
+
+                                <input v-model="talentForm.school" type="text">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>涓撲笟</label>
+
+
+
+                                <input v-model="talentForm.major" type="text">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鍦ㄨ瀛﹀巻</label>
+
+
+
+                                <select v-model="talentForm.education">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏈">鏈</option>
+
+
+
+                                    <option value="纭曞＋">纭曞＋</option>
+
+
+
+                                    <option value="鍗氬＋">鍗氬＋</option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>棰勮姣曚笟骞翠唤</label>
+
+
+
+                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY骞?>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鎵嬫満鍙?/label>
+
+
+
+                                <input v-model="talentForm.phone" type="text">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>寰俊鍙?/label>
+
+
+
+                                <input v-model="talentForm.wechat" type="text">
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="form-section">
+
+
+
+                        <div class="form-section-title">浜哄憳璇勪环</div>
+
+
+
+                        <div class="form-grid">
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>涓氬姟娆℃暟</label>
+
+
+
+                                <input v-model="talentForm.project_count" type="text">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鍘嗗彶骞冲潎鏄熺骇</label>
+
+
+
+                                <input v-model="talentForm.avg_rating" type="text" placeholder="1.0-5.0">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>褰撴湀鏄熺骇</label>
+
+
+
+                                <input v-model="talentForm.month_rating" type="text" placeholder="1.0-5.0">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鍏艰亴鑰冭瘯寰楀垎</label>
+
+
+
+                                <input v-model="talentForm.exam_score" type="text" placeholder="0-100">
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group" style="grid-column: span 2;">
+
+
+
+                                <label>鏁翠綋璇勪环鎽樿</label>
+
+
+
+                                <input v-model="talentForm.overall_summary" type="text">
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="form-section">
+
+
+
+                        <div class="form-section-title">涓氬姟鑳藉姏 (绋嬪害绫?</div>
+
+
+
+                        <div class="form-grid">
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>鏃ュ父璺戞祴/鍩虹娴嬭瘎</label>
+
+
+
+                                <select v-model="talentForm.basic_test">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>妗岄潰鐮旂┒</label>
+
+
+
+                                <select v-model="talentForm.desktop_research">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>闂娓呭崟鎵ц</label>
+
+
+
+                                <select v-model="talentForm.issue_list">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>娲炲療鎻愭鑳藉姏</label>
+
+
+
+                                <select v-model="talentForm.insight_proposal">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>璁胯皥鎵ц-绾夸笂璁胯皥</label>
+
+
+
+                                <select v-model="talentForm.online_interview">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>闂嵎璋冪爺</label>
+
+
+
+                                <select v-model="talentForm.questionnaire_analysis">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="绮鹃€?>绮鹃€?/option>
+
+
+
+                                    <option value="杩涢樁">杩涢樁</option>
+
+
+
+                                    <option value="鍩虹">鍩虹</option>
+
+
+
+                                    <option value="鏃?>鏃?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="form-section">
+
+
+
+                        <div class="form-section-title">涓氬姟鑳藉姏 (鏄惁绫?</div>
+
+
+
+                        <div class="form-grid">
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>Skills鐢熸垚/璋冭瘯</label>
+
+
+
+                                <select v-model="talentForm.skills_debug">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏄?>鏄?/option>
+
+
+
+                                    <option value="鍚?>鍚?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>Agent鐢熸垚/璋冭瘯</label>
+
+
+
+                                <select v-model="talentForm.agent_debug">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏄?>鏄?/option>
+
+
+
+                                    <option value="鍚?>鍚?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>AI鐭ヨ瘑搴撳缓璁?/label>
+
+
+
+                                <select v-model="talentForm.knowledge_base">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏄?>鏄?/option>
+
+
+
+                                    <option value="鍚?>鍚?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>瀹為獙瀹ゆ祴璇?鍗忓姪鎵ц</label>
+
+
+
+                                <select v-model="talentForm.lab_assist">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏄?>鏄?/option>
+
+
+
+                                    <option value="鍚?>鍚?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label>瀹為獙瀹ゆ祴璇?涓昏礋璐?/label>
+
+
+
+                                <select v-model="talentForm.lab_leader">
+
+
+
+                                    <option value="">璇烽€夋嫨</option>
+
+
+
+                                    <option value="鏄?>鏄?/option>
+
+
+
+                                    <option value="鍚?>鍚?/option>
+
+
+
+                                </select>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+
+
+                    <button class="btn-secondary" @click="showModal = false">鍙栨秷</button>
+
+
+
+                    <button class="btn-primary" @click="saveTalent">淇濆瓨</button>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <!-- 鎵归噺瀵煎叆妯℃€佹 -->
+
+
+
+        <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
+
+
+
+            <div class="modal" style="max-width: 500px;">
+
+
+
+                <div class="modal-header">
+
+
+
+                    <h3>鎵归噺瀵煎叆</h3>
+
+
+
+                    <button class="modal-close" @click="showImportModal = false">&times;</button>
+
+
+
+                </div>
+
+
+
+                <div class="modal-body">
+
+
+
+                    <div class="form-group">
+
+
+
+                        <label>閫夋嫨 Excel 鏂囦欢</label>
+
+
+
+                        <input type="file" accept=".xlsx,.xls" @change="handleFileSelect">
+
+
+
+                    </div>
+
+
+
+                    <p style="color: #666; font-size: 13px; margin-top: 12px;">
+
+
+
+                        璇风‘淇?Excel 鏂囦欢鐨勫垪鍚嶄笌绯荤粺瀛楁瀵瑰簲銆傚垪鍚嶅彲浠ユ槸涓枃鎴栬嫳鏂囥€?
+
+                    </p>
+
+
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+
+
+                    <button class="btn-secondary" @click="showImportModal = false">鍙栨秷</button>
+
+
+
+                    <button class="btn-primary" @click="importTalents" :disabled="!importFile">瀵煎叆</button>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <!-- Toast -->
+
+
+
+        <div id="toast" class="toast">{{ toastMessage }}</div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    
+            <!-- 需求管理 -->
+            <div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h2>需求管理</h2>
+                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
+                </div>
+                <div class="toolbar" style="margin-bottom:12px;">
+                    <select v-model="demandStatusFilter" @change="loadDemands()" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        <option value="">全部状态</option>
+                        <option value="pending">待报价</option>
+                        <option value="quoting">报价中</option>
+                        <option value="confirmed">已确认</option>
+                        <option value="recruiting">招募中</option>
+                        <option value="selecting">选择人才</option>
+                        <option value="done">已完成</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>标题</th><th>业务类型</th><th>档位</th><th>数量</th><th>报价</th><th>状态</th><th>截止日期</th><th>操作</th></tr></thead>
+                        <tbody>
+                            <tr v-for="d in demands" :key="d.id">
+                                <td>{{ d.id }}</td>
+                                <td>{{ d.title }}</td>
+                                <td>{{ d.business_type }}</td>
+                                <td>{{ d.tier }}</td>
+                                <td>{{ d.quantity }}{{ d.brush_list ? " (刷名单)" : "" }}</td>
+                                <td><span v-if="getQuote(d.id)">￥{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">待计算</span></td>
+                                <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:d.status==='done'?'#4CAF50':d.status==='recruiting'?'#2196F3':d.status==='confirmed'?'#ff9800':'#999',color:'white'}">{{ statusLabels[d.status] || d.status }}</span></td>
+                                <td>{{ d.deadline || "-" }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button>
+                                        <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
+                                        <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
+                                        <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
+                                        <button v-if="d.status === 'recruiting'" class="btn-warning" @click="openApplications(d.id)" style="padding:4px 8px;font-size:12px;">报名列表</button>
+                                        <button v-if="d.status === 'selecting'" class="btn-warning" @click="openEvaluateModal(d)" style="padding:4px 8px;font-size:12px;">评价</button>
+                                        <button v-if="d.status === 'recruiting' && isAdmin" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">发企微群</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">暂无需求</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px;">
+                    <div v-for="(count, s) in demandStats" :key="s" style="background:white;padding:16px;border-radius:8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size:28px;font-weight:bold;color:#4a90d9;">{{ count }}</div>
+                        <div style="color:#666;font-size:13px;">{{ statusLabels[s] || s }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 发布需求弹窗 -->
+            <div v-if="currentModal === 'demand-create'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h3 style="margin:0;">发布需求</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
+                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">业务类型 *</label>
+                            <select v-model="demandForm.business_type" @change="onBizTypeChange" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">请选择</option>
+                                <option v-for="(tiers, biz) in demandMeta" :key="biz" :value="biz">{{ biz }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">档位 *</label>
+                            <select v-model="demandForm.tier" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">请选择</option>
+                                <option v-for="t in currentTierOptions" :key="t.label" :value="t.label">{{ t.label }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">数量/场次 *</label>
+                            <input v-model.number="demandForm.quantity" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">截止日期</label>
+                            <input v-model="demandForm.deadline" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                        </div>
+                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访（拆兼职）'">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">刷名单</label>
+                            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                                <input type="checkbox" v-model="demandForm.brush_list" />
+                                <span style="font-size:13px;">需要刷名单（+15元/样本）</span>
+                            </label>
+                        </div>
+                        <template v-if="demandForm.business_type === '实验室执行'">
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">排期时长（小时）</label>
+                                <input v-model.number="demandForm.scheduled_hours" type="number" step="0.5" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">结束时间</label>
+                                <input v-model="demandForm.end_time" type="time" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">横跨用餐时间</label>
+                                <select v-model.number="demandForm.cross_meal_count" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                    <option :value="0">不横跨</option>
+                                    <option :value="1">1顿</option>
+                                    <option :value="2">2顿</option>
+                                </select>
+                            </div>
+                        </template>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求描述</label>
+                            <textarea v-model="demandForm.description" rows="3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">具体要求</label>
+                            <textarea v-model="demandForm.requirements" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                        <button class="btn-secondary" @click="closeModal()">取消</button>
+                        <button class="btn-primary" @click="saveDemand">保存需求</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 详情弹窗 -->
+            <div v-if="currentModal === 'demand-detail'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="margin:0;">需求详情</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div v-if="currentDemand" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div><strong>标题：</strong>{{ currentDemand.title }}</div>
+                        <div><strong>业务类型：</strong>{{ currentDemand.business_type }}</div>
+                        <div><strong>档位：</strong>{{ currentDemand.tier }}</div>
+                        <div><strong>数量：</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "（刷名单）" : "" }}</div>
+                        <div><strong>截止日期：</strong>{{ currentDemand.deadline || "-" }}</div>
+                        <div><strong>状态：</strong>{{ statusLabels[currentDemand.status] || currentDemand.status }}</div>
+                        <div style="grid-column:1/-1;"><strong>描述：</strong>{{ currentDemand.description || "无" }}</div>
+                        <div style="grid-column:1/-1;"><strong>要求：</strong>{{ currentDemand.requirements || "无" }}</div>
+                        <div v-if="currentQuote" style="grid-column:1/-1;background:#f5f5f5;padding:12px;border-radius:4px;margin-top:8px;">
+                            <strong>报价：</strong>兼职{{ currentQuote.part_time_wage }}元 + 人力{{ currentQuote.human_cost }}元 = <strong>总计{{ currentQuote.total_quote }}元</strong>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+                        <button class="btn-secondary" @click="closeModal()">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报价确认弹窗 -->
+            <div v-if="currentModal === 'quote'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:500px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="margin:0;">填写报价（管理员）</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元）</label><input v-model.number="quoteForm.part_time_wage" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" /></div>
+                    <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">人力成本（元）</label><input v-model.number="quoteForm.human_cost" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" /></div>
+                    <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">备注</label><textarea v-model="quoteForm.note" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea></div>
+                    <div style="background:#f5f5f5;padding:12px;border-radius:4px;margin-bottom:16px;"><strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}元</strong></div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button class="btn-secondary" @click="closeModal()">取消</button>
+                        <button class="btn-primary" @click="saveQuote">保存报价</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报名列表弹窗 -->
+            <div v-if="currentModal === 'applications'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:850px;max-height:90vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="margin:0;">报名列表 - 需求 #{{ currentDemandId }}</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead><tr><th>ID</th><th>姓名</th><th>手机</th><th>星级</th><th>整体评价</th><th>报名时间</th><th>状态</th><th>操作</th></tr></thead>
+                            <tbody>
+                                <tr v-for="app in currentApplications" :key="app.id">
+                                    <td>{{ app.id }}</td><td>{{ app.name }}</td><td>{{ app.phone }}</td><td>{{ app.avg_rating || "-" }}</td>
+                                    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ app.overall_summary || "-" }}</td>
+                                    <td>{{ formatDate(app.applied_at) }}</td>
+                                    <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:app.status==='selected'?'#4CAF50':app.status==='rejected'?'#f44336':'#999',color:'white'}">{{ app.status }}</span></td>
+                                    <td><div class="actions"><button class="btn-secondary" @click="viewTalent(app.talent_id)" style="padding:4px 8px;font-size:12px;">查看</button><button v-if="app.status === 'applied'" class="btn-success" @click="selectTalent(app.id)" style="padding:4px 8px;font-size:12px;">选中</button><button v-if="app.status === 'applied'" class="btn-danger" @click="rejectTalent(app.id)" style="padding:4px 8px;font-size:12px;">拒绝</button></div></td>
+                                </tr>
+                                <tr v-if="currentApplications.length === 0"><td colspan="8" style="text-align:center;color:#999;padding:20px;">暂无报名</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:16px;"><button class="btn-secondary" @click="closeModal()">关闭</button></div>
+                </div>
+            </div>
+
+            <!-- 人才详情弹窗 -->
+            <div v-if="currentModal === 'talent'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:700px;max-height:90vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="margin:0;">人才详情 - {{ talentDetail.name }}</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div v-if="talentDetail" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+                        <div><strong>性别：</strong>{{ talentDetail.gender }}</div><div><strong>手机：</strong>{{ talentDetail.phone }}</div>
+                        <div><strong>城市：</strong>{{ talentDetail.city }}</div><div><strong>学校：</strong>{{ talentDetail.school }}</div>
+                        <div><strong>专业：</strong>{{ talentDetail.major }}</div><div><strong>学历：</strong>{{ talentDetail.education }}</div>
+                        <div><strong>历史均星：</strong>{{ talentDetail.avg_rating }}</div><div><strong>当月星级：</strong>{{ talentDetail.month_rating }}</div>
+                        <div style="grid-column:1/-1;"><strong>整体评价：</strong>{{ talentDetail.overall_summary || "无" }}</div>
+                        <div style="grid-column:1/-1;"><strong>详细评价：</strong>{{ talentDetail.detailed_review || "无" }}</div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:16px;"><button class="btn-secondary" @click="closeModal()">关闭</button></div>
+                </div>
+            </div>
+
+            <!-- 评价弹窗 -->
+            <div v-if="currentModal === 'evaluate'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:550px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="margin:0;">评价人才</h3>
+                        <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                    </div>
+                    <div v-if="selectedAppForEval" style="margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:4px;">已选中人才：<strong>{{ selectedAppForEval.name }}</strong></div>
+                    <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">评分（1-5星）</label><div style="display:flex;gap:8px;margin-top:4px;"><span v-for="s in [1,2,3,4,5]" :key="s" @click="evalForm.rating = s" :style="{cursor:'pointer',fontSize:'24px',color:evalForm.rating >= s ? '#ff9800' : '#ddd'}">&#9733;</span></div></div>
+                    <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">评价内容</label><textarea v-model="evalForm.comment" rows="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea></div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button class="btn-secondary" @click="closeModal()">取消</button>
+                        <button class="btn-primary" @click="submitEvaluation">提交评价</button>
+                    </div>
+                </div>
+            </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
+
+
+    <script>
+
+
+
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+
+
+
+
+
+
+        const app = createApp({
+
+
+
+            setup() {
+
+
+
+                // 鐘舵€?
+
+                const isLoggedIn = ref(false);
+
+
+
+                const currentUser = ref(null);
+
+
+
+                const loginForm = ref({ username: '', password: '' });
+
+
+
+                const loginError = ref('');
+
+
+
+
+
+
+
+                const talents = ref([]);
+
+
+
+                const loading = ref(false);
+
+
+
+                const searchQuery = ref('');
+
+
+
+                const filterEducation = ref('');
+
+
+
+                const filterIdentity = ref('');
+
+
+
+                const pagination = ref({ page: 1, per_page: 20, total: 0, total_pages: 0 });
+
+
+
+
+
+
+
+                const showModal = ref(false);
+
+
+
+                const editingTalent = ref(null);
+
+
+
+                const talentForm = ref({});
+
+
+
+
+
+
+
+                const showImportModal = ref(false);
+
+
+
+                const importFile = ref(null);
+
+
+
+
+
+
+
+                const activeTab = ref('list');
+
+
+
+                const stats = ref({});
+
+
+
+
+
+
+
+                const systemUsers = ref([]);
+
+
+
+                const newUser = ref({ username: '', password: '', role: 'user' });
+
+
+
+
+
+
+
+                const toastMessage = ref('');
+
+
+
+
+
+
+
+                // 璁＄畻鍙椤电爜
+
+
+
+                const visiblePages = computed(() => {
+
+
+
+                    const pages = [];
+
+
+
+                    const total = pagination.value.total_pages;
+
+
+
+                    const current = pagination.value.page;
+
+
+
+                    const start = Math.max(1, current - 2);
+
+
+
+                    const end = Math.min(total, current + 2);
+
+
+
+                    for (let i = start; i <= end; i++) pages.push(i);
+
+
+
+                    return pages;
+
+
+
+                });
+
+
+
+
+
+
+
+                // 鏂规硶
+
+
+
+                const api = axios.create({ baseURL: '' });
+
+
+
+
+
+
+
+                const handleLogin = async () => {
+
+
+
+                    try {
+
+
+
+                        const res = await api.post('/api/login', loginForm.value);
+
+
+
+                        if (res.data.success) {
+
+
+
+                            isLoggedIn.value = true;
+
+
+
+                            currentUser.value = res.data.user;
+
+
+
+                            localStorage.setItem('user', JSON.stringify(res.data.user));
+
+
+
+                            loadTalents();
+
+
+
+                        }
+
+
+
+                    } catch (e) {
+
+
+
+                        loginError.value = '鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒';
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const handleLogout = () => {
+
+
+
+                    isLoggedIn.value = false;
+
+
+
+                    currentUser.value = null;
+
+
+
+                    localStorage.removeItem('user');
+
+
+
+                };
+
+
+
+
+
+
+
+                const loadTalents = async () => {
+
+
+
+                    loading.value = true;
+
+
+
+                    try {
+
+
+
+                        const params = {
+
+
+
+                            page: pagination.value.page,
+
+
+
+                            per_page: pagination.value.per_page,
+
+
+
+                            search: searchQuery.value,
+
+
+
+                            filters: JSON.stringify({
+
+
+
+                                education: filterEducation.value,
+
+
+
+                                identity_tag: filterIdentity.value
+
+
+
+                            })
+
+
+
+                        };
+
+
+
+                        const res = await api.get('/api/talents', { params });
+
+
+
+                        talents.value = res.data.data;
+
+
+
+                        pagination.value = {
+
+
+
+                            page: res.data.page,
+
+
+
+                            per_page: res.data.per_page,
+
+
+
+                            total: res.data.total,
+
+
+
+                            total_pages: res.data.total_pages
+
+
+
+                        };
+
+
+
+                    } finally {
+
+
+
+                        loading.value = false;
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const debouncedSearch = _.debounce(() => {
+
+
+
+                    pagination.value.page = 1;
+
+
+
+                    loadTalents();
+
+
+
+                }, 500);
+
+
+
+
+
+
+
+                const changePage = (page) => {
+
+
+
+                    pagination.value.page = page;
+
+
+
+                    loadTalents();
+
+
+
+                };
+
+
+
+
+
+
+
+                const openAddModal = () => {
+
+
+
+                    editingTalent.value = null;
+
+
+
+                    talentForm.value = {};
+
+
+
+                    showModal.value = true;
+
+
+
+                };
+
+
+
+
+
+
+
+                const openEditModal = (talent) => {
+
+
+
+                    editingTalent.value = talent;
+
+
+
+                    talentForm.value = { ...talent };
+
+
+
+                    showModal.value = true;
+
+
+
+                };
+
+
+
+
+
+
+
+                const saveTalent = async () => {
+
+
+
+                    try {
+
+
+
+                        if (editingTalent.value) {
+
+
+
+                            await api.put(`/api/talents/${editingTalent.value.id}`, talentForm.value);
+
+
+
+                        } else {
+
+
+
+                            await api.post('/api/talents', talentForm.value);
+
+
+
+                        }
+
+
+
+                        showModal.value = false;
+
+
+
+                        showToast('淇濆瓨鎴愬姛');
+
+
+
+                        loadTalents();
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast('淇濆瓨澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const deleteTalent = async (id) => {
+
+
+
+                    if (!confirm('纭畾瑕佸垹闄よ繖鏉¤褰曞悧锛?)) return;
+
+
+
+                    try {
+
+
+
+                        await api.delete(`/api/talents/${id}`);
+
+
+
+                        showToast('鍒犻櫎鎴愬姛');
+
+
+
+                        loadTalents();
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast('鍒犻櫎澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const handleFileSelect = (e) => {
+
+
+
+                    importFile.value = e.target.files[0];
+
+
+
+                };
+
+
+
+
+
+
+
+                const importTalents = async () => {
+
+
+
+                    if (!importFile.value) return;
+
+
+
+                    const formData = new FormData();
+
+
+
+                    formData.append('file', importFile.value);
+
+
+
+                    try {
+
+
+
+                        const res = await api.post('/api/talents/import', formData);
+
+
+
+                        showToast(res.data.message);
+
+
+
+                        showImportModal.value = false;
+
+
+
+                        loadTalents();
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast('瀵煎叆澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const exportTalents = async () => {
+
+
+
+                    try {
+
+
+
+                        const res = await api.get('/api/talents/export', { responseType: 'blob' });
+
+
+
+                        const url = window.URL.createObjectURL(new Blob([res.data]));
+
+
+
+                        const link = document.createElement('a');
+
+
+
+                        link.href = url;
+
+
+
+                        link.download = `浜烘墠搴揰${new Date().toISOString().slice(0,10)}.xlsx`;
+
+
+
+                        link.click();
+
+
+
+                        showToast('瀵煎嚭鎴愬姛');
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast('瀵煎嚭澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const loadStats = async () => {
+
+
+
+                    const res = await api.get('/api/stats');
+
+
+
+                    stats.value = res.data;
+
+
+
+                };
+
+
+
+
+
+
+
+                const loadUsers = async () => {
+
+
+
+                    const res = await api.get('/api/users');
+
+
+
+                    systemUsers.value = res.data;
+
+
+
+                };
+
+
+
+
+
+
+
+                const addUser = async () => {
+
+
+
+                    if (!newUser.value.username || !newUser.value.password) {
+
+
+
+                        showToast('璇峰～鍐欑敤鎴峰悕鍜屽瘑鐮?);
+
+
+
+                        return;
+
+
+
+                    }
+
+
+
+                    try {
+
+
+
+                        const res = await api.post('/api/users', newUser.value);
+
+
+
+                        showToast('璐﹀彿鍒涘缓鎴愬姛');
+
+
+
+                        newUser.value = { username: '', password: '', role: 'user' };
+
+
+
+                        loadUsers();
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast(e.response?.data?.error || '鍒涘缓澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const deleteUser = async (id) => {
+
+
+
+                    if (!confirm('纭畾瑕佸垹闄よ繖涓处鍙峰悧锛?)) return;
+
+
+
+                    try {
+
+
+
+                        await api.delete(`/api/users/${id}`);
+
+
+
+                        showToast('鍒犻櫎鎴愬姛');
+
+
+
+                        loadUsers();
+
+
+
+                    } catch (e) {
+
+
+
+                        showToast(e.response?.data?.error || '鍒犻櫎澶辫触');
+
+
+
+                    }
+
+
+
+                };
+
+
+
+
+
+
+
+                const showToast = (msg) => {
+
+
+
+                    toastMessage.value = msg;
+
+
+
+                    const toast = document.getElementById('toast');
+
+
+
+                    toast.classList.add('show');
+
+
+
+                    setTimeout(() => toast.classList.remove('show'), 2000);
+
+
+
+                };
+
+
+
+
+
+
+
+                // 妫€鏌ョ櫥褰曠姸鎬?
+
+                onMounted(() => {
+
+
+
+                    const savedUser = localStorage.getItem('user');
+
+
+
+                    if (savedUser) {
+
+
+
+                        currentUser.value = JSON.parse(savedUser);
+
+
+
+                        isLoggedIn.value = true;
+
+
+
+                        loadTalents();
+
+
+
+                    }
+
+
+
+                });
+
+
+
+
+
+
+
+                return {
+
+
+
+                    isLoggedIn, currentUser, loginForm, loginError,
+
+
+
+                    handleLogin, handleLogout,
+
+
+
+                    talents, loading, searchQuery, filterEducation, filterIdentity,
+
+
+
+                    pagination, visiblePages, loadTalents, debouncedSearch, changePage,
+
+
+
+                    showModal, editingTalent, talentForm, openAddModal, openEditModal, saveTalent,
+
+
+
+                    deleteTalent,
+
+
+
+                    showImportModal, importFile, handleFileSelect, importTalents,
+
+
+
+                    exportTalents,
+
+
+
+                    activeTab, stats, loadStats,
+
+
+
+                    systemUsers, newUser, loadUsers, addUser, deleteUser,
+
+
+
+                    toastMessage
+
+
+
+                };
+
+
+
+            }
+
+
+
+        });
+
+
+
+        // 鏀?Vue 鍒嗛殧绗︼紝閬垮厤璺?Jinja2 鍐茬獊
+
+
+
+                app.mount('#app');
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+</html>
+
+
+
