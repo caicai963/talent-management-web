@@ -247,6 +247,7 @@
                 <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
 
                 <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+                <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
 
             </div>
 
@@ -1209,6 +1210,263 @@
 
 
 
+    
+            <!-- 需求管理 -->
+            <div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h2>需求管理</h2>
+                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
+                </div>
+                <div class="toolbar" style="margin-bottom:12px;">
+                    <select v-model="demandStatusFilter" @change="loadDemands()" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        <option value="">全部状态</option>
+                        <option value="pending">待报价</option>
+                        <option value="quoting">报价中</option>
+                        <option value="confirmed">已确认</option>
+                        <option value="recruiting">招募中</option>
+                        <option value="selecting">选择人才</option>
+                        <option value="done">已完成</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>标题</th><th>业务类型</th><th>档位</th><th>数量</th><th>报价</th><th>状态</th><th>截止日期</th><th>操作</th></tr></thead>
+                        <tbody>
+                            <tr v-for="d in demands" :key="d.id">
+                                <td>{{ d.id }}</td>
+                                <td>{{ d.title }}</td>
+                                <td>{{ d.business_type }}</td>
+                                <td>{{ d.tier }}</td>
+                                <td>{{ d.quantity }}{{ d.brush_list ? " (刷名单)" : "" }}</td>
+                                <td><span v-if="getQuote(d.id)">￥{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">待计算</span></td>
+                                <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:d.status==='done'?'#4CAF50':d.status==='recruiting'?'#2196F3':d.status==='confirmed'?'#ff9800':'#999',color:'white'}">{{ statusLabels[d.status] || d.status }}</span></td>
+                                <td>{{ d.deadline || "-" }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button>
+                                        <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
+                                        <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
+                                        <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
+                                        <button v-if="d.status === 'recruiting'" class="btn-warning" @click="openApplications(d.id)" style="padding:4px 8px;font-size:12px;">报名列表</button>
+                                        <button v-if="d.status === 'selecting'" class="btn-warning" @click="openEvaluateModal(d)" style="padding:4px 8px;font-size:12px;">评价</button>
+                                        <button v-if="d.status === 'recruiting' && isAdmin" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">发企微群</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">暂无需求</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px;">
+                    <div v-for="(count, s) in demandStats" :key="s" style="background:white;padding:16px;border-radius:8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size:28px;font-weight:bold;color:#4a90d9;">{{ count }}</div>
+                        <div style="color:#666;font-size:13px;">{{ statusLabels[s] || s }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 发布需求弹窗 -->
+            <div v-if="showDemandModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                    <h3 style="margin-bottom:20px;">发布需求</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
+                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：H73产品 甄别需求" />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">业务类型 *</label>
+                            <select v-model="demandForm.business_type" @change="onBizTypeChange" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">请选择</option>
+                                <option v-for="(tiers, biz) in demandMeta" :key="biz" :value="biz">{{ biz }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">档位 *</label>
+                            <select v-model="demandForm.tier" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">请选择</option>
+                                <option v-for="t in currentTierOptions" :key="t.label" :value="t.label">{{ t.label }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">数量/场次 *</label>
+                            <input v-model.number="demandForm.quantity" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">截止日期</label>
+                            <input v-model="demandForm.deadline" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                        </div>
+                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访（拆兼职）'">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">刷名单</label>
+                            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                                <input type="checkbox" v-model="demandForm.brush_list" />
+                                <span style="font-size:13px;">需要刷名单（+15元/样本呼出费）</span>
+                            </label>
+                        </div>
+                        <template v-if="demandForm.business_type === '实验室执行'">
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">排期时长（小时）</label>
+                                <input v-model.number="demandForm.scheduled_hours" type="number" step="0.5" min="0" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">结束时间</label>
+                                <input v-model="demandForm.end_time" type="time" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">横跨用餐时间（顿数）</label>
+                                <select v-model.number="demandForm.cross_meal_count" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                    <option :value="0">不横跨</option>
+                                    <option :value="1">1顿</option>
+                                    <option :value="2">2顿</option>
+                                </select>
+                            </div>
+                        </template>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求描述</label>
+                            <textarea v-model="demandForm.description" rows="3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">具体要求</label>
+                            <textarea v-model="demandForm.requirements" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                        <button class="btn-secondary" @click="showDemandModal = false">取消</button>
+                        <button class="btn-primary" @click="saveDemand">保存需求</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 详情弹窗 -->
+            <div v-if="showDemandDetail" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                    <h3 style="margin-bottom:16px;">需求详情</h3>
+                    <div v-if="currentDemand" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div><strong>标题：</strong>{{ currentDemand.title }}</div>
+                        <div><strong>业务类型：</strong>{{ currentDemand.business_type }}</div>
+                        <div><strong>档位：</strong>{{ currentDemand.tier }}</div>
+                        <div><strong>数量：</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "（刷名单）" : "" }}</div>
+                        <div><strong>截止日期：</strong>{{ currentDemand.deadline || "-" }}</div>
+                        <div><strong>状态：</strong>{{ statusLabels[currentDemand.status] || currentDemand.status }}</div>
+                        <div style="grid-column:1/-1;"><strong>描述：</strong>{{ currentDemand.description || "无" }}</div>
+                        <div style="grid-column:1/-1;"><strong>要求：</strong>{{ currentDemand.requirements || "无" }}</div>
+                        <div v-if="currentQuote" style="grid-column:1/-1;background:#f5f5f5;padding:12px;border-radius:4px;margin-top:8px;">
+                            <strong>报价：</strong>兼职工资{{ currentQuote.part_time_wage }}元 + 人力成本{{ currentQuote.human_cost }}元 = <strong>总计{{ currentQuote.total_quote }}元</strong>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+                        <button class="btn-secondary" @click="showDemandDetail = false">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报价确认弹窗 -->
+            <div v-if="showQuoteModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:500px;">
+                    <h3 style="margin-bottom:16px;">填写报价（管理员）</h3>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元）</label>
+                        <input v-model.number="quoteForm.part_time_wage" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">人力成本（元）</label>
+                        <input v-model.number="quoteForm.human_cost" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">备注</label>
+                        <textarea v-model="quoteForm.note" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                    </div>
+                    <div style="background:#f5f5f5;padding:12px;border-radius:4px;margin-bottom:16px;">
+                        <strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}元</strong>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button class="btn-secondary" @click="showQuoteModal = false">取消</button>
+                        <button class="btn-primary" @click="saveQuote">保存报价</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报名列表弹窗 -->
+            <div v-if="showApplicationsModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:850px;max-height:90vh;overflow-y:auto;">
+                    <h3 style="margin-bottom:16px;">报名列表 - 需求 #{{ currentDemandId }}</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead><tr><th>ID</th><th>姓名</th><th>手机</th><th>星级</th><th>整体评价</th><th>报名时间</th><th>状态</th><th>操作</th></tr></thead>
+                            <tbody>
+                                <tr v-for="app in currentApplications" :key="app.id">
+                                    <td>{{ app.id }}</td>
+                                    <td>{{ app.name }}</td>
+                                    <td>{{ app.phone }}</td>
+                                    <td>{{ app.avg_rating || "-" }}</td>
+                                    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ app.overall_summary || "-" }}</td>
+                                    <td>{{ formatDate(app.applied_at) }}</td>
+                                    <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:app.status==='selected'?'#4CAF50':app.status==='rejected'?'#f44336':'#999',color:'white'}">{{ app.status }}</span></td>
+                                    <td>
+                                        <div class="actions">
+                                            <button class="btn-secondary" @click="viewTalent(app.talent_id)" style="padding:4px 8px;font-size:12px;">查看</button>
+                                            <button v-if="app.status === 'applied'" class="btn-success" @click="selectTalent(app.id)" style="padding:4px 8px;font-size:12px;">选中</button>
+                                            <button v-if="app.status === 'applied'" class="btn-danger" @click="rejectTalent(app.id)" style="padding:4px 8px;font-size:12px;">拒绝</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="currentApplications.length === 0"><td colspan="8" style="text-align:center;color:#999;padding:20px;">暂无报名</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+                        <button class="btn-secondary" @click="showApplicationsModal = false">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 人才详情弹窗 -->
+            <div v-if="showTalentModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:700px;max-height:90vh;overflow-y:auto;">
+                    <h3 style="margin-bottom:16px;">人才详情 - {{ talentDetail.name }}</h3>
+                    <div v-if="talentDetail" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+                        <div><strong>性别：</strong>{{ talentDetail.gender }}</div>
+                        <div><strong>手机：</strong>{{ talentDetail.phone }}</div>
+                        <div><strong>城市：</strong>{{ talentDetail.city }}</div>
+                        <div><strong>学校：</strong>{{ talentDetail.school }}</div>
+                        <div><strong>专业：</strong>{{ talentDetail.major }}</div>
+                        <div><strong>学历：</strong>{{ talentDetail.education }}</div>
+                        <div><strong>历史均星：</strong>{{ talentDetail.avg_rating }}</div>
+                        <div><strong>当月星级：</strong>{{ talentDetail.month_rating }}</div>
+                        <div style="grid-column:1/-1;"><strong>整体评价：</strong>{{ talentDetail.overall_summary || "无" }}</div>
+                        <div style="grid-column:1/-1;"><strong>详细评价：</strong>{{ talentDetail.detailed_review || "无" }}</div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+                        <button class="btn-secondary" @click="showTalentModal = false">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评价弹窗 -->
+            <div v-if="showEvaluateModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:8px;padding:24px;width:550px;">
+                    <h3 style="margin-bottom:16px;">评价人才</h3>
+                    <div v-if="selectedAppForEval" style="margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:4px;">
+                        已选中人才：<strong>{{ selectedAppForEval.name }}</strong>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">评分（1-5星）</label>
+                        <div style="display:flex;gap:8px;margin-top:4px;">
+                            <span v-for="s in [1,2,3,4,5]" :key="s" @click="evalForm.rating = s" :style="{cursor:'pointer',fontSize:'24px',color:evalForm.rating >= s ? '#ff9800' : '#ddd'}">&#9733;</span>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">评价内容</label>
+                        <textarea v-model="evalForm.comment" rows="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;">
+                        <button class="btn-secondary" @click="showEvaluateModal = false">取消</button>
+                        <button class="btn-primary" @click="submitEvaluation">提交评价</button>
+                    </div>
+                </div>
+            </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
     <script>
@@ -1639,6 +1897,158 @@
 
 
 
+                // ---- 需求管理状态 ----
+                const demands = ref([]);
+                const demandStatusFilter = ref('');
+                const showDemandModal = ref(false);
+                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'' });
+                const currentDemand = ref(null);
+                const showDemandDetail = ref(false);
+                const showQuoteModal = ref(false);
+                const quoteForm = ref({ part_time_wage:0, human_cost:0, note:'' });
+                const showApplicationsModal = ref(false);
+                const currentDemandId = ref(null);
+                const currentApplications = ref([]);
+                const showTalentModal = ref(false);
+                const talentDetail = ref(null);
+                const showEvaluateModal = ref(false);
+                const evalForm = ref({ rating:5, comment:'' });
+                const selectedAppForEval = ref(null);
+                const demandQuotes = ref({});
+                const demandMeta = ref({});
+                const currentTierOptions = ref([]);
+                const currentQuote = ref(null);
+                const statusLabels = ref({ pending:'待报价', quoting:'报价中', confirmed:'已确认', recruiting:'招募中', selecting:'选择人才', done:'已完成', cancelled:'已取消' });
+                const isAdmin = computed(() => currentUser.value && currentUser.value.role === 'admin');
+
+
+                // ---- 需求管理方法 ----
+                const loadDemandMeta = async () => {
+                    try {
+                        const res = await axios.get('/api/demand/meta');
+                        demandMeta.value = res.data;
+                    } catch(e) { console.error(e); }
+                };
+                const loadDemands = async () => {
+                    try {
+                        const params = {};
+                        if (demandStatusFilter.value) params.status = demandStatusFilter.value;
+                        const res = await axios.get('/api/demands', { params });
+                        demands.value = res.data.data || [];
+                        for (const d of demands.value) {
+                            try {
+                                const q = await axios.get('/api/demands/' + d.id + '/quote');
+                                if (q.data && q.data.id) demandQuotes.value[d.id] = q.data;
+                            } catch(e) {}
+                        }
+                    } catch(e) { console.error(e); }
+                };
+                const getQuote = (id) => demandQuotes.value[id] || null;
+                const demandStats = computed(() => {
+                    const s = {};
+                    for (const d of demands.value) { s[d.status] = (s[d.status]||0) + 1; }
+                    return s;
+                });
+                const onBizTypeChange = () => {
+                    demandForm.value.tier = '';
+                    const biz = demandForm.value.business_type;
+                    currentTierOptions.value = biz && demandMeta.value[biz] ? demandMeta.value[biz] : [];
+                };
+                const openDemandModal = (d) => {
+                    if (d) {
+                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'' };
+                    } else {
+                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'' };
+                    }
+                    showDemandModal.value = true;
+                };
+                const viewDemand = async (d) => {
+                    currentDemand.value = d;
+                    try {
+                        const q = await axios.get('/api/demands/' + d.id + '/quote');
+                        currentQuote.value = q.data || null;
+                    } catch(e) { currentQuote.value = null; }
+                    showDemandDetail.value = true;
+                };
+                const saveDemand = async () => {
+                    try {
+                        await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id });
+                        showDemandModal.value = false;
+                        loadDemands();
+                        showToast('需求保存成功');
+                    } catch(e) { showToast('保存失败'); }
+                };
+                const calcAndSaveQuote = async (d) => {
+                    try {
+                        const res = await axios.post('/api/demands/' + d.id + '/calc-quote');
+                        const q = res.data;
+                        const note = (q.wage_note || '') + (q.human_note ? '; '+q.human_note : '');
+                        await axios.post('/api/demands/' + d.id + '/quote', { part_time_wage: q.part_time_wage, human_cost: q.human_cost, total_quote: q.total, note });
+                        demandQuotes.value[d.id] = { total_quote: q.total, part_time_wage: q.part_time_wage, human_cost: q.human_cost };
+                        await axios.put('/api/demands/' + d.id, { status: 'quoting' });
+                        loadDemands();
+                        showToast('报价已计算并保存');
+                    } catch(e) { showToast('计算报价失败'); }
+                };
+                const openQuoteModal = (d) => {
+                    currentDemand.value = d;
+                    quoteForm.value = demandQuotes.value[d.id] ? { part_time_wage: demandQuotes.value[d.id].part_time_wage, human_cost: demandQuotes.value[d.id].human_cost, note: '' } : { part_time_wage: 0, human_cost: 0, note: '' };
+                    showQuoteModal.value = true;
+                };
+                const saveQuote = async () => {
+                    try {
+                        const total = parseFloat(((quoteForm.value.part_time_wage||0) + (quoteForm.value.human_cost||0)).toFixed(2));
+                        await axios.post('/api/demands/' + currentDemand.value.id + '/quote', { part_time_wage: quoteForm.value.part_time_wage, human_cost: quoteForm.value.human_cost, total_quote: total, note: quoteForm.value.note });
+                        demandQuotes.value[currentDemand.value.id] = { total_quote: total, part_time_wage: quoteForm.value.part_time_wage, human_cost: quoteForm.value.human_cost };
+                        showQuoteModal.value = false;
+                        loadDemands();
+                        showToast('报价已保存');
+                    } catch(e) { showToast('保存报价失败'); }
+                };
+                const confirmQuote = async (id) => {
+                    try { await axios.post('/api/demands/' + id + '/quote/confirm'); loadDemands(); showToast('报价已确认，进入招募阶段'); } catch(e) { showToast('确认失败'); }
+                };
+                const openApplications = async (id) => {
+                    currentDemandId.value = id;
+                    try { const res = await axios.get('/api/demands/' + id + '/applications'); currentApplications.value = res.data; showApplicationsModal.value = true; } catch(e) { showToast('加载报名列表失败'); }
+                };
+                const viewTalent = async (talentId) => {
+                    try { const res = await axios.get('/api/talents/' + talentId); talentDetail.value = res.data; showTalentModal.value = true; } catch(e) { showToast('加载失败'); }
+                };
+                const selectTalent = async (appId) => {
+                    try { await axios.post('/api/applications/' + appId + '/select'); openApplications(currentDemandId.value); showToast('已选中该人才'); } catch(e) { showToast('操作失败'); }
+                };
+                const rejectTalent = async (appId) => {
+                    try { await axios.post('/api/applications/' + appId + '/reject'); openApplications(currentDemandId.value); } catch(e) { showToast('操作失败'); }
+                };
+                const openEvaluateModal = async (d) => {
+                    currentDemandId.value = d.id;
+                    try {
+                        const res = await axios.get('/api/demands/' + d.id + '/applications');
+                        const selected = res.data.find(a => a.status === 'selected');
+                        if (selected) { selectedAppForEval.value = selected; showEvaluateModal.value = true; }
+                        else { showToast('请先在报名列表中选中人才'); }
+                    } catch(e) { showToast('加载失败'); }
+                };
+                const submitEvaluation = async () => {
+                    if (!selectedAppForEval.value || !evalForm.value.rating) { showToast('请填写评分'); return; }
+                    try {
+                        await axios.post('/api/demands/' + currentDemandId.value + '/evaluate', { talent_id: selectedAppForEval.value.talent_id, rating: evalForm.value.rating, comment: evalForm.value.comment, evaluated_by: currentUser.value?.id });
+                        await axios.put('/api/demands/' + currentDemandId.value, { status: 'done' });
+                        showEvaluateModal.value = false;
+                        loadDemands();
+                        showToast('评价已提交');
+                    } catch(e) { showToast('提交失败'); }
+                };
+                const publishToWecom = async (id) => {
+                    try { await axios.post('/api/demands/' + id + '/publish'); showToast('已发送到企微群'); } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
+                };
+                const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
+
+                // ---- 初始化 ----
+                onMounted(() => { loadDemandMeta(); });
+
+
                 const showToast = (msg) => {
 
                     toastMessage.value = msg;
@@ -1676,6 +2086,15 @@
                 return {
 
                     isLoggedIn, currentUser, loginForm, loginError,
+                    demands, demandStatusFilter, showDemandModal, demandForm, currentDemand, showDemandDetail,
+                    showQuoteModal, quoteForm, showApplicationsModal, currentDemandId, currentApplications,
+                    showTalentModal, talentDetail, showEvaluateModal, evalForm, selectedAppForEval,
+                    demandQuotes, demandMeta, currentTierOptions, currentQuote, statusLabels, isAdmin,
+                    loadDemandMeta, loadDemands, getQuote, demandStats, onBizTypeChange,
+                    openDemandModal, viewDemand, saveDemand, calcAndSaveQuote,
+                    openQuoteModal, saveQuote, confirmQuote,
+                    openApplications, viewTalent, selectTalent, rejectTalent,
+                    openEvaluateModal, submitEvaluation, publishToWecom, formatDate,
 
                     handleLogin, handleLogout,
 
