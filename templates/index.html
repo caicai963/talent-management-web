@@ -1267,7 +1267,7 @@
 
             <!-- 发布需求弹窗 -->
             <div v-if="currentModal === 'demand-create'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
                     <h3 style="margin-bottom:20px;">发布需求</h3>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div style="grid-column:1/-1;">
@@ -1339,7 +1339,7 @@
 
             <!-- 详情弹窗 -->
             <div v-if="currentModal === 'demand-detail'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
                     <h3 style="margin-bottom:16px;">需求详情</h3>
                     <div v-if="currentDemand" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div><strong>标题：</strong>{{ currentDemand.title }}</div>
@@ -1362,7 +1362,7 @@
 
             <!-- 报价确认弹窗 -->
             <div v-if="currentModal === 'quote'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:500px;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:500px;">
                     <h3 style="margin-bottom:16px;">填写报价（管理员）</h3>
                     <div style="margin-bottom:12px;">
                         <label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元）</label>
@@ -1388,7 +1388,7 @@
 
             <!-- 报名列表弹窗 -->
             <div v-if="currentModal === 'applications'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:850px;max-height:90vh;overflow-y:auto;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:850px;max-height:90vh;overflow-y:auto;">
                     <h3 style="margin-bottom:16px;">报名列表 - 需求 #{{ currentDemandId }}</h3>
                     <div class="table-container">
                         <table class="data-table">
@@ -1422,7 +1422,7 @@
 
             <!-- 人才详情弹窗 -->
             <div v-if="currentModal === 'talent'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:700px;max-height:90vh;overflow-y:auto;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:700px;max-height:90vh;overflow-y:auto;">
                     <h3 style="margin-bottom:16px;">人才详情 - {{ talentDetail.name }}</h3>
                     <div v-if="talentDetail" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
                         <div><strong>性别：</strong>{{ talentDetail.gender }}</div>
@@ -1444,7 +1444,7 @@
 
             <!-- 评价弹窗 -->
             <div v-if="currentModal === 'evaluate'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="background:white;border-radius:8px;padding:24px;width:550px;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:550px;">
                     <h3 style="margin-bottom:16px;">评价人才</h3>
                     <div v-if="selectedAppForEval" style="margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:4px;">
                         已选中人才：<strong>{{ selectedAppForEval.name }}</strong>
