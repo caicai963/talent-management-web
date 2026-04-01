@@ -1268,7 +1268,10 @@
             <!-- 发布需求弹窗 -->
             <div v-if="currentModal === 'demand-create'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
-                    <h3 style="margin-bottom:20px;">发布需求</h3>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h3 style="margin:0;">发布需求</h3>
+                    <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
+                </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div style="grid-column:1/-1;">
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
@@ -2042,7 +2045,15 @@
                 const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
 
                 // ---- 初始化 ----
-                onMounted(() => { loadDemandMeta(); });
+                onMounted(() => { 
+                    loadDemandMeta(); 
+                    // ESC key closes modals
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && currentModal.value) {
+                            closeModal();
+                        }
+                    });
+                });
 
 
                 const showToast = (msg) => {
