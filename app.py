@@ -283,6 +283,14 @@ def init_db():
         )
     """)
 
+    # 系统设置表
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS system_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    """)
+
     # 需求表
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS demands (
@@ -993,12 +1001,22 @@ def create_evaluation(demand_id):
 
 
 # ---- 企微群发 API ----
-WECOM_WEBHOOK_URL = os.environ.get('WECOM_WEBHOOK_URL', '')
+# WeCom webhook URL is read from system_settings table
+
+
+def get_setting(key, default=''):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT value FROM system_settings WHERE key = ?', (key,))
+    row = cursor.fetchone()
+    conn.close()
+    return row['value'] if row else default
 
 
 def send_wecom_message(content):
-    if not WECOM_WEBHOOK_URL:
-        return {'error': '企微 Webhook URL 未配置（请设置 WECOM_WEBHOOK_URL 环境变量）'}
+    wecom_url = get_setting('wecom_webhook_url')
+    if not wecom_url:
+        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
     try:
         import urllib.request
         import json as json_lib
@@ -1007,7 +1025,7 @@ def send_wecom_message(content):
             "markdown": {"content": content}
         }
         req = urllib.request.Request(
-            WECOM_WEBHOOK_URL,
+            wecom_url,
             data=json_lib.dumps(payload).encode('utf-8'),
             headers={'Content-Type': 'application/json'}
         )
@@ -1022,7 +1040,8 @@ def send_wecom_message(content):
 
 @app.route('/api/demands/<int:demand_id>/publish', methods=['POST'])
 def publish_to_wecom(demand_id):
-    if not WECOM_WEBHOOK_URL:
+    wecom_url = get_setting('wecom_webhook_url')
+    if not wecom_url:
         return jsonify({'error': '企微 Webhook URL 未配置'}), 400
 
     conn = get_db()
@@ -1110,6 +1129,31 @@ def my_evaluations(talent_id):
     rows = cursor.fetchall()
     conn.close()
     return jsonify([dict(r) for r in rows])
+
+
+
+
+# ---- 系统设置 API ----
+
+@app.route('/api/settings/<key>', methods=['GET'])
+def get_setting_api(key):
+    value = get_setting(key)
+    return jsonify({'key': key, 'value': value})
+
+
+@app.route('/api/settings/<key>', methods=['POST'])
+def set_setting_api(key):
+    data = request.json
+    value = data.get('value', '')
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO system_settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    """, (key, value))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': '设置已保存', 'key': key, 'value': value})
 
 
 if __name__ == '__main__':
