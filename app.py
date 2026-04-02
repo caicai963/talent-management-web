@@ -27,7 +27,7 @@ TALENT_PRICE_TABLE = {
         {"label": "20~30mins/个", "price": 16},
         {"label": ">30mins/个", "price": 26},
     ],
-    "电访（拆兼职）": [
+    "电访": [
         {"label": "30mins以内/个", "price": 30},
         {"label": "30~60mins/个", "price": 45},
         {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
@@ -169,8 +169,8 @@ def calc_quote(demand_data):
             part_time_wage = base + fixed
             wage_note = f"120元/天底薪 + 固定{fixed}元"
 
-    # ---- 电访（拆兼职）：兼职工资 + 人力成本（工具×1200 + 200）----
-    elif biz == "电访（拆兼职）":
+    # ---- 电访：兼职工资 + 人力成本（工具×1200 + 200）----
+    elif biz == "电访":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/个 × {quantity}个"

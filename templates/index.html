@@ -584,7 +584,7 @@
 
             </div>
 
-        v-if="activeTab === 'demands'" style="padding:0 0 20px;">
+            <div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <h2>需求管理</h2>
                     <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
@@ -671,7 +671,7 @@
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">截止日期</label>
                             <input v-model="demandForm.deadline" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
-                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访（拆兼职）'">
+                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访'">
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">刷名单</label>
                             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
                                 <input type="checkbox" v-model="demandForm.brush_list" />
@@ -1457,6 +1457,7 @@
                 </div>
 
             </div>
+
 
         </div>
 
