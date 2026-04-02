@@ -387,10 +387,16 @@ def init_db():
             scheduled_hours REAL DEFAULT 0, end_time TEXT, cross_meal_count INTEGER DEFAULT 0,
             human_cost REAL DEFAULT 0,
             budget_min REAL, budget_max REAL, deadline TEXT,
-            demander_id INTEGER, status TEXT DEFAULT 'pending',
+            demander_id INTEGER, tidanren TEXT,
+            status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # 如果已存在的表没有 tidanren 列，则添加
+    try:
+        cursor.execute("ALTER TABLE demands ADD COLUMN tidanren TEXT")
+    except:
+        pass
 
     # 需求报价表
     cursor.execute("""
@@ -858,8 +864,8 @@ def create_demand():
             quantity, brush_list, gmv,
             scheduled_hours, end_time, cross_meal_count,
             human_cost, budget_min, budget_max,
-            deadline, demander_id, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            deadline, demander_id, tidanren, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     """, (
         data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
         data.get('business_type', ''), data.get('tier', ''),
@@ -869,7 +875,7 @@ def create_demand():
         data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
         data.get('human_cost', 0),
         data.get('budget_min'), data.get('budget_max'),
-        data.get('deadline'), data.get('demander_id'),
+        data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
     ))
     demand_id = cursor.lastrowid
     conn.commit()
@@ -1163,8 +1169,9 @@ def publish_to_wecom(demand_id):
     else:
         quote_str = "待确认"
 
+    msg_demander_tidan = demand.get('tidanren', '') or msg_demander
     msg = "### New 需求发布\n"
-    msg += "**需求方：** %s\n" % msg_demander
+    msg += "**提单人：** %s\n" % msg_demander_tidan
     msg += "**需求标题：** %s\n" % msg_title
     msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
     msg += "**数量：** %s\n" % msg_qty

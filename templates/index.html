@@ -645,7 +645,11 @@
                     <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
                 </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <div style="grid-column:1/-1;">
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">提单人 *</label>
+                            <input v-model="demandForm.tidanren" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="请填写提单人姓名" />
+                        </div>
+                        <div style="grid-column:2;">
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
                             <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：H73产品 甄别需求" />
                         </div>
@@ -1964,9 +1968,9 @@
                 };
                 const openDemandModal = (d) => {
                     if (d) {
-                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'' };
+                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'' };
                     } else {
-                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'' };
+                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'' };
                     }
                     currentModal.value = 'demand-create';
                 };
@@ -2016,13 +2020,25 @@
                 const confirmQuoteFromModal = async () => {
                     try {
                         await axios.post('/api/demands/' + currentDemand.value.id + '/quote/confirm');
+                        try {
+                            await axios.post('/api/demands/' + currentDemand.value.id + '/publish');
+                            showToast('报价已确认，招募信息已发送到企微群');
+                        } catch(e2) {
+                            showToast('报价已确认，但企微发送失败，请手动发布');
+                        }
                         closeModal();
                         loadDemands();
-                        showToast('报价已确认，进入招募阶段');
                     } catch(e) { showToast('确认失败'); }
                 };
                 const confirmQuote = async (id) => {
-                    try { await axios.post('/api/demands/' + id + '/quote/confirm'); loadDemands(); showToast('报价已确认，进入招募阶段'); } catch(e) { showToast('确认失败'); }
+                    try {
+                        await axios.post('/api/demands/' + id + '/quote/confirm');
+                        try {
+                            await axios.post('/api/demands/' + id + '/publish');
+                            showToast('报价已确认，招募信息已发送到企微群');
+                        } catch(e2) { showToast('报价已确认，但企微发送失败'); }
+                        loadDemands();
+                    } catch(e) { showToast('确认失败'); }
                 };
                 const openApplications = async (id) => {
                     currentDemandId.value = id;
