@@ -754,9 +754,12 @@
                     <div style="background:#f5f5f5;padding:12px;border-radius:4px;margin-bottom:16px;">
                         <strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}元</strong>
                     </div>
-                    <div style="display:flex;justify-content:flex-end;gap:12px;">
-                        <button class="btn-secondary" @click="closeModal()">取消</button>
-                        <button class="btn-primary" @click="saveQuote">保存报价</button>
+                    <div style="display:flex;justify-content:space-between;gap:12px;">
+                        <button v-if="currentDemand && currentDemand.status === 'quoting' && isAdmin" class="btn-success" @click="confirmQuoteFromModal">确认报价（进入招募）</button>
+                        <div style="display:flex;justify-content:flex-end;gap:12px;">
+                            <button class="btn-secondary" @click="closeModal()">取消</button>
+                            <button class="btn-primary" @click="saveQuote">保存报价</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2009,6 +2012,14 @@
                         loadDemands();
                         showToast('报价已保存');
                     } catch(e) { showToast('保存报价失败'); }
+                };
+                const confirmQuoteFromModal = async () => {
+                    try {
+                        await axios.post('/api/demands/' + currentDemand.value.id + '/quote/confirm');
+                        closeModal();
+                        loadDemands();
+                        showToast('报价已确认，进入招募阶段');
+                    } catch(e) { showToast('确认失败'); }
                 };
                 const confirmQuote = async (id) => {
                     try { await axios.post('/api/demands/' + id + '/quote/confirm'); loadDemands(); showToast('报价已确认，进入招募阶段'); } catch(e) { showToast('确认失败'); }
