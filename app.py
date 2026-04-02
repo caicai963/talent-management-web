@@ -1152,6 +1152,11 @@ def publish_to_wecom(demand_id):
     quote = cursor.fetchone()
     conn.close()
 
+    # sqlite3.Row → dict，避免 get() 行为差异
+    demand = dict(demand)
+    if quote:
+        quote = dict(quote)
+
     brush_str = "（刷名单）" if demand['brush_list'] else ""
     msg_title = demand['title'] or ""
     msg_biz = demand['business_type'] or ""
