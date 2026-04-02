@@ -1186,7 +1186,10 @@ def publish_to_wecom(demand_id):
     msg += "---\n"
     msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com)"
 
-    result = send_wecom_message(msg)
+    try:
+        result = send_wecom_message(msg)
+    except Exception as e:
+        result = {'error': str(e)}
     if 'error' in result:
         return jsonify(result), 500
     return jsonify({'message': '已发送到企微群', 'result': result})
