@@ -169,15 +169,15 @@ def calc_quote(demand_data):
             part_time_wage = base + fixed
             wage_note = f"120元/天底薪 + 固定{fixed}元"
 
-    # ---- 电访：兼职工资 + 人力成本（工具×1200 + 200）----
+    # ---- 电访执行：兼职工资 + 人力成本（H列人力投入×1200）----
     elif biz == "电访":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/个 × {quantity}个"
-        # 人力成本 = 工具值（gmv）× 1200 + 200
-        tool_value = gmv if gmv else 0
-        human_cost = tool_value * 1200 + 200
-        human_note = f"工具值{gmv}元×1200 + 200 = {int(human_cost)}元"
+        # 人力成本 = Excel研究资源成本估算表 H列（人力投入）× 1200
+        # 电访执行对应 H37 = 0.7 → 0.7×1200 = 840元
+        human_cost = 0.7 * 1200
+        human_note = f"人力投入0.7×1200 = {int(human_cost)}元"
 
     # ---- 实验室执行：单价 × 场次 + 额外人力补贴 ----
     elif biz == "实验室执行":
