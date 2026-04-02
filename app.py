@@ -1097,7 +1097,7 @@ def create_evaluation(demand_id):
 
 def get_setting(key, default=''):
     # First check environment variable (e.g. WECOM_WEBHOOK_URL)
-    env_key = f'WECOM_{key.upper()}'
+    env_key = key.upper()
     env_val = os.environ.get(env_key)
     if env_val:
         return env_val
