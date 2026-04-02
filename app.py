@@ -127,11 +127,60 @@ def calc_quote(demand_data):
     }
     返回: { part_time_wage, human_cost, total, note, wage_note, human_note }
     """
+
+    # ---- Excel 人力成本 Lookup 表（VLOOKUP 近似匹配：找 <= gmv 的最大键）----
+    def vlookup_h(gmv_val, lut):
+        """根据样本数量 gmv，从 lookup 表返回人力投入 H。"""
+        if not gmv_val or gmv_val <= 0:
+            return 0
+        # 找 <= gmv_val 的最大键
+        keys = sorted(lut.keys())
+        result = 0
+        for k in keys:
+            if k <= gmv_val:
+                result = lut[k]
+            else:
+                break
+        return result
+
+    # 甄别执行 lookup：样本数量(G) → H(人力投入)
+    # 样本: 1-7→0.2, 8-12→0.2, 13-16→0.3, 17-20→0.3, 21-24→0.4, 25-28→0.4,
+    #       29-32→0.6, 33-36→0.6, 37-40→0.7, 41-44→1.0, 45-48→1.0, 49-52→1.0,
+    #       53-61→1.2, 62-99→1.2, 100+→1.3
+    LUT_ZHENBIE = {1:0.2, 8:0.2, 13:0.3, 17:0.3, 21:0.4, 25:0.4,
+                   29:0.6, 33:0.6, 37:0.7, 41:1.0, 45:1.0, 49:1.0,
+                   53:1.2, 62:1.2, 100:1.3}
+
+    # 电访执行 lookup：样本数量(G) → H(人力投入)
+    # 样本: 1-7→0.3, 8-12→0.4, 13-16→0.5, 17-20→0.6, 21-24→0.7, 25-28→0.7,
+    #       29-32→0.7, 33-36→0.8, 37-40→0.8, 41-44→1.0, 45-48→1.0, 49-52→1.0,
+    #       53-61→1.2, 62-99→1.2, 100+→1.2
+    LUT_DIANFANG = {1:0.3, 8:0.4, 13:0.5, 17:0.6, 21:0.7, 25:0.7,
+                    29:0.7, 33:0.8, 37:0.8, 41:1.0, 45:1.0, 49:1.0,
+                    53:1.2, 62:1.2, 100:1.2}
+
+    # 街访执行 lookup：样本数量(G) → H(人力投入)
+    # 样本: 1-7→0.5, 8-12→0.5, 13-16→0.5, 17-20→0.5, 21-24→0.6, 25-28→0.6,
+    #       29-32→0.6, 33-36→1.0, 37-40→1.0, 41-44→1.0, 45-48→1.0, 49-52→1.5,
+    #       53-61→1.5, 62-99→1.5, 100+→2.0
+    LUT_JIEFANG = {1:0.5, 8:0.5, 13:0.5, 17:0.5, 21:0.6, 25:0.6,
+                   29:0.6, 33:1.0, 37:1.0, 41:1.0, 45:1.0, 49:1.5,
+                   53:1.5, 62:1.5, 100:2.0}
+
+    # 测试执行 lookup：样本数量(G) → H(人力投入)
+    # 样本: 1-7→0.5, 8-12→0.5, 13-16→0.5, 17-20→1.0, 21-24→1.0, 25-28→1.0,
+    #       29-32→1.0, 33-36→1.5, 37-40→1.5, 41-44→1.5, 45-48→1.5, 49+→1.5
+    LUT_CESHI = {1:0.5, 8:0.5, 13:0.5, 17:1.0, 21:1.0, 25:1.0,
+                 29:1.0, 33:1.5, 37:1.5, 41:1.5, 45:1.5, 100:1.5}
+
     biz = demand_data.get("business_type", "")
     tier = demand_data.get("tier", "")
     quantity = demand_data.get("quantity", 1)
     brush = demand_data.get("brush_list", False)
     gmv = demand_data.get("gmv", 0)
+    # 对于需要查表的业务类型，gmv 即为样本数量（quantity）
+    if biz in ("甄别执行", "电访", "街访执行", "测试执行") and not gmv:
+        gmv = quantity
     scheduled_hours = demand_data.get("scheduled_hours", 0)
     end_time = demand_data.get("end_time", "")
     cross_meal = demand_data.get("cross_meal_count", 0)
@@ -169,15 +218,41 @@ def calc_quote(demand_data):
             part_time_wage = base + fixed
             wage_note = f"120元/天底薪 + 固定{fixed}元"
 
-    # ---- 电访执行：兼职工资 + 人力成本（H列人力投入×1200）----
+    # ---- 甄别执行：兼职工资 + 人力成本（lookup G→H×1200）----
+    elif biz == "甄别执行":
+        unit_price = tier_data.get("price", 0)
+        part_time_wage = unit_price * quantity
+        wage_note = f"{unit_price}元/个 × {quantity}个"
+        h = vlookup_h(gmv, LUT_ZHENBIE)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+
+    # ---- 电访执行：兼职工资 + 人力成本（lookup G→H×1200）----
     elif biz == "电访":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/个 × {quantity}个"
-        # 人力成本 = Excel研究资源成本估算表 H列（人力投入）× 1200
-        # 电访执行对应 H37 = 0.7 → 0.7×1200 = 840元
-        human_cost = 0.7 * 1200
-        human_note = f"人力投入0.7×1200 = {int(human_cost)}元"
+        h = vlookup_h(gmv, LUT_DIANFANG)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+
+    # ---- 街访执行：兼职工资 + 人力成本（lookup G→H×1200）----
+    elif biz == "街访执行":
+        unit_price = tier_data.get("price", 0)
+        part_time_wage = unit_price * quantity
+        wage_note = f"{unit_price}元/个 × {quantity}个"
+        h = vlookup_h(gmv, LUT_JIEFANG)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+
+    # ---- 测试执行：兼职工资 + 人力成本（lookup G→H×1200）----
+    elif biz == "测试执行":
+        unit_price = tier_data.get("price", 0)
+        part_time_wage = unit_price * quantity
+        wage_note = f"{unit_price}元/个 × {quantity}个"
+        h = vlookup_h(gmv, LUT_CESHI)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
     # ---- 实验室执行：单价 × 场次 + 额外人力补贴 ----
     elif biz == "实验室执行":
