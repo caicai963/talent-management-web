@@ -310,7 +310,7 @@
                         <button @click="checkMyStatus" style="padding: 10px 20px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer;">查询</button>
                     </div>
                     <div v-if="statusResult && statusResult.found" style="padding: 16px; background: #f8f9fa; border-radius: 4px;">
-                        <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ statusResult.name }}</p>
+                        <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ (statusResult && statusResult.name) || '未知' }}</p>
                         <p style="margin-bottom: 8px;"><strong>报名状态：</strong><span :style="{ color: statusResult.status === '已入选' ? 'green' : statusResult.status === '未入选' ? 'red' : '#666' }">{{ statusResult.status }}</span></p>
                         <p v-if="statusResult.demand_title" style="margin-bottom: 8px;"><strong>需求名称：</strong>{{ statusResult.demand_title }}</p>
                         <p v-if="statusResult.selected_at" style="margin-bottom: 8px;"><strong>入选时间：</strong>{{ statusResult.selected_at }}</p>
