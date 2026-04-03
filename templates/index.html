@@ -265,14 +265,12 @@
 
                 <div class="tabs">
 
-                    <button class="tab" :class="{ active: activeTab === 'register' }" @click="activeTab = 'register'">报名信息</button>
+                    <button class="tab" :class="{ active: activeTab === 'register' }" @click="activeTab = 'register'; loadDemandInfo()">报名信息</button>
 
-                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状态</button>
+                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'; loadDemandInfo()">查询状态</button>
 
 
                 </div>
-
-            </div>
 
 
             <!-- 普通用户内容：报名信息 -->
@@ -378,6 +376,9 @@
                     </div>
                     <div v-else-if="statusChecked" style="padding: 16px; color: #666; text-align: center;">未找到该手机号的报名记录</div>
                 </div>
+            </div>
+
+
             </div>
 
             <!-- 人才列表 -->
