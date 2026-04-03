@@ -32,9 +32,12 @@ def get_db():
         conn.row_factory = sqlite3.Row
     return conn
 
+def get_result_cursor(conn):
+    """返回普通 cursor，INSERT + SELECT lastval() 可靠获取新插入行的 ID"""
+    return conn.cursor()
+
+
 def dict_from_row(row):
-    """将数据库行转为普通 dict（兼容 sqlite3.Row 和 psycopg2 行）"""
-    if row is None:
         return None
     if hasattr(row, 'keys'):
         return dict(row)
@@ -722,8 +725,9 @@ def create_user():
         return jsonify({'error': '最多只能创建200个账号'}), 400
     try:
         if DATABASE_URL:
-            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING id",
+            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
                            (username, password, role))
+            cursor.execute("SELECT lastval()")
             user_id = cursor.fetchone()[0]
         else:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
