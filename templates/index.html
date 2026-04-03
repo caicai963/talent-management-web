@@ -480,7 +480,9 @@
 
                 <h3 style="margin-bottom: 20px;">账号管理</h3>
 
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多5个）</p>
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多5个）
+                    <button class="btn-warning" @click="showUserImportModal = true" style="margin-left:12px;padding:6px 14px;">📥 批量导入账号</button>
+                </p>
 
 
 
@@ -1504,6 +1506,32 @@
             </div>
         </div>
 
+        <!-- 批量导入账号模态框 -->
+        <div v-if="showUserImportModal" class="modal-overlay" @click.self="showUserImportModal = false">
+            <div class="modal" style="max-width:520px;">
+                <div class="modal-header">
+                    <h3>📥 批量导入账号</h3>
+                    <button class="modal-close" @click="showUserImportModal = false">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color:#666;margin-bottom:16px;">请上传 Excel 文件（.xlsx / .xls），必需列：<strong>username</strong>、<strong>password</strong>，可选列：<strong>role</strong>（默认为 user）</p>
+                    <div style="border:2px dashed #ddd;border-radius:8px;padding:32px;text-align:center;margin-bottom:16px;">
+                        <input type="file" accept=".xlsx,.xls" @change="handleUserFileSelect" style="display:none;" id="userFileInput" />
+                        <label for="userFileInput" style="cursor:pointer;">
+                            <div style="font-size:40px;margin-bottom:8px;">📄</div>
+                            <div style="color:#555;">{{ userImportFile ? userImportFile.name : '点击选择文件或拖拽到此处' }}</div>
+                        </label>
+                    </div>
+                    <div v-if="userImportError" style="color:#e53935;background:#ffebee;padding:10px 14px;border-radius:6px;margin-bottom:8px;font-size:14px;">{{ userImportError }}</div>
+                    <div v-if="userImportResult" style="color:#2e7d32;background:#e8f5e9;padding:10px 14px;border-radius:6px;margin-bottom:8px;font-size:14px;">{{ userImportResult }}</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" @click="showUserImportModal = false; userImportError=''; userImportResult='';">取消</button>
+                    <button class="btn-primary" @click="importUsers" :disabled="!userImportFile">导入</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast -->
 
         <div id="toast" class="toast">{{ toastMessage }}</div>
@@ -1566,8 +1594,11 @@
 
 
                 const showImportModal = ref(false);
-
                 const importFile = ref(null);
+                const showUserImportModal = ref(false);
+                const userImportFile = ref(null);
+                const userImportError = ref('');
+                const userImportResult = ref('');
 
 
 
@@ -1840,6 +1871,48 @@
                     } catch (e) {
 
                         showToast('导入失败');
+
+                    }
+
+                };
+
+
+
+                const handleUserFileSelect = (e) => {
+
+                    userImportFile.value = e.target.files[0];
+
+                    userImportError.value = '';
+
+                    userImportResult.value = '';
+
+                };
+
+
+
+                const importUsers = async () => {
+
+                    if (!userImportFile.value) return;
+
+                    const formData = new FormData();
+
+                    formData.append('file', userImportFile.value);
+
+                    try {
+
+                        const res = await api.post('/api/users/import', formData);
+
+                        userImportResult.value = res.data.message;
+
+                        userImportError.value = '';
+
+                        loadUsers();
+
+                    } catch (e) {
+
+                        userImportError.value = e.response?.data?.error || '导入失败，请检查文件格式';
+
+                        userImportResult.value = '';
 
                     }
 
@@ -2183,6 +2256,8 @@
                     deleteTalent,
 
                     showImportModal, importFile, handleFileSelect, importTalents,
+
+                    showUserImportModal, userImportFile, handleUserFileSelect, importUsers, userImportError, userImportResult,
 
                     exportTalents,
 

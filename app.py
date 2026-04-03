@@ -715,6 +715,69 @@ def create_user():
         return jsonify({'error': '用户名已存在'}), 400
 
 
+@app.route('/api/users/import', methods=['POST'])
+def import_users():
+    """批量导入账号（Excel 文件）"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        return jsonify({'error': '请上传 Excel 文件'}), 400
+    try:
+        df = pd.read_excel(file)
+        # 验证必需列
+        required_cols = ['username', 'password']
+        missing = [c for c in required_cols if c not in df.columns]
+        if missing:
+            return jsonify({'error': f'Excel 缺少必需列: {", ".join(missing)}，可选列: role'}), 400
+
+        conn = get_db()
+        cursor = conn.cursor()
+        imported, skipped, errors = 0, 0, []
+
+        for idx, row in df.iterrows():
+            username = str(row.get('username', '')).strip()
+            password = str(row.get('password', '')).strip()
+            role = str(row.get('role', 'user')).strip() or 'user'
+
+            if not username or not password:
+                skipped += 1
+                continue
+
+            # 限制总数不超过 5 个
+            cursor.execute("SELECT COUNT(*) FROM users")
+            if cursor.fetchone()[0] >= 5:
+                skipped += 1
+                errors.append(f"第{idx+2}行: 已达到账号上限（5个）")
+                continue
+
+            try:
+                if DATABASE_URL:
+                    cursor.execute(
+                        "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                        (username, password, role))
+                else:
+                    cursor.execute(
+                        "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                        (username, password, role))
+                imported += 1
+            except Exception as e:
+                skipped += 1
+                err_msg = str(e)
+                if 'unique' in err_msg.lower() or 'duplicate' in err_msg.lower():
+                    errors.append(f"第{idx+2}行「{username}」: 用户名已存在")
+                else:
+                    errors.append(f"第{idx+2}行「{username}」: {err_msg}")
+
+        close_conn(conn)
+        msg = f'成功导入 {imported} 个账号'
+        if skipped:
+            msg += f'，跳过 {skipped} 行'
+        return jsonify({'message': msg, 'count': imported, 'skipped': skipped, 'errors': errors[:20]})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     conn = get_db()
