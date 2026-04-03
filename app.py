@@ -595,8 +595,13 @@ def ensure_admin():
     else:
         close_conn(conn)
 
-init_db()
-ensure_admin()
+try:
+    init_db()
+    ensure_admin()
+    _db_init_ok = True
+except Exception as e:
+    print(f"[WARN] 数据库初始化失败（稍后可访问 /api/init 重试）: {e}")
+    _db_init_ok = False
 
 
 # ============================================================
@@ -607,6 +612,7 @@ def manual_init():
     try:
         init_db()
         ensure_admin()
+        _db_init_ok = True
         return jsonify({'message': '数据库初始化完成'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
