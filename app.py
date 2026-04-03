@@ -744,9 +744,9 @@ def import_users():
                 skipped += 1
                 continue
 
-            # 限制总数不超过 5 个
+            # 限制总数不超过 200 个
             cursor.execute("SELECT COUNT(*) FROM users")
-            if cursor.fetchone()[0] >= 5:
+            if cursor.fetchone()[0] >= 200:
                 skipped += 1
                 errors.append(f"第{idx+2}行: 已达到账号上限（200个）")
                 continue
