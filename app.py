@@ -724,7 +724,7 @@ def create_user():
         if DATABASE_URL:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING id",
                            (username, password, role))
-            user_id = cursor.fetchone()["id"]
+            user_id = cursor.fetchone()[0]
         else:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                            (username, password, role))
