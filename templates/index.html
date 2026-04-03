@@ -297,6 +297,12 @@
                 </div>
 
                 <!-- 查询状态 -->
+                <div v-if="activeTab === 'register' && !registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                    <h3 style="color: #666; margin-bottom: 8px;">请通过招募链接访问</h3>
+                    <p style="color: #999; font-size: 14px;">点击企微群中的报名链接即可填写报名信息</p>
+                </div>
+
                 <div v-if="activeTab === 'mystatus' && registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
                     <div style="display: flex; gap: 8px; margin-bottom: 16px;">
