@@ -267,7 +267,7 @@
                 </div>
 
                 <!-- 报名表单 -->
-                <div v-if="activeTab === 'register'" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div v-if="activeTab === 'register' && registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <div v-if="currentDemand" style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center;">
                         <strong style="color: #1565c0; font-size: 16px;">{{ currentDemand.title }}</strong>
                         <div style="color: #666; font-size: 13px; margin-top: 4px;">{{ currentDemand.business_type }} · {{ currentDemand.tier }}</div>
@@ -297,7 +297,7 @@
                 </div>
 
                 <!-- 查询状态 -->
-                <div v-if="activeTab === 'mystatus'" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div v-if="activeTab === 'mystatus' && registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
                     <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                         <input v-model="statusPhone" type="text" placeholder="请输入报名时填写的手机号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
