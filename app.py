@@ -26,22 +26,39 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def get_db():
     """返回数据库连接（自动在行结束时关闭）"""
     if DATABASE_URL:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        conn = psycopg2.connect(DATABASE_URL)
     else:
         conn = sqlite3.connect('/tmp/talent.db')
         conn.row_factory = sqlite3.Row
     return conn
 
-def get_result_cursor(conn):
-    """返回普通 cursor，INSERT + SELECT lastval() 可靠获取新插入行的 ID"""
-    return conn.cursor()
-
 
 def dict_from_row(row):
+    if row is None:
         return None
     if hasattr(row, 'keys'):
         return dict(row)
     return row
+
+
+def fetchall_dicts(cursor):
+    rows = cursor.fetchall()
+    if not rows:
+        return []
+    if hasattr(rows[0], 'keys'):
+        return [dict(row) for row in rows]
+    cols = [desc[0] for desc in cursor.description]
+    return [dict(zip(cols, row)) for row in rows]
+
+
+def fetchone_dict(cursor):
+    row = cursor.fetchone()
+    if row is None:
+        return None
+    if hasattr(row, 'keys'):
+        return dict(row)
+    cols = [desc[0] for desc in cursor.description]
+    return dict(zip(cols, row))
 
 def close_conn(conn):
     """关闭连接（psycopg2 需要 commit+close，sqlite3 只管 close）"""
@@ -619,7 +636,13 @@ def manual_init():
         _db_init_ok = True
         return jsonify({'message': '数据库初始化完成'})
     except Exception as e:
-        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+        import sys
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb_str = ''.join(tb)
+        # 找最后一个有价值的行
+        lines = [l for l in tb_str.split('\n') if 'app.py' in l]
+        last_app_line = lines[-1].strip() if lines else tb_str[-200:]
+        return jsonify({'error': str(e), 'type': type(e).__name__, 'location': last_app_line}), 500
 
 
 # ============================================================
@@ -644,7 +667,7 @@ def system_status():
         cursor.execute("SELECT id, username, role FROM users")
     else:
         cursor.execute("SELECT id, username, role FROM users")
-    users = [dict(row) for row in cursor.fetchall()]
+    users = fetchall_dicts(cursor)
     close_conn(conn)
     return jsonify({'has_users': count > 0, 'user_count': count, 'users': users})
 
@@ -704,7 +727,7 @@ def list_users():
         cursor.execute("SELECT id, username, role, created_at FROM users ORDER BY id")
     else:
         cursor.execute("SELECT id, username, role, created_at FROM users ORDER BY id")
-    users = [dict(row) for row in cursor.fetchall()]
+    users = fetchall_dicts(cursor)
     close_conn(conn)
     return jsonify(users)
 
@@ -831,7 +854,7 @@ def login():
     else:
         cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?",
                        (username, password))
-    user = cursor.fetchone()
+    user = fetchone_dict(cursor)
     if user:
         result = {'success': True, 'user': {'id': user['id'], 'username': user['username'], 'role': user['role']}}
         close_conn(conn)
@@ -897,10 +920,10 @@ def get_talents():
         base_query += " ORDER BY id DESC LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
     cursor.execute(base_query, params)
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
     return jsonify({
-        'data': [dict(r) for r in rows],
+        'data': rows,
         'total': total,
         'page': page,
         'per_page': per_page,
@@ -916,10 +939,10 @@ def get_talent(talent_id):
         cursor.execute("SELECT * FROM talents WHERE id = %s", (talent_id,))
     else:
         cursor.execute("SELECT * FROM talents WHERE id = ?", (talent_id,))
-    row = cursor.fetchone()
+    row = fetchone_dict(cursor)
     close_conn(conn)
     if row:
-        return jsonify(dict(row))
+        return jsonify(row)
     return jsonify({'error': 'Not found'}), 404
 
 
@@ -1051,11 +1074,11 @@ def export_talents():
         cursor.execute("SELECT * FROM talents ORDER BY id DESC")
     else:
         cursor.execute("SELECT * FROM talents ORDER BY id DESC")
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
     if not rows:
         return jsonify({'error': 'No data'}), 400
-    df = pd.DataFrame([dict(r) for r in rows])
+    df = pd.DataFrame(rows)
     for col in ['created_at', 'updated_at']:
         if col in df.columns:
             df = df.drop(columns=[col])
@@ -1185,9 +1208,9 @@ def get_demands():
         params.extend([per_page, offset])
         cursor.execute(base_query, params)
 
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify({'data': [dict(r) for r in rows], 'total': total, 'page': page, 'per_page': per_page})
+    return jsonify({'data': rows, 'total': total, 'page': page, 'per_page': per_page})
 
 
 @app.route('/api/demands/<int:demand_id>', methods=['GET'])
@@ -1208,10 +1231,10 @@ def get_demand(demand_id):
             LEFT JOIN users u ON d.demander_id = u.id
             WHERE d.id = ?
         """, (demand_id,))
-    row = cursor.fetchone()
+    row = fetchone_dict(cursor)
     close_conn(conn)
     if row:
-        return jsonify(dict(row))
+        return jsonify(row)
     return jsonify({'error': 'Not found'}), 404
 
 
@@ -1306,11 +1329,10 @@ def calc_demand_quote(demand_id):
         cursor.execute('SELECT * FROM demands WHERE id = %s', (demand_id,))
     else:
         cursor.execute('SELECT * FROM demands WHERE id = ?', (demand_id,))
-    demand = cursor.fetchone()
+    demand = fetchone_dict(cursor)
     close_conn(conn)
     if not demand:
         return jsonify({'error': '需求不存在'}), 404
-    demand = dict(demand)
     demand_data = {
         'business_type': demand['business_type'],
         'tier': demand['tier'],
@@ -1383,10 +1405,10 @@ def get_quote(demand_id):
         cursor.execute('SELECT * FROM demand_quotes WHERE demand_id = %s', (demand_id,))
     else:
         cursor.execute('SELECT * FROM demand_quotes WHERE demand_id = ?', (demand_id,))
-    row = cursor.fetchone()
+    row = fetchone_dict(cursor)
     close_conn(conn)
     if row:
-        return jsonify(dict(row))
+        return jsonify(row)
     return jsonify({})
 
 
@@ -1472,9 +1494,9 @@ def get_demand_applications(demand_id):
             WHERE da.demand_id = ?
             ORDER BY da.applied_at DESC
         """, (demand_id,))
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify([dict(r) for r in rows])
+    return jsonify(rows)
 
 
 @app.route('/api/applications/<int:app_id>/select', methods=['POST'])
@@ -1525,9 +1547,9 @@ def get_evaluations(demand_id):
             LEFT JOIN users u ON de.evaluated_by = u.id
             WHERE de.demand_id = ?
         """, (demand_id,))
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify([dict(r) for r in rows])
+    return jsonify(rows)
 
 
 @app.route('/api/demands/<int:demand_id>/evaluate', methods=['POST'])
@@ -1566,7 +1588,7 @@ def get_setting(key, default=''):
         cursor.execute('SELECT value FROM system_settings WHERE key = %s', (key,))
     else:
         cursor.execute('SELECT value FROM system_settings WHERE key = ?', (key,))
-    row = cursor.fetchone()
+    row = fetchone_dict(cursor)
     close_conn(conn)
     return row['value'] if row else default
 
@@ -1618,7 +1640,7 @@ def publish_to_wecom(demand_id):
             LEFT JOIN users u ON d.demander_id = u.id
             WHERE d.id = ?
         """, (demand_id,))
-    demand = cursor.fetchone()
+    demand = fetchone_dict(cursor)
     if not demand:
         close_conn(conn)
         return jsonify({'error': '需求不存在'}), 404
@@ -1627,11 +1649,10 @@ def publish_to_wecom(demand_id):
         cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = %s AND status = 'confirmed'", (demand_id,))
     else:
         cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = ? AND status = 'confirmed'", (demand_id,))
-    quote = cursor.fetchone()
+    quote = fetchone_dict(cursor)
     close_conn(conn)
 
-    demand = dict(demand)
-    quote = dict(quote) if quote else None
+    quote = quote if quote else None
 
     brush_str = "（刷名单）" if demand['brush_list'] else ""
     msg_title = demand['title'] or ""
@@ -1691,9 +1712,9 @@ def my_applications(talent_id):
             WHERE da.talent_id = ?
             ORDER BY da.applied_at DESC
         """, (talent_id,))
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify([dict(r) for r in rows])
+    return jsonify(rows)
 
 
 @app.route('/api/talents/<int:talent_id>/my-evaluations', methods=['GET'])
@@ -1718,9 +1739,9 @@ def my_evaluations(talent_id):
             WHERE de.talent_id = ?
             ORDER BY de.created_at DESC
         """, (talent_id,))
-    rows = cursor.fetchall()
+    rows = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify([dict(r) for r in rows])
+    return jsonify(rows)
 
 
 # ---- 系统设置 API ----
