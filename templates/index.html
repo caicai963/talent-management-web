@@ -278,6 +278,13 @@
             <!-- 普通用户内容：报名信息 -->
             <div v-if="activeTab === 'register'">
                 <div style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div v-if="currentDemand" style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center;">
+                        <strong style="color: #1565c0; font-size: 16px;">{{ currentDemand.title || '招募中' }}</strong>
+                        <div style="color: #666; font-size: 13px; margin-top: 4px;">{{ currentDemand.business_type }} · {{ currentDemand.tier }}</div>
+                    </div>
+                    <div v-else style="background: #fff3e0; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; color: #e65100;">
+                        未指定需求，请通过招募链接访问
+                    </div>
                     <h3 style="margin-bottom: 20px; color: #333;">填写报名信息</h3>
                     <div style="margin-bottom: 16px;">
                         <label style="display: block; margin-bottom: 4px; color: #666;">姓名</label>
@@ -1788,6 +1795,7 @@
                                 loadTalents();
                             } else {
                                 activeTab.value = 'register';
+                                loadDemandInfo();
                             }
 
                         }
@@ -2076,9 +2084,26 @@
 
 
 
+                const loadDemandInfo = async () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const demandId = params.get('demand_id');
+                    if (!demandId) {
+                        currentDemand.value = null;
+                        registerDemandId.value = null;
+                        return;
+                    }
+                    registerDemandId.value = demandId;
+                    try {
+                        const res = await api.get('/api/demands/' + demandId + '/public');
+                        currentDemand.value = res.data;
+                    } catch (e) {
+                        currentDemand.value = { title: '未知需求' };
+                    }
+                };
+
                 const submitRegistration = async () => {
                 try {
-                    const res = await api.post('/api/talents/register', registerForm.value);
+                    const res = await api.post('/api/demands/' + registerDemandId.value + '/apply', registerForm.value);
                     registerMessage.value = res.data.message || '提交成功';
                     registerForm.value = { name: '', phone: '', available_time: '', game_experience: '' };
                     setTimeout(() => { registerMessage.value = ''; }, 3000);
@@ -2093,7 +2118,7 @@
                     return;
                 }
                 try {
-                    const res = await api.get('/api/talents/register/status', {
+                    const res = await api.get('/api/demands/' + registerDemandId.value + '/apply/status', {
                         params: { phone: statusPhone.value.trim() }
                     });
                     statusResult.value = res.data;
