@@ -269,7 +269,6 @@
 
                     <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状态</button>
 
-                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
 
                 </div>
 
@@ -1721,6 +1720,13 @@
 
 
                 const activeTab = ref('list');
+
+                // 普通用户报名相关
+                const registerForm = ref({ name: '', phone: '', available_time: '', game_experience: '' });
+                const registerMessage = ref('');
+                const statusPhone = ref('');
+                const statusResult = ref(null);
+                const statusChecked = ref(false);
 
                 const stats = ref({});
 
