@@ -33,7 +33,7 @@ def get_db():
     return conn
 
 def dict_from_row(row):
-    """将数据库行转为普通 dict（兼容 sqlite3.Row 和 psycopg2 RealDictRow）"""
+    """将数据库行转为普通 dict（兼容 sqlite3.Row 和 psycopg2 行）"""
     if row is None:
         return None
     if hasattr(row, 'keys'):
@@ -609,13 +609,14 @@ except Exception as e:
 # ============================================================
 @app.route('/api/init', methods=['GET'])
 def manual_init():
+    import traceback
     try:
         init_db()
         ensure_admin()
         _db_init_ok = True
         return jsonify({'message': '数据库初始化完成'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
 
 
 # ============================================================
@@ -723,7 +724,7 @@ def create_user():
         if DATABASE_URL:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING id",
                            (username, password, role))
-            user_id = cursor.fetchone()[0]
+            user_id = cursor.fetchone()["id"]
         else:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                            (username, password, role))
