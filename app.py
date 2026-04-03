@@ -721,17 +721,21 @@ def create_user():
         return jsonify({'error': '最多只能创建200个账号'}), 400
     try:
         if DATABASE_URL:
-            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING id",
                            (username, password, role))
+            user_id = cursor.fetchone()[0]
         else:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                            (username, password, role))
-        user_id = cursor.lastrowid
+            user_id = cursor.lastrowid
         close_conn(conn)
         return jsonify({'id': user_id, 'message': '账号创建成功'})
     except Exception as e:
         close_conn(conn)
-        return jsonify({'error': '用户名已存在'}), 400
+        err_msg = str(e)
+        if 'unique' in err_msg.lower() or 'duplicate' in err_msg.lower():
+            return jsonify({'error': '用户名已存在'}), 400
+        return jsonify({'error': err_msg}), 400
 
 
 @app.route('/api/users/import', methods=['POST'])
