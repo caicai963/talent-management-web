@@ -480,7 +480,7 @@
 
                 <h3 style="margin-bottom: 20px;">账号管理</h3>
 
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多5个）
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多200个）
                     <button class="btn-warning" @click="showUserImportModal = true" style="margin-left:12px;padding:6px 14px;">📥 批量导入账号</button>
                 </p>
 
@@ -576,7 +576,7 @@
 
                         <div class="form-group" style="display: flex; align-items: flex-end;">
 
-                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 5">添加账号</button>
+                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 200">添加账号</button>
 
                         </div>
 

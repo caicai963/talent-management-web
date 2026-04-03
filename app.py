@@ -697,9 +697,9 @@ def create_user():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM users")
-    if cursor.fetchone()[0] >= 5:
+    if cursor.fetchone()[0] >= 200:
         close_conn(conn)
-        return jsonify({'error': '最多只能创建5个账号'}), 400
+        return jsonify({'error': '最多只能创建200个账号'}), 400
     try:
         if DATABASE_URL:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
@@ -748,7 +748,7 @@ def import_users():
             cursor.execute("SELECT COUNT(*) FROM users")
             if cursor.fetchone()[0] >= 5:
                 skipped += 1
-                errors.append(f"第{idx+2}行: 已达到账号上限（5个）")
+                errors.append(f"第{idx+2}行: 已达到账号上限（200个）")
                 continue
 
             try:
