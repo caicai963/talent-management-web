@@ -863,6 +863,113 @@ def login():
     return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
 
+# ============================================================
+# 公开报名 API（无需登录）
+# ============================================================
+@app.route('/api/talents/register', methods=['POST'])
+def register_talent():
+    """公开报名接口：姓名 + 手机号 + 空闲时间 + 游戏经历"""
+    data = request.json
+    name = str(data.get('name', '')).strip()
+    phone = str(data.get('phone', '')).strip()
+    available_time = str(data.get('available_time', '')).strip()
+    game_experience = str(data.get('game_experience', '')).strip()
+
+    if not name or not phone:
+        return jsonify({'error': '姓名和手机号不能为空'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 检查是否已报名
+    if DATABASE_URL:
+        cursor.execute("SELECT id FROM talents WHERE phone = %s", (phone,))
+    else:
+        cursor.execute("SELECT id FROM talents WHERE phone = ?", (phone,))
+    existing = fetchone_dict(cursor)
+    if existing:
+        cursor.execute("""
+            UPDATE talents SET name = %s, available_time = %s, game_experience = %s, updated_at = NOW()
+            WHERE phone = %s
+        """ if DATABASE_URL else """
+            UPDATE talents SET name = ?, available_time = ?, game_experience = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE phone = ?
+        """, (name, available_time, game_experience, phone))
+        close_conn(conn)
+        return jsonify({'message': '报名信息已更新', 'phone': phone})
+
+    # 新报名
+    if DATABASE_URL:
+        cursor.execute("""
+            INSERT INTO talents (name, phone, available_time, game_experience, updated_at)
+            VALUES (%s, %s, %s, %s, NOW())
+        """, (name, phone, available_time, game_experience))
+    else:
+        cursor.execute("""
+            INSERT INTO talents (name, phone, available_time, game_experience, updated_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (name, phone, available_time, game_experience))
+    close_conn(conn)
+    return jsonify({'message': '报名成功', 'phone': phone})
+
+
+@app.route('/api/talents/register/status', methods=['GET'])
+def check_registration_status():
+    """公开查询接口：输入手机号查询是否入选"""
+    phone = request.args.get('phone', '').strip()
+    if not phone:
+        return jsonify({'error': '手机号不能为空'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.registration_status,
+                   da.status as application_status, da.selected_at,
+                   d.title as demand_title, d.business_type, d.tier
+            FROM talents t
+            LEFT JOIN demand_applications da ON da.talent_id = t.id
+            LEFT JOIN demands d ON da.demand_id = d.id
+            WHERE t.phone = %s
+            ORDER BY da.applied_at DESC
+            LIMIT 1
+        """, (phone,))
+    else:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.registration_status,
+                   da.status as application_status, da.selected_at,
+                   d.title as demand_title, d.business_type, d.tier
+            FROM talents t
+            LEFT JOIN demand_applications da ON da.talent_id = t.id
+            LEFT JOIN demands d ON da.demand_id = d.id
+            WHERE t.phone = ?
+            ORDER BY da.applied_at DESC
+            LIMIT 1
+        """, (phone,))
+    row = fetchone_dict(cursor)
+    close_conn(conn)
+
+    if not row:
+        return jsonify({'found': False, 'message': '未找到报名记录'})
+
+    status_text = {
+        None: '待审核',
+        'pending': '审核中',
+        'selected': '已入选',
+        'rejected': '未入选'
+    }.get(row.get('application_status'), '待审核')
+
+    return jsonify({
+        'found': True,
+        'name': row.get('name'),
+        'status': status_text,
+        'demand_title': row.get('demand_title'),
+        'business_type': row.get('business_type'),
+        'tier': row.get('tier'),
+        'selected_at': row.get('selected_at')
+    })
+
+
 # ---- 人才管理 API ----
 
 @app.route('/api/talents', methods=['GET'])
