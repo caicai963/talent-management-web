@@ -233,7 +233,7 @@
 
                 <div class="header-right">
 
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role }})</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : '普通用户' }})</span>
 
                     <button class="logout-btn" @click="handleLogout">退出</button>
 
@@ -241,24 +241,142 @@
 
             </div>
 
+            <!-- 管理员视图 -->
 
+            <div v-if="currentUser.role === 'admin'">
 
-            <div class="tabs">
+                <div class="tabs">
 
-                <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">人才列表</button>
+                    <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">人才列表</button>
 
-                <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
+                    <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
 
-                <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
-                <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
+                    <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+
+                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
+
+                </div>
+
+            </div>
+
+            <!-- 普通用户视图 -->
+
+            <div v-else>
+
+                <div class="tabs">
+
+                    <button class="tab" :class="{ active: activeTab === 'register' }" @click="activeTab = 'register'">报名信息</button>
+
+                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状态</button>
+
+                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
+
+                </div>
 
             </div>
 
 
+            <!-- 普通用户内容：报名信息 -->
+            <div v-if="activeTab === 'register'">
+                <div style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 20px; color: #333;">填写报名信息</h3>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">姓名</label>
+                        <input v-model="registerForm.name" type="text" placeholder="请输入姓名" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">手机号</label>
+                        <input v-model="registerForm.phone" type="text" placeholder="请输入手机号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">空闲时间</label>
+                        <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚上" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">游戏经历</label>
+                        <textarea v-model="registerForm.game_experience" placeholder="请描述您的游戏经历" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+                    <button @click="submitRegistration" style="width: 100%; padding: 12px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">提交报名</button>
+                    <div v-if="registerMessage" style="margin-top: 12px; padding: 10px; border-radius: 4px; background: #d4edda; color: #155724;">{{ registerMessage }}</div>
+                </div>
+            </div>
+
+            <!-- 普通用户内容：查询状态 -->
+            <div v-if="activeTab === 'mystatus'">
+                <div style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <input v-model="statusPhone" type="text" placeholder="请输入报名时填写的手机号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <button @click="checkMyStatus" style="padding: 10px 20px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer;">查询</button>
+                    </div>
+                    <div v-if="statusResult">
+                        <div style="padding: 16px; background: #f8f9fa; border-radius: 4px;">
+                            <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ statusResult.name || '未知' }}</p>
+                            <p style="margin-bottom: 8px;">
+                                <strong>报名状态：</strong>
+                                <span :style="{ color: statusResult.status === '已入选' ? 'green' : statusResult.status === '未入选' ? 'red' : '#666' }">{{ statusResult.status }}</span>
+                            </p>
+                            <p v-if="statusResult.demand_title" style="margin-bottom: 8px;"><strong>需求名称：</strong>{{ statusResult.demand_title }}</p>
+                            <p v-if="statusResult.business_type" style="margin-bottom: 8px;"><strong>业务类型：</strong>{{ statusResult.business_type }}</p>
+                            <p v-if="statusResult.selected_at" style="margin-bottom: 8px;"><strong>入选时间：</strong>{{ statusResult.selected_at }}</p>
+                        </div>
+                    </div>
+                    <div v-else-if="statusChecked" style="padding: 16px; color: #666; text-align: center;">未找到该手机号的报名记录</div>
+                </div>
+            </div>
+
+            <!-- 普通用户内容：报名信息 -->
+            <div v-if="activeTab === 'register'">
+                <div style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 20px; color: #333;">填写报名信息</h3>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">姓名</label>
+                        <input v-model="registerForm.name" type="text" placeholder="请输入姓名" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">手机号</label>
+                        <input v-model="registerForm.phone" type="text" placeholder="请输入手机号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">空闲时间</label>
+                        <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚上" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">游戏经历</label>
+                        <textarea v-model="registerForm.game_experience" placeholder="请描述您的游戏经历" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+                    <button @click="submitRegistration" style="width: 100%; padding: 12px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">提交报名</button>
+                    <div v-if="registerMessage" style="margin-top: 12px; padding: 10px; border-radius: 4px; background: #d4edda; color: #155724;">{{ registerMessage }}</div>
+                </div>
+            </div>
+
+            <!-- 普通用户内容：查询状态 -->
+            <div v-if="activeTab === 'mystatus'">
+                <div style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <input v-model="statusPhone" type="text" placeholder="请输入报名时填写的手机号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <button @click="checkMyStatus" style="padding: 10px 20px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer;">查询</button>
+                    </div>
+                    <div v-if="statusResult">
+                        <div style="padding: 16px; background: #f8f9fa; border-radius: 4px;">
+                            <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ statusResult.name || '未知' }}</p>
+                            <p style="margin-bottom: 8px;">
+                                <strong>报名状态：</strong>
+                                <span :style="{ color: statusResult.status === '已入选' ? 'green' : statusResult.status === '未入选' ? 'red' : '#666' }">{{ statusResult.status }}</span>
+                            </p>
+                            <p v-if="statusResult.demand_title" style="margin-bottom: 8px;"><strong>需求名称：</strong>{{ statusResult.demand_title }}</p>
+                            <p v-if="statusResult.business_type" style="margin-bottom: 8px;"><strong>业务类型：</strong>{{ statusResult.business_type }}</p>
+                            <p v-if="statusResult.selected_at" style="margin-bottom: 8px;"><strong>入选时间：</strong>{{ statusResult.selected_at }}</p>
+                        </div>
+                    </div>
+                    <div v-else-if="statusChecked" style="padding: 16px; color: #666; text-align: center;">未找到该手机号的报名记录</div>
+                </div>
+            </div>
 
             <!-- 人才列表 -->
 
-            <div v-if="activeTab === 'list'">
+            <div v-if="activeTab === 'list' && currentUser.role === 'admin'">
 
                 <div class="toolbar">
 
@@ -414,7 +532,7 @@
 
             <!-- 统计页面 -->
 
-            <div v-if="activeTab === 'stats'">
+            <div v-if="activeTab === 'stats' && currentUser.role === 'admin'">
 
                 <div class="stats-grid">
 
@@ -476,7 +594,7 @@
 
             <!-- 账号管理页面 -->
 
-            <div v-if="activeTab === 'users'" style="background: white; padding: 24px; border-radius: 8px;">
+            <div v-if="activeTab === 'users' && currentUser.role === 'admin'" style="background: white; padding: 24px; border-radius: 8px;">
 
                 <h3 style="margin-bottom: 20px;">账号管理</h3>
 
@@ -1660,7 +1778,11 @@
 
                             localStorage.setItem('user', JSON.stringify(res.data.user));
 
-                            loadTalents();
+                            if (res.data.user.role === 'admin') {
+                                loadTalents();
+                            } else {
+                                activeTab.value = 'register';
+                            }
 
                         }
 
@@ -1948,7 +2070,35 @@
 
 
 
-                const loadStats = async () => {
+                const submitRegistration = async () => {
+                try {
+                    const res = await api.post('/api/talents/register', registerForm.value);
+                    registerMessage.value = res.data.message || '提交成功';
+                    registerForm.value = { name: '', phone: '', available_time: '', game_experience: '' };
+                    setTimeout(() => { registerMessage.value = ''; }, 3000);
+                } catch (e) {
+                    registerMessage.value = '提交失败: ' + (e.response?.data?.error || e.message);
+                }
+            };
+
+            const checkMyStatus = async () => {
+                if (!statusPhone.value.trim()) {
+                    alert('请输入手机号');
+                    return;
+                }
+                try {
+                    const res = await api.get('/api/talents/register/status', {
+                        params: { phone: statusPhone.value.trim() }
+                    });
+                    statusResult.value = res.data;
+                    statusChecked.value = true;
+                } catch (e) {
+                    statusResult.value = { name: '查询失败', status: '请稍后重试' };
+                    statusChecked.value = true;
+                }
+            };
+
+            const loadStats = async () => {
 
                     const res = await api.get('/api/stats');
 
