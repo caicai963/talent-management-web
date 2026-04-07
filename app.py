@@ -26,7 +26,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def get_db():
     """返回数据库连接（自动在行结束时关闭）"""
     if DATABASE_URL:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     else:
         conn = sqlite3.connect('/tmp/talent.db')
         conn.row_factory = sqlite3.Row
@@ -1148,69 +1148,47 @@ def demand_meta():
 
 @app.route('/api/demands', methods=['GET'])
 def get_demands():
-    conn = get_db()
-    cursor = conn.cursor()
-    status = request.args.get('status', '')
-    role = request.args.get('role', '')
-    user_id = request.args.get('user_id', type=int)
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    offset = (page - 1) * per_page
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        status = request.args.get('status', '')
+        role = request.args.get('role', '')
 
-    if DATABASE_URL:
-        base_query = """
-            SELECT d.*, u.username as demander_name
-            FROM demands d
-            LEFT JOIN users u ON d.demander_id = u.id
-            WHERE 1=1
-        """
-        count_query = "SELECT COUNT(*) FROM demands d WHERE 1=1"
-        params = []
-        count_params = []
-        if status:
-            base_query += " AND d.status = %s"
-            count_query += " AND d.status = %s"
-            params.append(status)
-            count_params.append(status)
-        if role == 'demander' and user_id:
-            base_query += " AND d.demander_id = %s"
-            count_query += " AND d.demander_id = %s"
-            params.append(user_id)
-            count_params.append(user_id)
-        cursor.execute(count_query, count_params)
-        total = cursor.fetchone()[0]
-        base_query += " ORDER BY d.id DESC LIMIT %s OFFSET %s"
-        params.extend([per_page, offset])
-        cursor.execute(base_query, params)
-    else:
-        base_query = """
-            SELECT d.*, u.username as demander_name
-            FROM demands d
-            LEFT JOIN users u ON d.demander_id = u.id
-            WHERE 1=1
-        """
-        count_query = "SELECT COUNT(*) FROM demands d WHERE 1=1"
-        params = []
-        count_params = []
-        if status:
-            base_query += " AND d.status = ?"
-            count_query += f" AND d.status = '{status}'"
-            params.append(status)
-            count_params.append(status)
-        if role == 'demander' and user_id:
-            base_query += " AND d.demander_id = ?"
-            count_query += f" AND d.demander_id = {user_id}"
-            params.append(user_id)
-            count_params.append(user_id)
-        cursor.execute(count_query, count_params)
-        total = cursor.fetchone()[0]
-        base_query += " ORDER BY d.id DESC LIMIT ? OFFSET ?"
-        params.extend([per_page, offset])
-        cursor.execute(base_query, params)
+        conn = get_db()
+        cursor = conn.cursor()
 
-    rows = fetchall_dicts(cursor)
-    close_conn(conn)
-    return jsonify({'data': rows, 'total': total, 'page': page, 'per_page': per_page})
+        if DATABASE_URL:
+            if status:
+                cursor.execute("SELECT COUNT(*) FROM demands WHERE status = %s", (status,))
+            else:
+                cursor.execute("SELECT COUNT(*) FROM demands")
+        else:
+            if status:
+                cursor.execute("SELECT COUNT(*) FROM demands WHERE status = ?", (status,))
+            else:
+                cursor.execute("SELECT COUNT(*) FROM demands")
+
+        total = cursor.fetchone()[0]
+
+        if DATABASE_URL:
+            if status:
+                cursor.execute(f"SELECT * FROM demands WHERE status = %s ORDER BY id DESC LIMIT %s OFFSET %s", (status, per_page, (page-1)*per_page))
+            else:
+                cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT %s OFFSET %s", (per_page, (page-1)*per_page))
+        else:
+            if status:
+                cursor.execute(f"SELECT * FROM demands WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?", (status, per_page, (page-1)*per_page))
+            else:
+                cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, (page-1)*per_page))
+
+        rows = fetchall_dicts(cursor)
+        close_conn(conn)
+        return jsonify({'data': rows, 'total': total, 'page': page, 'per_page': per_page})
+    except Exception as e:
+        import traceback
+        try: close_conn(conn)
+        except: pass
+        return jsonify({'error': 'get_demands失败: ' + str(e)[:200], 'trace': traceback.format_exc()[-500:]}), 500
 
 
 @app.route('/api/demands/<int:demand_id>', methods=['GET'])
