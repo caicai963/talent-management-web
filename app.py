@@ -1261,63 +1261,85 @@ def generate_serial_no():
     return "DM-" + str(year) + "-" + num
 
 def create_demand():
+    """创建需求单"""
     data = request.json
     conn = get_db()
-
-    # Migration: ensure serial_no column exists in demands table
+    cursor = conn.cursor()
     try:
+        # Migration: add serial_no column if missing
         if DATABASE_URL:
             cursor.execute('ALTER TABLE demands ADD COLUMN serial_no TEXT')
         else:
             cursor.execute('ALTER TABLE demands ADD COLUMN serial_no TEXT')
-    except Exception:
-        pass  # column already exists
+    except Exception as e:
+        pass  # column may already exist, ignore
 
     cursor = conn.cursor()
-    if DATABASE_URL:
-        cursor.execute("""
-            INSERT INTO demands (
-                serial_no, title, description, requirements, business_type, tier,
-                quantity, brush_list, gmv,
-                scheduled_hours, end_time, cross_meal_count,
-                human_cost, budget_min, budget_max,
-                deadline, demander_id, tidanren, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
-        """, (
-            generate_serial_no(), data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
-            data.get('business_type', ''), data.get('tier', ''),
-            data.get('quantity', 1),
-            1 if data.get('brush_list') else 0,
-            data.get('gmv', 0),
-            data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
-            data.get('human_cost', 0),
-            data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
-        ))
+    try:
+        # Generate serial number
+        year = __import__('datetime').datetime.now().year
+        if DATABASE_URL:
+            cursor.execute(
+                "SELECT COUNT(*) FROM demands WHERE serial_no IS NOT NULL AND serial_no LIKE %s",
+                (f'DM-{year}-%',)
+            )
+        else:
+            cursor.execute(
+                "SELECT COUNT(*) FROM demands WHERE serial_no IS NOT NULL AND serial_no LIKE ?",
+                (f'DM-{year}-%',)
+            )
+        count = cursor.fetchone()[0]
+        serial_no = 'DM-' + str(year) + '-' + str(count + 1).zfill(4)
+
+        if DATABASE_URL:
+            cursor.execute("""
+                INSERT INTO demands (
+                    serial_no, title, description, requirements, business_type, tier,
+                    quantity, brush_list, gmv,
+                    scheduled_hours, end_time, cross_meal_count,
+                    human_cost, budget_min, budget_max,
+                    deadline, demander_id, tidanren, status
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            """, (
+                serial_no,
+                data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
+                data.get('business_type', ''), data.get('tier', ''),
+                data.get('quantity', 1),
+                1 if data.get('brush_list') else 0,
+                data.get('gmv', 0),
+                data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
+                data.get('human_cost', 0),
+                data.get('budget_min'), data.get('budget_max'),
+                data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
+            ))
+        else:
+            cursor.execute("""
+                INSERT INTO demands (
+                    serial_no, title, description, requirements, business_type, tier,
+                    quantity, brush_list, gmv,
+                    scheduled_hours, end_time, cross_meal_count,
+                    human_cost, budget_min, budget_max,
+                    deadline, demander_id, tidanren, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            """, (
+                serial_no,
+                data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
+                data.get('business_type', ''), data.get('tier', ''),
+                data.get('quantity', 1),
+                1 if data.get('brush_list') else 0,
+                data.get('gmv', 0),
+                data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
+                data.get('human_cost', 0),
+                data.get('budget_min'), data.get('budget_max'),
+                data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
+            ))
         demand_id = cursor.lastrowid
-    else:
-        cursor.execute("""
-            INSERT INTO demands (
-                serial_no, title, description, requirements, business_type, tier,
-                quantity, brush_list, gmv,
-                scheduled_hours, end_time, cross_meal_count,
-                human_cost, budget_min, budget_max,
-                deadline, demander_id, tidanren, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-        """, (
-            generate_serial_no(), data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
-            data.get('business_type', ''), data.get('tier', ''),
-            data.get('quantity', 1),
-            1 if data.get('brush_list') else 0,
-            data.get('gmv', 0),
-            data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
-            data.get('human_cost', 0),
-            data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
-        ))
-        demand_id = cursor.lastrowid
-    close_conn(conn)
-    return jsonify({'id': demand_id, 'message': '需求创建成功'})
+        close_conn(conn)
+        return jsonify({'id': demand_id, 'serial_no': serial_no, 'message': '需求创建成功'})
+    except Exception as e:
+        close_conn(conn)
+        import traceback
+        return jsonify({'error': 'create_demand失败: ' + str(e)}), 500
 
 
 @app.route('/api/demands/<int:demand_id>', methods=['PUT'])
