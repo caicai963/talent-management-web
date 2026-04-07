@@ -1272,7 +1272,7 @@ def create_demand():
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
                 deadline, demander_id, tidanren, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
         """, (
             generate_serial_no(), data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
@@ -1293,9 +1293,9 @@ def create_demand():
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
                 deadline, demander_id, tidanren, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
         """, (
-            data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
+            generate_serial_no(), data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
             data.get('quantity', 1),
             1 if data.get('brush_list') else 0,
