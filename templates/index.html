@@ -303,7 +303,7 @@
                     <p style="color: #999; font-size: 14px;">点击企微群中的报名链接即可填写报名信息</p>
                 </div>
 
-                <div v-if="activeTab === 'mystatus' && registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div v-if="activeTab === 'mystatus'" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
                     <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                         <input v-model="statusPhone" type="text" placeholder="请输入报名时填写的手机号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
@@ -1673,6 +1673,7 @@
                 const statusPhone = ref('');
                 const statusResult = ref(null);
                 const statusChecked = ref(false);
+                const registerDemandId = ref(null);
 
                 const stats = ref({});
 
@@ -2031,6 +2032,7 @@
                         return;
                     }
                     registerDemandId.value = demandId;
+                    activeTab.value = 'register';
                     try {
                         const res = await api.get('/api/demands/' + demandId + '/public');
                         currentDemand.value = res.data;
@@ -2380,7 +2382,7 @@
 
                     exportTalents,
 
-                    activeTab, stats, loadStats,
+                    activeTab, stats, loadStats, loadDemandInfo,
 
                     systemUsers, newUser, loadUsers, addUser, deleteUser,
 
@@ -2394,6 +2396,7 @@
         // Emergency function to close all modals
 
                 app.mount('#app');
+                setTimeout(() => { try { loadDemandInfo(); } catch(e) { console.error(e); } }, 100);
 
     </script>
 
