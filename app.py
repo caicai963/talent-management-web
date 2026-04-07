@@ -1263,6 +1263,16 @@ def generate_serial_no():
 def create_demand():
     data = request.json
     conn = get_db()
+
+    # Migration: ensure serial_no column exists in demands table
+    try:
+        if DATABASE_URL:
+            cursor.execute('ALTER TABLE demands ADD COLUMN serial_no TEXT')
+        else:
+            cursor.execute('ALTER TABLE demands ADD COLUMN serial_no TEXT')
+    except Exception:
+        pass  # column already exists
+
     cursor = conn.cursor()
     if DATABASE_URL:
         cursor.execute("""
