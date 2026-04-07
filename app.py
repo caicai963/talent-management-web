@@ -1,6 +1,8 @@
-﻿"""
-浜烘墠鏍囩绠＄悊绯荤粺 - Flask 鍚庣
-鍖呭惈锛氫汉鎵嶇鐞?+ 闇€姹傛帴鍗曟祦绋?鏀寔锛歋QLite锛堟湰鍦帮級 / PostgreSQL锛圫upabase 浜戞暟鎹簱锛?"""
+"""
+人才标签管理系统 - Flask 后端
+包含：人才管理 + 需求接单流程
+支持：SQLite（本地） / PostgreSQL（Supabase 云数据库）
+"""
 import os
 import sqlite3
 import psycopg2
@@ -14,15 +16,15 @@ import io
 app = Flask(__name__)
 CORS(app)
 
-# 閰嶇疆 Jinja2 浣跨敤 <% %> 鏇夸唬 {{ }}锛岄伩鍏嶄笌 Vue 鍐茬獊
+# 配置 Jinja2 使用 <% %> 替代 {{ }}，避免与 Vue 冲突
 app.jinja_env.variable_start_string = '<%'
 app.jinja_env.variable_end_string = '%>'
 
-# 鏁版嵁搴撻厤缃細浼樺厛浣跨敤 DATABASE_URL锛圫upabase PostgreSQL锛夛紝鍚﹀垯鐢ㄦ湰鍦?SQLite
+# 数据库配置：优先使用 DATABASE_URL（Supabase PostgreSQL），否则用本地 SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db():
-    """杩斿洖鏁版嵁搴撹繛鎺ワ紙鑷姩鍦ㄨ缁撴潫鏃跺叧闂級"""
+    """返回数据库连接（自动在行结束时关闭）"""
     if DATABASE_URL:
         conn = psycopg2.connect(DATABASE_URL)
     else:
@@ -59,7 +61,7 @@ def fetchone_dict(cursor):
     return dict(zip(cols, row))
 
 def close_conn(conn):
-    """鍏抽棴杩炴帴锛坧sycopg2 闇€瑕?commit+close锛宻qlite3 鍙 close锛?""
+    """关闭连接（psycopg2 需要 commit+close，sqlite3 只管 close）"""
     try:
         conn.commit()
     except Exception:
@@ -71,50 +73,52 @@ def close_conn(conn):
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    # Flask 璇锋眰缁撴潫鍚庤嚜鍔ㄦ竻鐞嗚繛鎺ワ紙閫氳繃 request context锛?    pass
+    # Flask 请求结束后自动清理连接（通过 request context）
+    pass
 
 # ============================================================
-# 浜烘墠宸ヨ祫鍗曚环琛紙鍗曚綅锛氬厓锛?# ============================================================
+# 人才工资单价表（单位：元）
+# ============================================================
 TALENT_PRICE_TABLE = {
-    "鐢勫埆": [
-        {"label": "5~10mins/涓?, "price": 8},
-        {"label": "10~20mins/涓?, "price": 12},
-        {"label": "20~30mins/涓?, "price": 16},
-        {"label": ">30mins/涓?, "price": 26},
+    "甄别": [
+        {"label": "5~10mins/个", "price": 8},
+        {"label": "10~20mins/个", "price": 12},
+        {"label": "20~30mins/个", "price": 16},
+        {"label": ">30mins/个", "price": 26},
     ],
-    "鐢佃": [
-        {"label": "30mins浠ュ唴/涓?, "price": 30},
-        {"label": "30~60mins/涓?, "price": 45},
-        {"label": "60~90mins/涓紙浠呴檺5鏄熷吋鑱岋級", "price": 80},
-        {"label": "90~120mins/涓?, "price": 100},
+    "电访": [
+        {"label": "30mins以内/个", "price": 30},
+        {"label": "30~60mins/个", "price": 45},
+        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
+        {"label": "90~120mins/个", "price": 100},
     ],
-    "瀹為獙瀹ゆ墽琛?: [
-        {"label": "2H浠ュ唴/鍦?, "price": 150},
-        {"label": "2~4灏忔椂/鍦?, "price": 200},
-        {"label": "4~6灏忔椂/鍦?, "price": 250},
+    "实验室执行": [
+        {"label": "2H以内/场", "price": 150},
+        {"label": "2~4小时/场", "price": 200},
+        {"label": "4~6小时/场", "price": 250},
     ],
-    "琛楄1": [
-        {"label": "10鍒嗛挓浠ュ唴", "price": 30, "base": 120},
-        {"label": "30鍒嗛挓浠ュ唴", "price": 65, "base": 120},
-        {"label": "30~60鍒嗛挓", "price": 104, "base": 120},
+    "街访1": [
+        {"label": "10分钟以内", "price": 30, "base": 120},
+        {"label": "30分钟以内", "price": 65, "base": 120},
+        {"label": "30~60分钟", "price": 104, "base": 120},
     ],
-    "琛楄2": [
-        {"label": "鍗冧竾绾?, "gmv_rate": 0.05, "gmv_rate_display": "GMV脳5%", "base": 120, "fixed": 3000},
-        {"label": "鐧句竾绾?, "gmv_rate": 0.10, "gmv_rate_display": "GMV脳10%", "base": 120, "fixed": 1500},
-        {"label": "鍗佷竾绾?, "gmv_rate": 0.20, "gmv_rate_display": "GMV脳20%", "base": 120, "fixed": 800},
-        {"label": "鍗冪骇鍙婁互涓?, "gmv_rate": None, "gmv_rate_display": "鍥哄畾200鍏?, "base": 120, "fixed": 200},
+    "街访2": [
+        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
+        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
+        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
+        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
     ],
-    "鑸嗘儏鎵撴爣": [
-        {"label": "鏉?, "price": 0.3},
+    "舆情打标": [
+        {"label": "条", "price": 0.3},
     ],
-    "娲炲療鏀堕泦/妗岄潰鐮旂┒": [
-        {"label": "<0.5H/浜?, "price": 10},
-        {"label": "<1H/浜?, "price": 30},
-        {"label": "1~3H/浜?, "price": 100},
-        {"label": "3~6H/浜?, "price": 150},
+    "洞察收集/桌面研究": [
+        {"label": "<0.5H/人", "price": 10},
+        {"label": "<1H/人", "price": 30},
+        {"label": "1~3H/人", "price": 100},
+        {"label": "3~6H/人", "price": 150},
     ],
-    "閭€绾︽媺鏂?: [
-        {"label": "鏉?, "price": 3},
+    "邀约拉新": [
+        {"label": "条", "price": 3},
     ],
 }
 
@@ -122,7 +126,7 @@ BRUSH_LIST_FEE = 15
 OVERTIME_FEE_PER_HOUR = 50
 MEAL_FEE_PER_MEAL = 30
 TRANSPORT_SUBSIDY = 50
-LAB_TIER_HOURS = {"2H浠ュ唴/鍦?: 2, "2~4灏忔椂/鍦?: 4, "4~6灏忔椂/鍦?: 6}
+LAB_TIER_HOURS = {"2H以内/场": 2, "2~4小时/场": 4, "4~6小时/场": 6}
 
 
 def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_hours):
@@ -135,19 +139,19 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
     if scheduled_hours > std_hours:
         overtime_hours = round(scheduled_hours - std_hours, 2)
         overtime_fee = int(overtime_hours) * OVERTIME_FEE_PER_HOUR
-        note_parts.append(f"瓒呮椂{int(overtime_hours)}灏忔椂脳50={overtime_fee}鍏?)
+        note_parts.append(f"超时{int(overtime_hours)}小时×50={overtime_fee}元")
     if meal_fee > 0:
-        note_parts.append(f"椁愯ˉ{cross_meal_count}椤棵?0={meal_fee}鍏?)
+        note_parts.append(f"餐补{cross_meal_count}顿×30={meal_fee}元")
     if end_time_str:
         try:
             h, m = map(int, end_time_str.split(":"))
             if h > 21 or (h == 21 and m > 0):
                 transport_fee = TRANSPORT_SUBSIDY
-                note_parts.append(f"浜ら€氳ˉ璐?0鍏?)
+                note_parts.append(f"交通补贴50元")
         except:
             pass
     subtotal = overtime_fee + meal_fee + transport_fee
-    note = "锛?.join(note_parts) if note_parts else "鏃犻澶栬ˉ璐?
+    note = "，".join(note_parts) if note_parts else "无额外补贴"
     return {
         "overtime_hours": overtime_hours,
         "overtime_fee": overtime_fee,
@@ -190,78 +194,78 @@ def calc_quote(demand_data):
     quantity = demand_data.get("quantity", 1)
     brush = demand_data.get("brush_list", False)
     gmv = demand_data.get("gmv", 0)
-    if biz in ("鐢勫埆鎵ц", "鐢佃", "琛楄鎵ц", "娴嬭瘯鎵ц") and not gmv:
+    if biz in ("甄别执行", "电访", "街访执行", "测试执行") and not gmv:
         gmv = quantity
     scheduled_hours = demand_data.get("scheduled_hours", 0)
     end_time = demand_data.get("end_time", "")
     cross_meal = demand_data.get("cross_meal_count", 0)
 
     if biz not in TALENT_PRICE_TABLE:
-        return {"error": f"鏈煡涓氬姟绫诲瀷: {biz}"}
+        return {"error": f"未知业务类型: {biz}"}
     tiers = TALENT_PRICE_TABLE[biz]
     tier_data = next((t for t in tiers if t["label"] == tier), None)
     if not tier_data:
-        return {"error": f"鏈煡妗ｄ綅: {tier}"}
+        return {"error": f"未知档位: {tier}"}
 
     part_time_wage = 0
     human_cost = 0
     wage_note = ""
     human_note = ""
 
-    if biz == "琛楄1":
+    if biz == "街访1":
         base = tier_data.get("base", 120)
         price = tier_data.get("price", 0)
         part_time_wage = base + price * quantity
-        wage_note = f"120鍏?澶╁簳钖? {price}鍏?涓?{quantity}涓?
+        wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
 
-    elif biz == "琛楄2":
+    elif biz == "街访2":
         base = tier_data.get("base", 120)
         fixed = tier_data.get("fixed", 0)
         gmv_rate = tier_data.get("gmv_rate")
         rate_display = tier_data.get("gmv_rate_display", "")
         if gmv_rate is not None:
             part_time_wage = base + gmv * gmv_rate
-            wage_note = f"120鍏?澶╁簳钖? GMV({gmv}鍏?脳{gmv_rate*100:.0f}%"
+            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
         else:
             part_time_wage = base + fixed
-            wage_note = f"120鍏?澶╁簳钖? 鍥哄畾{fixed}鍏?
+            wage_note = f"120元/天底薪+ 固定{fixed}元"
 
-    elif biz == "鐢勫埆鎵ц":
+    elif biz == "甄别执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}鍏?涓?{quantity}涓?
+        wage_note = f"{unit_price}元/个× {quantity}个"
         h = vlookup_h(gmv, LUT_ZHENBIE)
         human_cost = h * 1200
-        human_note = f"鏍锋湰鏁皗gmv}鈫掍汉鍔涙姇鍏h}脳1200 = {int(human_cost)}鍏?
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "鐢佃":
+    elif biz == "电访":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}鍏?涓?{quantity}涓?
+        wage_note = f"{unit_price}元/个× {quantity}个"
         h = vlookup_h(gmv, LUT_DIANFANG)
         human_cost = h * 1200
-        human_note = f"鏍锋湰鏁皗gmv}鈫掍汉鍔涙姇鍏h}脳1200 = {int(human_cost)}鍏?
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "琛楄鎵ц":
+    elif biz == "街访执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}鍏?涓?{quantity}涓?
+        wage_note = f"{unit_price}元/个× {quantity}个"
         h = vlookup_h(gmv, LUT_JIEFANG)
         human_cost = h * 1200
-        human_note = f"鏍锋湰鏁皗gmv}鈫掍汉鍔涙姇鍏h}脳1200 = {int(human_cost)}鍏?
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "娴嬭瘯鎵ц":
+    elif biz == "测试执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}鍏?涓?{quantity}涓?
+        wage_note = f"{unit_price}元/个× {quantity}个"
         h = vlookup_h(gmv, LUT_CESHI)
         human_cost = h * 1200
-        human_note = f"鏍锋湰鏁皗gmv}鈫掍汉鍔涙姇鍏h}脳1200 = {int(human_cost)}鍏?
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "瀹為獙瀹ゆ墽琛?:
+    elif biz == "实验室执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}鍏?鍦好?{quantity}鍦?
+        wage_note = f"{unit_price}元/场× {quantity}场"
         lab_extra = calc_human_cost_lab(tier, end_time, cross_meal, scheduled_hours)
         human_cost = lab_extra["subtotal"]
         human_note = lab_extra["note"]
@@ -271,11 +275,11 @@ def calc_quote(demand_data):
         if brush:
             unit_price_brush = unit_price + BRUSH_LIST_FEE
             part_time_wage = unit_price_brush * quantity
-            wage_note = (f"({unit_price}+15鍏?鏍锋湰)脳{quantity}={part_time_wage}鍏冿紝"
-                         f"鍛煎嚭璐圭敤鏍规嵁鎷ㄦ墦闅惧害鏈夋墍涓嶅悓锛屼互瀹為檯浜х敓缁撶畻")
+            wage_note = (f"({unit_price}+15元/样本)×{quantity}={part_time_wage}元，"
+                         f"呼出费用根据拨打难度有所不同，以实际产生结算")
         else:
             part_time_wage = unit_price * quantity
-            wage_note = f"{unit_price}鍏?涓?{quantity}涓?
+            wage_note = f"{unit_price}元/个× {quantity}个"
 
     total = round(part_time_wage + human_cost, 2)
     return {
@@ -288,70 +292,70 @@ def calc_quote(demand_data):
 
 
 # ============================================================
-# 浜烘墠瀛楁鏄犲皠
+# 人才字段映射
 # ============================================================
 COLUMN_MAP = {
-    "name": "濮撳悕", "gender": "鎬у埆", "birth_date": "鍑虹敓骞存湀",
-    "identity_tag": "韬唤鏍囩", "city": "甯镐綇鍩庡競", "city_level": "鍩庡競绾у埆",
-    "school": "瀛︽牎", "major": "涓撲笟", "education": "鍦ㄨ瀛﹀巻",
-    "graduate_year": "棰勮姣曚笟骞翠唤", "phone": "鎵嬫満鍙?, "wechat": "寰俊鍙?,
-    "project_count": "涓氬姟娆℃暟", "avg_rating": "鍘嗗彶骞冲潎鏄熺骇",
-    "month_rating": "褰撴湀鏄熺骇", "overall_summary": "鏁翠綋璇勪环鎽樿",
-    "detailed_review": "璇︾粏涓氬姟璇勪环", "exam_score": "鍏艰亴鑰冭瘯寰楀垎",
-    "basic_test": "鏃ュ父璺戞祴/鍩虹娴嬭瘎",
-    "desktop_research": "妗岄潰鐮旂┒锛堢珵鍝佽垎鎯?璧勬枡鏁寸悊锛?,
-    "issue_list": "闂娓呭崟鎵ц", "insight_proposal": "娲炲療鎻愭鑳藉姏",
-    "skills_debug": "Skills鐢熸垚/璋冭瘯锛圓I宸ュ叿锛?,
-    "agent_debug": "Agent鐢熸垚/璋冭瘯", "knowledge_base": "AI鐭ヨ瘑搴撳缓璁?,
-    "interview_selection": "璁胯皥鎵ц-鐜╁鐢勫埆",
-    "online_interview": "璁胯皥鎵ц-绾夸笂璁胯皥",
-    "field_interview": "璁胯皥鎵ц-鐢伴噹璋冩煡/澶栬",
-    "questionnaire_design": "璁胯皥鎻愮翰/闂嵎璁捐",
-    "questionnaire_analysis": "闂嵎璋冪爺锛堝綍鍏ユ暣鐞?鍒嗘瀽锛?,
-    "lab_assist": "瀹為獙瀹ゆ祴璇曞崗鍔╂墽琛?, "lab_leader": "瀹為獙瀹ゆ祴璇曚富璐熻矗/涓绘寔",
-    "data_warehouse": "鏁颁粨宸ヤ綔锛堟棩甯告姤琛級",
-    "data_query": "鏁版嵁鏌ヨ/鎶ヨ〃寮€鍙?, "web_crawl": "鐖櫕/鏁版嵁鏀堕泦",
-    "deep_assessment": "娣卞害娴嬭瘎鑳藉姏",
-    "commercial_research": "鍟嗕笟鍖栫爺绌朵笌鍒嗘瀽",
-    "excel_level": "Excel鎶€鑳界瓑绾?, "spss_level": "SPSS鎶€鑳界瓑绾?,
-    "language_ability": "璇█鑳藉姏",
-    "category_moba": "鍝佺被-MOBA绫伙紙鑻遍泟鑱旂洘銆佺帇鑰呰崳鑰€绛夛級",
-    "category_mmorgp": "鍝佺被-MMORPG锛堥€嗘按瀵掋€佹ⅵ骞昏タ娓哥瓑锛?,
-    "category_openworld_rpg": "鍝佺被-寮€鏀句笘鐣孯PG锛堝灏旇揪锛屽師绁炵瓑锛?,
-    "category_card_rpg": "鍝佺被-鍗＄墝RPG绫伙紙闃撮槼甯堛€佸穿鍧忥細鏄熺┕閾侀亾绛夛級",
-    "category_tactical": "鍝佺被-鎴樻湳绔炴妧绫伙紙PUBG銆佸拰骞崇簿鑻辩瓑锛?,
-    "category_shooter": "鍝佺被-灏勫嚮绫伙紙绌胯秺鐏嚎銆丆ODM绛夛級",
-    "category_strategy_slg": "鍝佺被-绛栫暐/SLG绫伙紙鏂囨槑銆佺巼鍦熶箣婊ㄧ瓑锛?,
-    "category_action_fight": "鍝佺被-鍔ㄤ綔/鏍兼枟绫伙紙鍙嫾銆佸穿鍧忕瓑锛?,
-    "category_sandbox_survival": "鍝佺被-娌欑洅/鐢熷瓨绫伙紙鎴戠殑涓栫晫銆佹槑鏃ヤ箣鍚庣瓑锛?,
-    "category_autochess": "鍝佺被-鑷蛋妫嬬被锛堥噾閾查摬銆佸澶氳嚜璧版绛夛級",
-    "category_casual_puzzle": "鍝佺被-浼戦棽鐩婃櫤绫伙紙缇婁簡涓緤銆佹秷娑堜箰绛夛級",
-    "category_party": "鍝佺被-浼戦棽绔炴妧/娲惧绫伙紙铔嬩粩娲惧銆侀箙楦潃绛夛級",
-    "category_etc": "鍝佺被-鍏朵粬锛堣嚜濉級",
-    "key_game_1": "閲嶇偣娓告垙-閫嗘按瀵?, "key_game_2": "閲嶇偣娓告垙-鐕曚簯鍗佸叚澹?,
-    "key_game_3": "閲嶇偣娓告垙-涓€姊︽睙婀?, "key_game_4": "閲嶇偣娓告垙-闃撮槼甯?,
-    "key_game_5": "閲嶇偣娓告垙-閲戦摬閾蹭箣鎴?, "key_game_6": "閲嶇偣娓告垙-铔嬩粩娲惧",
-    "key_game_7": "閲嶇偣娓告垙-鏃犲敖鍐棩", "key_game_8": "閲嶇偣娓告垙-鐜囧湡涔嬫花",
-    "key_game_9": "閲嶇偣娓告垙-鐜嬭€呰崳鑰€", "key_game_10": "閲嶇偣娓告垙-鑻遍泟鑱旂洘",
-    "key_game_11": "閲嶇偣娓告垙-鏄庢棩涔嬪悗", "key_game_12": "閲嶇偣娓告垙-钀ょ伀绐佸嚮",
-    "key_game_13": "閲嶇偣娓告垙-涓夎娲茶鍔?,
-    "deep_game_1": "娣卞害娓告垙1", "deep_game_2": "娣卞害娓告垙2", "deep_game_3": "娣卞害娓告垙3",
-    "proficient_products": "绮鹃€氫骇鍝侊紙1000h+锛?,
-    "familiar_products": "鐔熸倝浜у搧锛?00h+锛?,
-    "other_game_experience": "鍏朵粬娓告垙缁忓巻琛ュ厖",
+    "name": "姓名", "gender": "性别", "birth_date": "出生年月",
+    "identity_tag": "身份标签", "city": "常住城市", "city_level": "城市级别",
+    "school": "学校", "major": "专业", "education": "在读学历",
+    "graduate_year": "预计毕业年份", "phone": "手机号", "wechat": "微信号",
+    "project_count": "业务次数", "avg_rating": "历史平均星级",
+    "month_rating": "当月星级", "overall_summary": "整体评价摘要",
+    "detailed_review": "详细业务评价", "exam_score": "兼职考试得分",
+    "basic_test": "日常跑测/基础测评",
+    "desktop_research": "桌面研究（竞品舆情/资料整理）",
+    "issue_list": "问题清单执行", "insight_proposal": "洞察提案能力",
+    "skills_debug": "Skills生成/调试（AI工具）",
+    "agent_debug": "Agent生成/调试", "knowledge_base": "AI知识库建设",
+    "interview_selection": "访谈执行-玩家甄别",
+    "online_interview": "访谈执行-线上访谈",
+    "field_interview": "访谈执行-田野调查/外访",
+    "questionnaire_design": "访谈提纲/问卷设计",
+    "questionnaire_analysis": "问卷调研（录入整理/分析）",
+    "lab_assist": "实验室测试协助执行", "lab_leader": "实验室测试主负责/主持",
+    "data_warehouse": "数仓工作（日常报表）",
+    "data_query": "数据查询/报表开发", "web_crawl": "爬虫/数据收集",
+    "deep_assessment": "深度测评能力",
+    "commercial_research": "商业化研究与分析",
+    "excel_level": "Excel技能等级", "spss_level": "SPSS技能等级",
+    "language_ability": "语言能力",
+    "category_moba": "品类-MOBA类（英雄联盟、王者荣耀等）",
+    "category_mmorgp": "品类-MMORPG（逆水寒、梦幻西游等）",
+    "category_openworld_rpg": "品类-开放世界RPG（塞尔达，原神等）",
+    "category_card_rpg": "品类-卡牌RPG类（阴阳师、崩坏：星穹铁道等）",
+    "category_tactical": "品类-战术竞技类（PUBG、和平精英等）",
+    "category_shooter": "品类-射击类（穿越火线、CODM等）",
+    "category_strategy_slg": "品类-策略/SLG类（文明、率土之滨等）",
+    "category_action_fight": "品类-动作/格斗类（只狼、崩坏等）",
+    "category_sandbox_survival": "品类-沙盒/生存类（我的世界、明日之后等）",
+    "category_autochess": "品类-自走棋类（金铲铲、多多自走棋等）",
+    "category_casual_puzzle": "品类-休闲益智类（羊了个羊、消消乐等）",
+    "category_party": "品类-休闲竞技/派对类（蛋仔派对、鹅鸭杀等）",
+    "category_etc": "品类-其他（自填）",
+    "key_game_1": "重点游戏-逆水寒", "key_game_2": "重点游戏-燕云十六声",
+    "key_game_3": "重点游戏-一梦江湖", "key_game_4": "重点游戏-阴阳师",
+    "key_game_5": "重点游戏-金铲铲之战", "key_game_6": "重点游戏-蛋仔派对",
+    "key_game_7": "重点游戏-无尽冬日", "key_game_8": "重点游戏-率土之滨",
+    "key_game_9": "重点游戏-王者荣耀", "key_game_10": "重点游戏-英雄联盟",
+    "key_game_11": "重点游戏-明日之后", "key_game_12": "重点游戏-萤火突击",
+    "key_game_13": "重点游戏-三角洲行动",
+    "deep_game_1": "深度游戏1", "deep_game_2": "深度游戏2", "deep_game_3": "深度游戏3",
+    "proficient_products": "精通产品（1000h+）",
+    "familiar_products": "熟悉产品（500h+）",
+    "other_game_experience": "其他游戏经历补充",
 }
 TALENT_FIELDS = list(COLUMN_MAP.keys())
 
 
 # ============================================================
-# 鏁版嵁搴撳垵濮嬪寲
+# 数据库初始化
 # ============================================================
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
     if DATABASE_URL:
-        # PostgreSQL 妯″紡
+        # PostgreSQL 模式
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS talents (
                 id SERIAL PRIMARY KEY,
@@ -507,7 +511,8 @@ def init_db():
             )
         """)
     else:
-        # SQLite 鏈湴寮€鍙戞ā寮?        cols = ["id INTEGER PRIMARY KEY AUTOINCREMENT"]
+        # SQLite 本地开发模式
+        cols = ["id INTEGER PRIMARY KEY AUTOINCREMENT"]
         for f in TALENT_FIELDS:
             cols.append(f"{f} TEXT")
         cols.extend(["created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP", "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"])
@@ -615,12 +620,12 @@ try:
     ensure_admin()
     _db_init_ok = True
 except Exception as e:
-    print(f"[WARN] 鏁版嵁搴撳垵濮嬪寲澶辫触锛堢◢鍚庡彲璁块棶 /api/init 閲嶈瘯锛? {e}")
+    print(f"[WARN] 数据库初始化失败（稍后可访问 /api/init 重试）: {e}")
     _db_init_ok = False
 
 
 # ============================================================
-# 璋冭瘯鐢細鎵嬪姩鍒濆鍖栨暟鎹簱锛堥儴缃插悗璋冪敤涓€娆″嵆鍙級
+# 调试用：手动初始化数据库（部署后调用一次即可）
 # ============================================================
 @app.route('/api/init', methods=['GET'])
 def manual_init():
@@ -629,18 +634,19 @@ def manual_init():
         init_db()
         ensure_admin()
         _db_init_ok = True
-        return jsonify({'message': '鏁版嵁搴撳垵濮嬪寲瀹屾垚'})
+        return jsonify({'message': '数据库初始化完成'})
     except Exception as e:
         import sys
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb_str = ''.join(tb)
-        # 鎵炬渶鍚庝竴涓湁浠峰€肩殑琛?        lines = [l for l in tb_str.split('\n') if 'app.py' in l]
+        # 找最后一个有价值的行
+        lines = [l for l in tb_str.split('\n') if 'app.py' in l]
         last_app_line = lines[-1].strip() if lines else tb_str[-200:]
         return jsonify({'error': str(e), 'type': type(e).__name__, 'location': last_app_line}), 500
 
 
 # ============================================================
-# 璺敱鍜?API
+# 路由和 API
 # ============================================================
 
 @app.route('/')
@@ -678,7 +684,7 @@ def reset_admin():
         cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                        ('admin', 'admin123', 'admin'))
     close_conn(conn)
-    return jsonify({'message': 'admin/admin123 宸查噸缃?})
+    return jsonify({'message': 'admin/admin123 已重置'})
 
 
 @app.route('/api/system/setup', methods=['POST'])
@@ -690,14 +696,14 @@ def system_setup():
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] > 1:
         close_conn(conn)
-        return jsonify({'error': '绯荤粺宸叉湁澶氫釜璐﹀彿'}), 403
+        return jsonify({'error': '系统已有多个账号'}), 403
     if not (1 <= len(users_to_create) <= 5):
         close_conn(conn)
-        return jsonify({'error': '璇峰垱寤?~5涓处鍙?}), 400
+        return jsonify({'error': '请创建1~5个账号'}), 400
     usernames = [u.get('username', '').strip() for u in users_to_create]
     if len(usernames) != len(set(usernames)):
         close_conn(conn)
-        return jsonify({'error': '鐢ㄦ埛鍚嶄笉鑳介噸澶?}), 400
+        return jsonify({'error': '用户名不能重复'}), 400
     cursor.execute("DELETE FROM users WHERE username != 'admin'")
     for u in users_to_create:
         uname = u.get('username', '').strip()
@@ -710,7 +716,7 @@ def system_setup():
             cursor.execute("INSERT OR REPLACE INTO users (username, password, role) VALUES (?, ?, ?)",
                            (uname, pwd, role))
     close_conn(conn)
-    return jsonify({'message': f'鎴愬姛鍒涘缓 {len(users_to_create)} 涓处鍙?})
+    return jsonify({'message': f'成功创建 {len(users_to_create)} 个账号'})
 
 
 @app.route('/api/users', methods=['GET'])
@@ -733,13 +739,13 @@ def create_user():
     password = data.get('password', '').strip()
     role = data.get('role', 'user').strip()
     if not username or not password:
-        return jsonify({'error': '鐢ㄦ埛鍚嶅拰瀵嗙爜涓嶈兘涓虹┖'}), 400
+        return jsonify({'error': '用户名和密码不能为空'}), 400
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] >= 200:
         close_conn(conn)
-        return jsonify({'error': '鏈€澶氬彧鑳藉垱寤?00涓处鍙?}), 400
+        return jsonify({'error': '最多只能创建200个账号'}), 400
     try:
         if DATABASE_URL:
             cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
@@ -751,29 +757,30 @@ def create_user():
                            (username, password, role))
             user_id = cursor.lastrowid
         close_conn(conn)
-        return jsonify({'id': user_id, 'message': '璐﹀彿鍒涘缓鎴愬姛'})
+        return jsonify({'id': user_id, 'message': '账号创建成功'})
     except Exception as e:
         close_conn(conn)
         err_msg = str(e)
         if 'unique' in err_msg.lower() or 'duplicate' in err_msg.lower():
-            return jsonify({'error': '鐢ㄦ埛鍚嶅凡瀛樺湪'}), 400
+            return jsonify({'error': '用户名已存在'}), 400
         return jsonify({'error': err_msg}), 400
 
 
 @app.route('/api/users/import', methods=['POST'])
 def import_users():
-    """鎵归噺瀵煎叆璐﹀彿锛圗xcel 鏂囦欢锛?""
+    """批量导入账号（Excel 文件）"""
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
     file = request.files['file']
     if not file.filename.endswith(('.xlsx', '.xls')):
-        return jsonify({'error': '璇蜂笂浼?Excel 鏂囦欢'}), 400
+        return jsonify({'error': '请上传 Excel 文件'}), 400
     try:
         df = pd.read_excel(file)
-        # 楠岃瘉蹇呴渶鍒?        required_cols = ['username', 'password']
+        # 验证必需列
+        required_cols = ['username', 'password']
         missing = [c for c in required_cols if c not in df.columns]
         if missing:
-            return jsonify({'error': f'Excel 缂哄皯蹇呴渶鍒? {", ".join(missing)}锛屽彲閫夊垪: role'}), 400
+            return jsonify({'error': f'Excel 缺少必需列: {", ".join(missing)}，可选列: role'}), 400
 
         conn = get_db()
         cursor = conn.cursor()
@@ -788,10 +795,11 @@ def import_users():
                 skipped += 1
                 continue
 
-            # 闄愬埗鎬绘暟涓嶈秴杩?200 涓?            cursor.execute("SELECT COUNT(*) FROM users")
+            # 限制总数不超过 200 个
+            cursor.execute("SELECT COUNT(*) FROM users")
             if cursor.fetchone()[0] >= 200:
                 skipped += 1
-                errors.append(f"绗瑊idx+2}琛? 宸茶揪鍒拌处鍙蜂笂闄愶紙200涓級")
+                errors.append(f"第{idx+2}行: 已达到账号上限（200个）")
                 continue
 
             try:
@@ -808,14 +816,14 @@ def import_users():
                 skipped += 1
                 err_msg = str(e)
                 if 'unique' in err_msg.lower() or 'duplicate' in err_msg.lower():
-                    errors.append(f"绗瑊idx+2}琛屻€寋username}銆? 鐢ㄦ埛鍚嶅凡瀛樺湪")
+                    errors.append(f"第{idx+2}行「{username}」: 用户名已存在")
                 else:
-                    errors.append(f"绗瑊idx+2}琛屻€寋username}銆? {err_msg}")
+                    errors.append(f"第{idx+2}行「{username}」: {err_msg}")
 
         close_conn(conn)
-        msg = f'鎴愬姛瀵煎叆 {imported} 涓处鍙?
+        msg = f'成功导入 {imported} 个账号'
         if skipped:
-            msg += f'锛岃烦杩?{skipped} 琛?
+            msg += f'，跳过 {skipped} 行'
         return jsonify({'message': msg, 'count': imported, 'skipped': skipped, 'errors': errors[:20]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -830,7 +838,7 @@ def delete_user(user_id):
     else:
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
     close_conn(conn)
-    return jsonify({'message': '鍒犻櫎鎴愬姛'})
+    return jsonify({'message': '删除成功'})
 
 
 @app.route('/api/login', methods=['POST'])
@@ -855,7 +863,7 @@ def login():
     return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
 
-# ---- 浜烘墠绠＄悊 API ----
+# ---- 人才管理 API ----
 
 @app.route('/api/talents', methods=['GET'])
 def get_talents():
@@ -965,8 +973,8 @@ def create_talent():
         close_conn(conn)
     else:
         close_conn(conn)
-        return jsonify({'id': None, 'message': '鍒涘缓鎴愬姛锛堟棤瀛楁锛?})
-    return jsonify({'id': talent_id, 'message': '鍒涘缓鎴愬姛'})
+        return jsonify({'id': None, 'message': '创建成功（无字段）'})
+    return jsonify({'id': talent_id, 'message': '创建成功'})
 
 
 @app.route('/api/talents/<int:talent_id>', methods=['PUT'])
@@ -991,7 +999,7 @@ def update_talent(talent_id):
         close_conn(conn)
     else:
         close_conn(conn)
-    return jsonify({'message': '鏇存柊鎴愬姛'})
+    return jsonify({'message': '更新成功'})
 
 
 @app.route('/api/talents/<int:talent_id>', methods=['DELETE'])
@@ -1003,7 +1011,7 @@ def delete_talent(talent_id):
     else:
         cursor.execute("DELETE FROM talents WHERE id = ?", (talent_id,))
     close_conn(conn)
-    return jsonify({'message': '鍒犻櫎鎴愬姛'})
+    return jsonify({'message': '删除成功'})
 
 
 @app.route('/api/talents/import', methods=['POST'])
@@ -1048,11 +1056,11 @@ def import_talents():
                             values)
                     imported += 1
                 except Exception as e:
-                    errors.append(f"绗瑊idx+2}琛? {str(e)}")
+                    errors.append(f"第{idx+2}行: {str(e)}")
         close_conn(conn)
-        msg = f'鎴愬姛瀵煎叆 {imported} 鏉¤褰?
+        msg = f'成功导入 {imported} 条记录'
         if errors:
-            msg += f'锛寋len(errors)} 琛屽け璐?
+            msg += f'，{len(errors)} 行失败'
         return jsonify({'message': msg, 'count': imported, 'errors': errors[:10]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -1076,12 +1084,12 @@ def export_talents():
             df = df.drop(columns=[col])
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='浜烘墠搴?)
+        df.to_excel(writer, index=False, sheet_name='人才库')
     output.seek(0)
     return send_file(output,
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True,
-                     download_name=f'浜烘墠搴揰{datetime.now().strftime("%Y%m%d")}.xlsx')
+                     download_name=f'人才库_{datetime.now().strftime("%Y%m%d")}.xlsx')
 
 
 @app.route('/api/stats', methods=['GET'])
@@ -1108,16 +1116,16 @@ def get_stats():
     stats['skills'] = {}
     for field in skill_fields:
         if DATABASE_URL:
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '绮鹃€?")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
         else:
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '绮鹃€?")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
         stats['skills'][field] = cursor.fetchone()[0]
     close_conn(conn)
     return jsonify(stats)
 
 
 # ============================================================
-# 闇€姹傛帴鍗曟ā鍧?API
+# 需求接单模块 API
 # ============================================================
 
 @app.route('/api/demand/meta', methods=['GET'])
@@ -1278,7 +1286,7 @@ def create_demand():
         ))
         demand_id = cursor.lastrowid
     close_conn(conn)
-    return jsonify({'id': demand_id, 'message': '闇€姹傚垱寤烘垚鍔?})
+    return jsonify({'id': demand_id, 'message': '需求创建成功'})
 
 
 @app.route('/api/demands/<int:demand_id>', methods=['PUT'])
@@ -1296,7 +1304,7 @@ def update_demand(demand_id):
                 "UPDATE demands SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                 (data['status'], demand_id))
     close_conn(conn)
-    return jsonify({'message': '鏇存柊鎴愬姛'})
+    return jsonify({'message': '更新成功'})
 
 
 @app.route('/api/demands/<int:demand_id>', methods=['DELETE'])
@@ -1308,10 +1316,10 @@ def delete_demand(demand_id):
     else:
         cursor.execute('DELETE FROM demands WHERE id = ?', (demand_id,))
     close_conn(conn)
-    return jsonify({'message': '鍒犻櫎鎴愬姛'})
+    return jsonify({'message': '删除成功'})
 
 
-# ---- 鎶ヤ环 API ----
+# ---- 报价 API ----
 
 @app.route('/api/demands/<int:demand_id>/calc-quote', methods=['POST'])
 def calc_demand_quote(demand_id):
@@ -1324,7 +1332,7 @@ def calc_demand_quote(demand_id):
     demand = fetchone_dict(cursor)
     close_conn(conn)
     if not demand:
-        return jsonify({'error': '闇€姹備笉瀛樺湪'}), 404
+        return jsonify({'error': '需求不存在'}), 404
     demand_data = {
         'business_type': demand['business_type'],
         'tier': demand['tier'],
@@ -1386,7 +1394,7 @@ def save_quote(demand_id):
                  data['total_quote'], data.get('note', '')))
         quote_id = cursor.lastrowid
     close_conn(conn)
-    return jsonify({'id': quote_id, 'message': '鎶ヤ环宸蹭繚瀛?})
+    return jsonify({'id': quote_id, 'message': '报价已保存'})
 
 
 @app.route('/api/demands/<int:demand_id>/quote', methods=['GET'])
@@ -1427,10 +1435,10 @@ def confirm_quote(demand_id):
             WHERE id = ?
         """, (demand_id,))
     close_conn(conn)
-    return jsonify({'message': '鎶ヤ环宸茬‘璁わ紝杩涘叆鎷涘嫙闃舵'})
+    return jsonify({'message': '报价已确认，进入招募阶段'})
 
 
-# ---- 鎶ュ悕 API ----
+# ---- 报名 API ----
 
 @app.route('/api/demands/<int:demand_id>/apply', methods=['POST'])
 def apply_demand(demand_id):
@@ -1448,7 +1456,7 @@ def apply_demand(demand_id):
                      (demand_id, talent_id))
     if cursor.fetchone():
         close_conn(conn)
-        return jsonify({'error': '宸茬粡鎶ュ悕杩囦簡'}), 400
+        return jsonify({'error': '已经报名过了'}), 400
     if DATABASE_URL:
         cursor.execute("""
             INSERT INTO demand_applications (demand_id, talent_id, status)
@@ -1461,7 +1469,7 @@ def apply_demand(demand_id):
         """, (demand_id, talent_id))
     app_id = cursor.lastrowid
     close_conn(conn)
-    return jsonify({'id': app_id, 'message': '鎶ュ悕鎴愬姛'})
+    return jsonify({'id': app_id, 'message': '报名成功'})
 
 
 @app.route('/api/demands/<int:demand_id>/applications', methods=['GET'])
@@ -1502,7 +1510,7 @@ def select_talent(app_id):
         cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = CURRENT_TIMESTAMP WHERE id = ?",
                      (app_id,))
     close_conn(conn)
-    return jsonify({'message': '宸查€変腑璇ヤ汉鎵?})
+    return jsonify({'message': '已选中该人才'})
 
 
 @app.route('/api/applications/<int:app_id>/reject', methods=['POST'])
@@ -1514,10 +1522,10 @@ def reject_talent(app_id):
     else:
         cursor.execute("UPDATE demand_applications SET status = 'rejected' WHERE id = ?", (app_id,))
     close_conn(conn)
-    return jsonify({'message': '宸叉嫆缁?})
+    return jsonify({'message': '已拒绝'})
 
 
-# ---- 璇勪环 API ----
+# ---- 评价 API ----
 
 @app.route('/api/demands/<int:demand_id>/evaluations', methods=['GET'])
 def get_evaluations(demand_id):
@@ -1565,10 +1573,10 @@ def create_evaluation(demand_id):
              data.get('comment', ''), data.get('evaluated_by')))
     eval_id = cursor.lastrowid
     close_conn(conn)
-    return jsonify({'id': eval_id, 'message': '璇勪环宸蹭繚瀛?})
+    return jsonify({'id': eval_id, 'message': '评价已保存'})
 
 
-# ---- 浼佸井 Webhook ----
+# ---- 企微 Webhook ----
 
 def get_setting(key, default=''):
     env_val = os.environ.get(key.upper())
@@ -1588,7 +1596,7 @@ def get_setting(key, default=''):
 def send_wecom_message(content):
     wecom_url = get_setting('wecom_webhook_url')
     if not wecom_url:
-        return {'error': '浼佸井 Webhook URL 鏈厤缃紝璇峰湪绯荤粺璁剧疆涓～鍐?}
+        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
     try:
         import urllib.request
         import json as json_lib
@@ -1605,7 +1613,7 @@ def send_wecom_message(content):
             result = json_lib.loads(resp.read().decode('utf-8'))
             if result.get('errcode') == 0:
                 return {'success': True}
-            return {'error': result.get('errmsg', '鍙戦€佸け璐?)}
+            return {'error': result.get('errmsg', '发送失败')}
     except Exception as e:
         return {'error': str(e)}
 
@@ -1614,7 +1622,7 @@ def send_wecom_message(content):
 def publish_to_wecom(demand_id):
     wecom_url = get_setting('wecom_webhook_url')
     if not wecom_url:
-        return jsonify({'error': '浼佸井 Webhook URL 鏈厤缃?}), 400
+        return jsonify({'error': '企微 Webhook URL 未配置'}), 400
 
     conn = get_db()
     cursor = conn.cursor()
@@ -1635,7 +1643,7 @@ def publish_to_wecom(demand_id):
     demand = fetchone_dict(cursor)
     if not demand:
         close_conn(conn)
-        return jsonify({'error': '闇€姹備笉瀛樺湪'}), 404
+        return jsonify({'error': '需求不存在'}), 404
 
     if DATABASE_URL:
         cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = %s AND status = 'confirmed'", (demand_id,))
@@ -1646,41 +1654,41 @@ def publish_to_wecom(demand_id):
 
     quote = quote if quote else None
 
-    brush_str = "锛堝埛鍚嶅崟锛? if demand['brush_list'] else ""
+    brush_str = "（刷名单）" if demand['brush_list'] else ""
     msg_title = demand['title'] or ""
     msg_biz = demand['business_type'] or ""
     msg_tier = demand['tier'] or ""
     msg_qty = demand['quantity'] or 0
-    msg_deadline = demand['deadline'] or "寰呭畾"
-    msg_desc = demand['description'] or "鏃?
+    msg_deadline = demand['deadline'] or "待定"
+    msg_desc = demand['description'] or "无"
     msg_demander_tidan = demand.get('tidanren', '') or demand.get('demander_name', '')
 
     if quote:
         pw = quote['part_time_wage'] or 0
         hc = quote['human_cost'] or 0
         total = quote['total_quote'] or 0
-        quote_str = "%s鍏冿紙鍏艰亴宸ヨ祫%s鍏?+ 浜哄姏鎴愭湰%s鍏冿級" % (total, pw, hc)
+        quote_str = "%s元（兼职工资%s元 + 人力成本%s元）" % (total, pw, hc)
     else:
-        quote_str = "寰呯‘璁?
+        quote_str = "待确认"
 
-    msg = "### New 闇€姹傚彂甯僜n"
-    msg += "**鎻愬崟浜猴細** %s\n" % msg_demander_tidan
-    msg += "**闇€姹傛爣棰橈細** %s\n" % msg_title
-    msg += "**涓氬姟绫诲瀷锛?* %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
-    msg += "**鏁伴噺锛?* %s\n" % msg_qty
-    msg += "**鎴鏃ユ湡锛?* %s\n" % msg_deadline
-    msg += "**闇€姹傛弿杩帮細** %s\n" % msg_desc
-    msg += "**鎶ヤ环锛?* %s\n" % quote_str
+    msg = "### New 需求发布\n"
+    msg += "**提单人：** %s\n" % msg_demander_tidan
+    msg += "**需求标题：** %s\n" % msg_title
+    msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
+    msg += "**数量：** %s\n" % msg_qty
+    msg += "**截止日期：** %s\n" % msg_deadline
+    msg += "**需求描述：** %s\n" % msg_desc
+    msg += "**报价：** %s\n" % quote_str
     msg += "---\n"
-    msg += "> 鐐瑰嚮鎶ュ悕锛歔绯荤粺閾炬帴](https://talent-management-web.onrender.com)"
+    msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com)"
 
     result = send_wecom_message(msg)
     if 'error' in result:
         return jsonify(result), 500
-    return jsonify({'message': '宸插彂閫佸埌浼佸井缇?, 'result': result})
+    return jsonify({'message': '已发送到企微群', 'result': result})
 
 
-# ---- 浜烘墠绔細鎴戠殑鎶ュ悕 & 鎴戠殑璇勪环 ----
+# ---- 人才端：我的报名 & 我的评价 ----
 
 @app.route('/api/talents/<int:talent_id>/my-applications', methods=['GET'])
 def my_applications(talent_id):
@@ -1736,7 +1744,7 @@ def my_evaluations(talent_id):
     return jsonify(rows)
 
 
-# ---- 绯荤粺璁剧疆 API ----
+# ---- 系统设置 API ----
 
 @app.route('/api/settings/<key>', methods=['GET'])
 def get_setting_api(key):
@@ -1761,7 +1769,7 @@ def set_setting_api(key):
             ON CONFLICT(key) DO UPDATE SET value = excluded.value
         """, (key, value))
     close_conn(conn)
-    return jsonify({'message': '璁剧疆宸蹭繚瀛?, 'key': key, 'value': value})
+    return jsonify({'message': '设置已保存', 'key': key, 'value': value})
 
 
 if __name__ == '__main__':
