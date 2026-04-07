@@ -453,6 +453,7 @@ def init_db():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS demands (
                 id SERIAL PRIMARY KEY,
+                serial_no TEXT,
                 title TEXT NOT NULL,
                 description TEXT,
                 requirements TEXT,
@@ -1239,6 +1240,26 @@ def get_demand(demand_id):
 
 
 @app.route('/api/demands', methods=['POST'])
+
+def generate_serial_no():
+    year = __import__('datetime').datetime.now().year
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute(
+            "SELECT COUNT(*) FROM demands WHERE serial_no LIKE %s",
+            (f"DM-{year}-%",)
+        )
+    else:
+        cursor.execute(
+            "SELECT COUNT(*) FROM demands WHERE serial_no LIKE ?",
+            (f"DM-{year}-%",)
+        )
+    count = cursor.fetchone()[0]
+    close_conn(conn)
+    num = str(count + 1).zfill(4)
+    return "DM-" + str(year) + "-" + num
+
 def create_demand():
     data = request.json
     conn = get_db()
@@ -1246,14 +1267,14 @@ def create_demand():
     if DATABASE_URL:
         cursor.execute("""
             INSERT INTO demands (
-                title, description, requirements, business_type, tier,
+                serial_no, title, description, requirements, business_type, tier,
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
                 deadline, demander_id, tidanren, status
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
         """, (
-            data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
+            generate_serial_no(), data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
             data.get('quantity', 1),
             1 if data.get('brush_list') else 0,
@@ -1267,7 +1288,7 @@ def create_demand():
     else:
         cursor.execute("""
             INSERT INTO demands (
-                title, description, requirements, business_type, tier,
+                serial_no, title, description, requirements, business_type, tier,
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
@@ -1749,7 +1770,7 @@ def publish_to_wecom(demand_id):
     quote = quote if quote else None
 
     brush_str = "（刷名单）" if demand['brush_list'] else ""
-    msg_title = demand['title'] or ""
+    msg_title = (demand.get('serial_no', '') or '') + ' ' + (demand['title'] or "")
     msg_biz = demand['business_type'] or ""
     msg_tier = demand['tier'] or ""
     msg_qty = demand['quantity'] or 0
