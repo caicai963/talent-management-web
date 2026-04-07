@@ -1442,12 +1442,40 @@ def confirm_quote(demand_id):
 
 @app.route('/api/demands/<int:demand_id>/apply', methods=['POST'])
 def apply_demand(demand_id):
+    """
+    报名接口：接受{name, phone}，根据手机号查找或创建人才记录，然后创建报名。
+    """
     data = request.json
-    talent_id = data.get('talent_id')
-    if not talent_id:
-        return jsonify({'error': 'talent_id required'}), 400
+    name = (data.get('name') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    if not phone:
+        return jsonify({'error': '手机号不能为空'}), 400
+
     conn = get_db()
     cursor = conn.cursor()
+
+    # 1. Find or create talent by phone
+    if DATABASE_URL:
+        cursor.execute('SELECT id FROM talents WHERE phone = %s', (phone,))
+    else:
+        cursor.execute('SELECT id FROM talents WHERE phone = ?', (phone,))
+    row = cursor.fetchone()
+    if row:
+        talent_id = row[0]
+    else:
+        if DATABASE_URL:
+            cursor.execute(
+                'INSERT INTO talents (name, phone) VALUES (%s, %s)',
+                (name or '未知', phone)
+            )
+        else:
+            cursor.execute(
+                'INSERT INTO talents (name, phone) VALUES (?, ?)',
+                (name or '未知', phone)
+            )
+        talent_id = cursor.lastrowid
+
+    # 2. Check if already applied
     if DATABASE_URL:
         cursor.execute('SELECT id FROM demand_applications WHERE demand_id = %s AND talent_id = %s',
                      (demand_id, talent_id))
@@ -1457,19 +1485,21 @@ def apply_demand(demand_id):
     if cursor.fetchone():
         close_conn(conn)
         return jsonify({'error': '已经报名过了'}), 400
+
+    # 3. Create application
     if DATABASE_URL:
-        cursor.execute("""
-            INSERT INTO demand_applications (demand_id, talent_id, status)
-            VALUES (%s, %s, 'applied')
-        """, (demand_id, talent_id))
+        cursor.execute(
+            'INSERT INTO demand_applications (demand_id, talent_id, status) VALUES (%s, %s, %s)',
+            (demand_id, talent_id, 'applied')
+        )
     else:
-        cursor.execute("""
-            INSERT INTO demand_applications (demand_id, talent_id, status)
-            VALUES (?, ?, 'applied')
-        """, (demand_id, talent_id))
+        cursor.execute(
+            'INSERT INTO demand_applications (demand_id, talent_id, status) VALUES (?, ?, ?)',
+            (demand_id, talent_id, 'applied')
+        )
     app_id = cursor.lastrowid
     close_conn(conn)
-    return jsonify({'id': app_id, 'message': '报名成功'})
+    return jsonify({'id': app_id, 'message': '报名成功', 'talent_id': talent_id})
 
 @app.route('/api/demands/<int:demand_id>/public', methods=['GET'])
 def get_demand_public(demand_id):
