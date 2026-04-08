@@ -865,7 +865,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+                    <div style="display:flex;justify-content:space-between;margin-top:16px;">
+                        <button v-if="currentApplications.some(a => a.status === 'selected')" class="btn-warning" @click="notifyGroupForDemand()" style="padding:8px 16px;">🔔 通知菜菜拉群</button>
                         <button class="btn-secondary" @click="closeModal()">关闭</button>
                     </div>
                 </div>
@@ -2339,6 +2340,13 @@
                 const rejectTalent = async (appId) => {
                     try { await axios.post('/api/applications/' + appId + '/reject'); openApplications(currentDemandId.value); } catch(e) { showToast('操作失败'); }
                 };
+                const notifyGroupForDemand = async () => {
+                    if (!currentDemandId.value) return;
+                    try {
+                        const res = await axios.post('/api/demands/' + currentDemandId.value + '/notify-group');
+                        showToast(res.data.message || '已发送企微群');
+                    } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
+                };
                 const openEvaluateModal = async (d) => {
                     currentDemandId.value = d.id;
                     try {
@@ -2421,7 +2429,7 @@
                     loadDemandMeta, loadDemands, getQuote, demandStats, onBizTypeChange,
                     openDemandModal, viewDemand, saveDemand, calcAndSaveQuote,
                     openQuoteModal, saveQuote, confirmQuote, confirmQuoteFromModal,
-                    openApplications, viewTalent, selectTalent, rejectTalent,
+                    openApplications, viewTalent, selectTalent, rejectTalent, notifyGroupForDemand,
                     openEvaluateModal, submitEvaluation, publishToWecom, formatDate,
 
                     handleLogin, handleLogout,

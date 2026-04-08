@@ -1662,6 +1662,53 @@ def select_talent(app_id):
 
 @app.route('/api/applications/<int:app_id>/reject', methods=['POST'])
 def reject_talent(app_id):
+
+
+@app.route('/api/demands/<int:demand_id>/notify-group', methods=['POST'])
+def notify_group_for_demand(demand_id):
+    """手动触发入选通知到企微执行群"""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 获取需求标题
+    if DATABASE_URL:
+        cursor.execute("SELECT title FROM demands WHERE id = %s", (demand_id,))
+    else:
+        cursor.execute("SELECT title FROM demands WHERE id = ?", (demand_id,))
+    demand_row = fetchone_dict(cursor)
+    if not demand_row:
+        close_conn(conn)
+        return jsonify({'error': '需求不存在'}), 404
+    demand_title = demand_row['title']
+
+    # 获取所有已入选的兼职
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.wechat
+            FROM demand_applications da
+            JOIN talents t ON da.talent_id = t.id
+            WHERE da.demand_id = %s AND da.status = 'selected'
+        """, (demand_id,))
+    else:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.wechat
+            FROM demand_applications da
+            JOIN talents t ON da.talent_id = t.id
+            WHERE da.demand_id = ? AND da.status = 'selected'
+        """, (demand_id,))
+    selected_list = fetchall_dicts(cursor)
+    close_conn(conn)
+
+    if not selected_list:
+        return jsonify({'error': '暂无已入选的兼职'}), 400
+
+    result = send_wecom_group_notification(demand_title, demand_title, selected_list)
+    if 'error' in result:
+        return jsonify({'error': result['error']}), 500
+    return jsonify({'message': '已发送企微执行群', 'count': len(selected_list)})
+
+
+
     conn = get_db()
     cursor = conn.cursor()
     if DATABASE_URL:
