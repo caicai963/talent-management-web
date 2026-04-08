@@ -210,7 +210,7 @@ def calc_quote(demand_data):
     quantity = demand_data.get("quantity", 1)
     brush = demand_data.get("brush_list", False)
     gmv = demand_data.get("gmv", 0)
-    if biz in ("甄别执行", "电访", "街访执行", "测试执行") and not gmv:
+    if biz in ("甄别", "电访", "街访执行", "测试执行") and not gmv:
         gmv = quantity
     scheduled_hours = demand_data.get("scheduled_hours", 0)
     end_time = demand_data.get("end_time", "")
