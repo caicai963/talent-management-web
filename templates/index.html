@@ -1668,13 +1668,27 @@
                 const activeTab = ref('list');
 
                 // 普通用户报名相关
+                // 初始化时直接从URL读取demand_id，避免异步时序问题
+                const urlParams = new URLSearchParams(window.location.search);
+                const initDemandId = urlParams.get('demand_id');
                 const registerForm = ref({ name: '', phone: '', available_time: '', game_experience: '' });
                 const registerMessage = ref('');
                 const statusPhone = ref('');
                 const statusResult = ref(null);
                 const statusChecked = ref(false);
-                const registerDemandId = ref(null);
+                const registerDemandId = ref(initDemandId);
                 let statusResultInitialized = false;
+
+                // 同步加载demand信息（setup阶段执行，避免onMounted只在首次加载时触发的时序问题）
+                if (initDemandId) {
+                    statusResult.value = null;
+                    statusChecked.value = false;
+                    api.get('/api/demands/' + initDemandId + '/public').then(res => {
+                        currentDemand.value = res.data;
+                    }).catch(() => {
+                        currentDemand.value = null;
+                    });
+                }
 
                 const stats = ref({});
 
@@ -1736,6 +1750,18 @@
                                 loadTalents();
                             } else {
                                 activeTab.value = 'register';
+                                // 登录后如果URL有demand_id，同步加载需求信息
+                                const params = new URLSearchParams(window.location.search);
+                                const demandId = params.get('demand_id');
+                                if (demandId) {
+                                    statusResult.value = null;
+                                    statusChecked.value = false;
+                                    api.get('/api/demands/' + demandId + '/public').then(r => {
+                                        currentDemand.value = r.data;
+                                    }).catch(() => {
+                                        currentDemand.value = null;
+                                    });
+                                }
                             }
 
                         }
@@ -2029,10 +2055,8 @@
                     const demandId = params.get('demand_id');
                     if (!demandId) {
                         currentDemand.value = null;
-                        registerDemandId.value = null;
                         return;
                     }
-                    registerDemandId.value = demandId;
                     activeTab.value = 'register';
                     statusResult.value = null;
                     statusChecked.value = false;
