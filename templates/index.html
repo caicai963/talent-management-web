@@ -1698,7 +1698,21 @@
 
                 const newUser = ref({ username: '', password: '', role: 'user' });
 
+                const showUserModal = ref(false);
+                const editingUser = ref(null);
+                const userForm = ref({ username: '', password: '', real_name: '', phone: '', role: 'user' });
 
+                const saveUser = async () => {
+                    try {
+                        const res = await api.post('/api/users', userForm.value);
+                        showUserModal.value = false;
+                        userForm.value = { username: '', password: '', real_name: '', phone: '', role: 'user' };
+                        loadUsers();
+                        showToast(res.data.id ? '账号创建成功' : '保存成功');
+                    } catch (e) {
+                        showToast('保存失败: ' + (e.response?.data?.error || e.message));
+                    }
+                };
 
                 const toastMessage = ref('');
 
@@ -2426,7 +2440,12 @@
 
                     systemUsers, newUser, loadUsers, addUser, deleteUser,
 
-                    toastMessage
+                    toastMessage,
+
+                    registerDemandId, registerForm, registerMessage,
+                    statusPhone, statusResult, statusChecked,
+
+                    showUserModal, editingUser, userForm, saveUser
 
                 };
 
