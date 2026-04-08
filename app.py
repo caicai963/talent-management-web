@@ -1662,6 +1662,14 @@ def select_talent(app_id):
 
 @app.route('/api/applications/<int:app_id>/reject', methods=['POST'])
 def reject_talent(app_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("UPDATE demand_applications SET status = 'rejected' WHERE id = %s", (app_id,))
+    else:
+        cursor.execute("UPDATE demand_applications SET status = 'rejected' WHERE id = ?", (app_id,))
+    close_conn(conn)
+    return jsonify({'message': '已拒绝'})
 
 
 @app.route('/api/demands/<int:demand_id>/notify-group', methods=['POST'])
