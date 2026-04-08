@@ -1683,7 +1683,7 @@
                 if (initDemandId) {
                     statusResult.value = null;
                     statusChecked.value = false;
-                    api.get('/api/demands/' + initDemandId + '/public').then(res => {
+                    axios.get('/api/demands/' + initDemandId + '/public').then(res => {
                         currentDemand.value = res.data;
                     }).catch(() => {
                         currentDemand.value = null;
