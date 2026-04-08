@@ -1674,6 +1674,7 @@
                 const statusResult = ref(null);
                 const statusChecked = ref(false);
                 const registerDemandId = ref(null);
+                let statusResultInitialized = false;
 
                 const stats = ref({});
 
@@ -2033,15 +2034,25 @@
                     }
                     registerDemandId.value = demandId;
                     activeTab.value = 'register';
+                    statusResult.value = null;
+                    statusChecked.value = false;
                     try {
                         const res = await api.get('/api/demands/' + demandId + '/public');
                         currentDemand.value = res.data;
                     } catch (e) {
-                        currentDemand.value = { title: '未知需求' };
+                        currentDemand.value = null;
                     }
                 };
 
                 const submitRegistration = async () => {
+                if (!registerDemandId.value) {
+                    registerMessage.value = '需求ID无效，请通过招募链接访问';
+                    return;
+                }
+                if (!currentDemand.value) {
+                    registerMessage.value = '需求信息加载中，请稍后刷新页面重试';
+                    return;
+                }
                 try {
                     const res = await api.post('/api/demands/' + registerDemandId.value + '/apply', registerForm.value);
                     registerMessage.value = res.data.message || '提交成功';
@@ -2055,6 +2066,11 @@
             const checkMyStatus = async () => {
                 if (!statusPhone.value.trim()) {
                     alert('请输入手机号');
+                    return;
+                }
+                if (!registerDemandId.value) {
+                    statusResult.value = { found: false, status: '请通过招募链接访问后查询报名状态' };
+                    statusChecked.value = true;
                     return;
                 }
                 try {
