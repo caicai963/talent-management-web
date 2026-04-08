@@ -285,6 +285,10 @@
                         <input v-model="registerForm.phone" type="text" placeholder="请输入手机号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">微信号</label>
+                        <input v-model="registerForm.wechat" type="text" placeholder="请输入您的微信号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
                         <label style="display: block; margin-bottom: 4px; color: #666;">空闲时间</label>
                         <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚上" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
@@ -1671,7 +1675,7 @@
                 // 初始化时直接从URL读取demand_id，避免异步时序问题
                 const urlParams = new URLSearchParams(window.location.search);
                 const initDemandId = urlParams.get('demand_id');
-                const registerForm = ref({ name: '', phone: '', available_time: '', game_experience: '' });
+                const registerForm = ref({ name: '', phone: '', wechat: '', available_time: '', game_experience: '' });
                 const registerMessage = ref('');
                 const statusPhone = ref('');
                 const statusResult = ref(null);
@@ -2094,7 +2098,7 @@
                 try {
                     const res = await api.post('/api/demands/' + registerDemandId.value + '/apply', registerForm.value);
                     registerMessage.value = res.data.message || '提交成功';
-                    registerForm.value = { name: '', phone: '', available_time: '', game_experience: '' };
+                    registerForm.value = { name: '', phone: '', wechat: '', available_time: '', game_experience: '' };
                     setTimeout(() => { registerMessage.value = ''; }, 3000);
                 } catch (e) {
                     registerMessage.value = '提交失败: ' + (e.response?.data?.error || e.message);

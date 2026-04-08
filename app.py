@@ -1475,15 +1475,16 @@ def apply_demand(demand_id):
     if row:
         talent_id = row[0]
     else:
+        wechat = (data.get('wechat') or '').strip()
         if DATABASE_URL:
             cursor.execute(
-                'INSERT INTO talents (name, phone) VALUES (%s, %s)',
-                (name or '未知', phone)
+                'INSERT INTO talents (name, phone, wechat) VALUES (%s, %s, %s)',
+                (name or '未知', phone, wechat)
             )
         else:
             cursor.execute(
-                'INSERT INTO talents (name, phone) VALUES (?, ?)',
-                (name or '未知', phone)
+                'INSERT INTO talents (name, phone, wechat) VALUES (?, ?, ?)',
+                (name or '未知', phone, wechat)
             )
         talent_id = cursor.lastrowid
 
@@ -1608,14 +1609,55 @@ def get_demand_applications(demand_id):
 def select_talent(app_id):
     conn = get_db()
     cursor = conn.cursor()
+
+    # 获取当前 application 信息（demand_id + talent_id）
     if DATABASE_URL:
-        cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = NOW() WHERE id = %s",
-                     (app_id,))
+        cursor.execute("SELECT demand_id, talent_id FROM demand_applications WHERE id = %s", (app_id,))
     else:
-        cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = CURRENT_TIMESTAMP WHERE id = ?",
-                     (app_id,))
+        cursor.execute("SELECT demand_id, talent_id FROM demand_applications WHERE id = ?", (app_id,))
+    app_row = fetchone_dict(cursor)
+    if not app_row:
+        close_conn(conn)
+        return jsonify({'error': '未找到报名记录'}), 404
+    demand_id = app_row['demand_id']
+    talent_id = app_row['talent_id']
+
+    # 更新状态为已入选
+    if DATABASE_URL:
+        cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = NOW() WHERE id = %s", (app_id,))
+    else:
+        cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = CURRENT_TIMESTAMP WHERE id = ?", (app_id,))
+
+    # 获取需求标题
+    if DATABASE_URL:
+        cursor.execute("SELECT title FROM demands WHERE id = %s", (demand_id,))
+    else:
+        cursor.execute("SELECT title FROM demands WHERE id = ?", (demand_id,))
+    demand_row = fetchone_dict(cursor)
+    demand_title = demand_row['title'] if demand_row else '未知需求'
+
+    # 获取所有已入选的兼职信息
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.wechat
+            FROM demand_applications da
+            JOIN talents t ON da.talent_id = t.id
+            WHERE da.demand_id = %s AND da.status = 'selected'
+        """, (demand_id,))
+    else:
+        cursor.execute("""
+            SELECT t.name, t.phone, t.wechat
+            FROM demand_applications da
+            JOIN talents t ON da.talent_id = t.id
+            WHERE da.demand_id = ? AND da.status = 'selected'
+        """, (demand_id,))
+    selected_list = fetchall_dicts(cursor)
     close_conn(conn)
-    return jsonify({'message': '已选中该人才'})
+
+    # 发送企微执行群通知
+    notify_result = send_wecom_group_notification(demand_title, demand_title, selected_list)
+
+    return jsonify({'message': '已选中该人才', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
 
 
 @app.route('/api/applications/<int:app_id>/reject', methods=['POST'])
@@ -1702,6 +1744,30 @@ def send_wecom_message(content):
     wecom_url = get_setting('wecom_webhook_url')
     if not wecom_url:
         return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
+
+
+def send_wecom_group_notification(title, demand_title, selected_list):
+    """入选后发送企微群通知（通过群机器人）
+    selected_list: [{'name': '张三', 'phone': '138xxx', 'wechat': 'zhangsan'}]
+    """
+    wecom_group_url = get_setting('wecom_group_webhook_url')
+    if not wecom_group_url:
+        return {'error': '企微执行群 Webhook URL 未配置，请在系统设置中配置 wecom_group_webhook_url'}
+
+    msg = f"### ✅ 入选通知\n"
+    msg += f"**需求：** {demand_title}\n"
+    msg += f"**入选人数：** {len(selected_list)} 人\n\n"
+    msg += "**入选名单：**\n"
+    for i, t in enumerate(selected_list, 1):
+        wechat_info = f"（微信号：{t['wechat']}）" if t.get('wechat') else "（暂无微信号）"
+        msg += f"{i}. {t['name']} | {t['phone']} {wechat_info}\n"
+    msg += f"\n请相关执行负责人尽快拉群并通知以上人员。"
+
+    try:
+        resp = requests.post(wecom_group_url, json={'msgtype': 'markdown', 'markdown': {'content': msg}}, timeout=10)
+        return resp.json()
+    except Exception as e:
+        return {'error': str(e)}
     try:
         import urllib.request
         import json as json_lib
@@ -1786,6 +1852,7 @@ def publish_to_wecom(demand_id):
     msg += "**报价：** %s\n" % quote_str
     msg += "---\n"
     msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
+    msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
 
     result = send_wecom_message(msg)
     if 'error' in result:
@@ -1877,5 +1944,30 @@ def set_setting_api(key):
     return jsonify({'message': '设置已保存', 'key': key, 'value': value})
 
 
+def init_wecom_settings():
+    """启动时自动保存企微应用凭证（已配置则跳过）"""
+    settings_to_save = {
+        'wecom_corp_id': 'wwc64a71014d7be247',
+        'wecom_agent_id': '1000009',
+    }
+    for key, value in settings_to_save.items():
+        existing = get_setting(key)
+        if not existing:
+            conn = get_db()
+            cursor = conn.cursor()
+            if DATABASE_URL:
+                cursor.execute(
+                    "INSERT INTO system_settings (key, value) VALUES (%s, %s) ON CONFLICT(key) DO NOTHING",
+                    (key, value)
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO system_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING",
+                    (key, value)
+                )
+            close_conn(conn)
+
+
 if __name__ == '__main__':
+    init_wecom_settings()
     app.run(host='0.0.0.0', port=5000, debug=True)
