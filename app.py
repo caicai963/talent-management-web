@@ -684,6 +684,11 @@ def manual_init():
 def index():
     return render_template('index.html')
 
+@app.route('/apply')
+def apply_page():
+    """报名页面入口，企微等外部浏览器直接打开此路径"""
+    return render_template('index.html')
+
 
 @app.route('/api/system/status', methods=['GET'])
 def system_status():
@@ -1780,7 +1785,7 @@ def publish_to_wecom(demand_id):
     msg += "**需求描述：** %s\n" % msg_desc
     msg += "**报价：** %s\n" % quote_str
     msg += "---\n"
-    msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/?demand_id=%s)" % demand_id
+    msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
 
     result = send_wecom_message(msg)
     if 'error' in result:
