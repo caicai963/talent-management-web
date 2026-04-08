@@ -230,7 +230,7 @@ def calc_quote(demand_data):
             part_time_wage = base + fixed
             wage_note = f"120元/天底薪+ 固定{fixed}元"
 
-    elif biz == "甄别执行":
+    elif biz == "甄别":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/个× {quantity}个"
