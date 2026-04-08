@@ -1744,6 +1744,25 @@ def send_wecom_message(content):
     wecom_url = get_setting('wecom_webhook_url')
     if not wecom_url:
         return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
+    try:
+        import urllib.request
+        import json as json_lib
+        payload = {
+            "msgtype": "markdown",
+            "markdown": {"content": content}
+        }
+        req = urllib.request.Request(
+            wecom_url,
+            data=json_lib.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            result = json_lib.loads(resp.read().decode('utf-8'))
+            if result.get('errcode') == 0:
+                return {'success': True}
+            return {'error': result.get('errmsg', '发送失败')}
+    except Exception as e:
+        return {'error': str(e)}
 
 
 def send_wecom_group_notification(title, demand_title, selected_list):
@@ -1766,25 +1785,6 @@ def send_wecom_group_notification(title, demand_title, selected_list):
     try:
         resp = requests.post(wecom_group_url, json={'msgtype': 'markdown', 'markdown': {'content': msg}}, timeout=10)
         return resp.json()
-    except Exception as e:
-        return {'error': str(e)}
-    try:
-        import urllib.request
-        import json as json_lib
-        payload = {
-            "msgtype": "markdown",
-            "markdown": {"content": content}
-        }
-        req = urllib.request.Request(
-            wecom_url,
-            data=json_lib.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            result = json_lib.loads(resp.read().decode('utf-8'))
-            if result.get('errcode') == 0:
-                return {'success': True}
-            return {'error': result.get('errmsg', '发送失败')}
     except Exception as e:
         return {'error': str(e)}
 
