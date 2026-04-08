@@ -466,6 +466,14 @@ def init_db():
                 updated_at TIMESTAMP DEFAULT NOW()
             )
         """)
+        # Migration: add wechat column if not exists
+        try:
+            if DATABASE_URL:
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS wechat TEXT")
+            else:
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS wechat TEXT")
+        except Exception:
+            pass
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -1639,14 +1647,14 @@ def select_talent(app_id):
     # 获取所有已入选的兼职信息
     if DATABASE_URL:
         cursor.execute("""
-            SELECT t.name, t.phone, t.wechat
+            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
             FROM demand_applications da
             JOIN talents t ON da.talent_id = t.id
             WHERE da.demand_id = %s AND da.status = 'selected'
         """, (demand_id,))
     else:
         cursor.execute("""
-            SELECT t.name, t.phone, t.wechat
+            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
             FROM demand_applications da
             JOIN talents t ON da.talent_id = t.id
             WHERE da.demand_id = ? AND da.status = 'selected'
@@ -1692,14 +1700,14 @@ def notify_group_for_demand(demand_id):
     # 获取所有已入选的兼职
     if DATABASE_URL:
         cursor.execute("""
-            SELECT t.name, t.phone, t.wechat
+            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
             FROM demand_applications da
             JOIN talents t ON da.talent_id = t.id
             WHERE da.demand_id = %s AND da.status = 'selected'
         """, (demand_id,))
     else:
         cursor.execute("""
-            SELECT t.name, t.phone, t.wechat
+            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
             FROM demand_applications da
             JOIN talents t ON da.talent_id = t.id
             WHERE da.demand_id = ? AND da.status = 'selected'
