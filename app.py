@@ -97,6 +97,22 @@ TALENT_PRICE_TABLE = {
         {"label": "2~4小时/场", "price": 200},
         {"label": "4~6小时/场", "price": 250},
     ],
+    "测试执行": [
+        {"label": "2H以内/场", "price": 150},
+        {"label": "2~4小时/场", "price": 200},
+        {"label": "4~6小时/场", "price": 250},
+    ],
+    "街访执行": [
+        # 街访1（拦截+访谈）
+        {"label": "10分钟以内", "price": 30, "base": 120},
+        {"label": "30分钟以内", "price": 65, "base": 120},
+        {"label": "30~60分钟", "price": 104, "base": 120},
+        # 街访2（只拦截不访谈）
+        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
+        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
+        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
+        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
+    ],
     "街访1": [
         {"label": "10分钟以内", "price": 30, "base": 120},
         {"label": "30分钟以内", "price": 65, "base": 120},
@@ -247,9 +263,24 @@ def calc_quote(demand_data):
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
     elif biz == "街访执行":
-        unit_price = tier_data.get("price", 0)
-        part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/个× {quantity}个"
+        gmv_rate = tier_data.get("gmv_rate")
+        if gmv_rate is not None:
+            # 街访2：只拦截不访谈，按GMV比例
+            base = tier_data.get("base", 120)
+            part_time_wage = base + gmv * gmv_rate
+            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
+        elif "fixed" in tier_data:
+            # 街访2：固定档位
+            base = tier_data.get("base", 120)
+            fixed = tier_data.get("fixed", 0)
+            part_time_wage = base + fixed
+            wage_note = f"120元/天底薪+ 固定{fixed}元"
+        else:
+            # 街访1：拦截+访谈，按样本数×单价
+            base = tier_data.get("base", 120)
+            price = tier_data.get("price", 0)
+            part_time_wage = base + price * quantity
+            wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
         h = vlookup_h(gmv, LUT_JIEFANG)
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
@@ -257,7 +288,7 @@ def calc_quote(demand_data):
     elif biz == "测试执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/个× {quantity}个"
+        wage_note = f"{unit_price}元/场× {quantity}场"
         h = vlookup_h(gmv, LUT_CESHI)
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
