@@ -911,9 +911,30 @@ def login():
 @app.route('/api/demands/<int:demand_id>/gongzhang-yiti', methods=['POST'])
 def gongzhang_yiti(demand_id):
     try:
-        return jsonify({'ok': True, 'demand_id': demand_id})
+        conn = get_db()
+        cursor = conn.cursor()
+        if DATABASE_URL:
+            cursor.execute("SELECT * FROM demands WHERE id = %s", (demand_id,))
+        else:
+            cursor.execute("SELECT * FROM demands WHERE id = ?", (demand_id,))
+        demand = fetchone_dict(cursor)
+        if not demand:
+            close_conn(conn)
+            return jsonify({'error': 'Demand not found'}), 404
+        if DATABASE_URL:
+            cursor.execute("UPDATE demands SET status = 'done', gongzhang_yiti = 1 WHERE id = %s", (demand_id,))
+        else:
+            cursor.execute("UPDATE demands SET status = 'done', gongzhang_yiti = 1 WHERE id = ?", (demand_id,))
+        conn.commit()
+        if DATABASE_URL:
+            cursor.execute("SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = %s AND da.status = 'selected'", (demand_id,))
+        else:
+            cursor.execute("SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = ? AND da.status = 'selected'", (demand_id,))
+        selected_list = fetchall_dicts(cursor)
+        close_conn(conn)
+        return jsonify({'message': 'Done', 'gongzhang_yiti': True, 'selected_count': len(selected_list)})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Server error: ' + str(e)}), 500
 
 
 
