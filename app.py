@@ -922,24 +922,12 @@ def gongzhang_yiti(demand_id):
             close_conn(conn)
             return jsonify({'error': 'Demand not found'}), 404
         if DATABASE_URL:
-            cursor.execute("UPDATE demands SET status = 'done',gongzhang_yiti = 1 WHERE id = %s", (demand_id,))
+            cursor.execute("UPDATE demands SET status = 'done', gongzhang_yiti = 1 WHERE id = %s", (demand_id,))
         else:
-            cursor.execute("UPDATE demands SET status = 'done',gongzhang_yiti = 1 WHERE id = ?", (demand_id,))
+            cursor.execute("UPDATE demands SET status = 'done', gongzhang_yiti = 1 WHERE id = ?", (demand_id,))
         conn.commit()
-        if DATABASE_URL:
-            cursor.execute("SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = %s AND da.status = 'selected'", (demand_id,))
-        else:
-            cursor.execute("SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = ? AND da.status = 'selected'", (demand_id,))
-        selected_list = fetchall_dicts(cursor)
         close_conn(conn)
-        demand_title = demand.get('title') or ''
-        tidanren = demand.get('tidanren') or ''
-        product_code = demand.get('product_code') or ''
-        if selected_list:
-            result = send_wecom_group_notification(demand_title, demand_title, tidanren, product_code, selected_list)
-            if 'error' in result:
-                return jsonify({'message': 'Already marked, WeChat notification failed', 'gongzhang_yiti': True, 'selected_count': len(selected_list)})
-        return jsonify({'message': 'Marked as WeChat withdrawn', 'gongzhang_yiti': True, 'selected_count': len(selected_list)})
+        return jsonify({'message': 'Done', 'gongzhang_yiti': True})
     except Exception as e:
         return jsonify({'error': 'Server error: ' + str(e)}), 500
 
