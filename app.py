@@ -2139,6 +2139,31 @@ def init_wecom_settings():
             close_conn(conn)
 
 
+def migrate_add_missing_columns():
+    """Idempotent migration: 添加缺失字段到 demands 表"""
+    if not DATABASE_URL:
+        return  # SQLite 本地不需要
+    conn = get_db()
+    cursor = conn.cursor()
+    new_cols = {
+        'product_code': 'TEXT',
+        'parent_order': 'TEXT',
+        'child_order': 'TEXT',
+        'execution_time': 'TEXT',
+        'gongzhang_yiti': 'INTEGER DEFAULT 0',
+    }
+    for col, col_type in new_cols.items():
+        try:
+            cursor.execute(f"ALTER TABLE demands ADD COLUMN {col} {col_type}")
+            conn.commit()
+        except psycopg2.errors.DuplicateColumn:
+            conn.rollback()
+        except Exception:
+            conn.rollback()
+    close_conn(conn)
+
+
 if __name__ == '__main__':
+    migrate_add_missing_columns()
     init_wecom_settings()
     app.run(host='0.0.0.0', port=5000, debug=True)
