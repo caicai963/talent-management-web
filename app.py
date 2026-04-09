@@ -1832,9 +1832,10 @@ def send_wecom_group_notification(title, demand_title, selected_list):
     """入选后发送企微群通知（通过群机器人）
     selected_list: [{'name': '张三', 'phone': '138xxx', 'wechat': 'zhangsan'}]
     """
-    wecom_group_url = get_setting('wecom_group_webhook_url')
+    # 优先用 wecom_group_webhook_url，没有则复用 wecom_webhook_url（群机器人与个人机器人共享同一key）
+    wecom_group_url = get_setting('wecom_group_webhook_url') or get_setting('wecom_webhook_url')
     if not wecom_group_url:
-        return {'error': '企微执行群 Webhook URL 未配置，请在系统设置中配置 wecom_group_webhook_url'}
+        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写 wecom_webhook_url'}
 
     msg = f"### ✅ 入选通知\n"
     msg += f"**需求：** {demand_title}\n"
@@ -1846,8 +1847,19 @@ def send_wecom_group_notification(title, demand_title, selected_list):
     msg += f"\n请相关执行负责人尽快拉群并通知以上人员。"
 
     try:
-        resp = requests.post(wecom_group_url, json={'msgtype': 'markdown', 'markdown': {'content': msg}}, timeout=10)
-        return resp.json()
+        import urllib.request
+        import json as json_lib
+        payload = {'msgtype': 'markdown', 'markdown': {'content': msg}}
+        req = urllib.request.Request(
+            wecom_group_url,
+            data=json_lib.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            result = json_lib.loads(resp.read().decode('utf-8'))
+            if result.get('errcode') == 0:
+                return {'success': True}
+            return {'error': result.get('errmsg', '发送失败')}
     except Exception as e:
         return {'error': str(e)}
 
