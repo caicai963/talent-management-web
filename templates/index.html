@@ -8,7 +8,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>人才标签管理系统</title>
+    <title>人�签��系�</title>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
@@ -22,13 +22,13 @@
 
 
 
-        /* 布局 */
+        /* �� */
 
         .app-container { max-width: 1600px; margin: 0 auto; padding: 20px; }
 
 
 
-        /* 头部 */
+        /* 头� */
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px 24px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
@@ -42,7 +42,7 @@
 
 
 
-        /* 登录页 */
+        /* ���?*/
 
         .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
@@ -60,7 +60,7 @@
 
 
 
-        /* 操作栏 */
+        /* ��?*/
 
         .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 
@@ -82,7 +82,7 @@
 
 
 
-        /* 表格 */
+        /* 表� */
 
         .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
@@ -100,7 +100,7 @@
 
 
 
-        /* 分页 */
+        /* � */
 
         .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; }
 
@@ -112,7 +112,7 @@
 
 
 
-        /* 模态框 */
+        /* 模�� */
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 
@@ -130,7 +130,7 @@
 
 
 
-        /* 表单 */
+        /* 表� */
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
@@ -146,7 +146,7 @@
 
 
 
-        /* 统计卡片 */
+        /* �计�� */
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
 
@@ -162,7 +162,7 @@
 
 
 
-        /* 标签页 */
+        /* 签�?*/
 
         .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 4px; border-radius: 8px; }
 
@@ -180,13 +180,13 @@
 
 
 
-        /* 空状态 */
+        /* 空��?*/
 
         .empty-state { text-align: center; padding: 60px 20px; color: #999; }
 
 
 
-        /* 加载 */
+        /* � */
 
         .loading { text-align: center; padding: 40px; color: #999; }
 
@@ -201,21 +201,21 @@
 
     <div id="app">
 
-        <!-- 登录页 -->
+        <!-- ���?-->
 
         <div v-if="!isLoggedIn" class="login-container">
 
             <div class="login-box">
 
-                <h2>人才标签管理系统</h2>
+                <h2>人�签��系�</h2>
 
                 <div v-if="loginError" class="login-error">{{ loginError }}</div>
 
-                <input v-model="loginForm.username" type="text" placeholder="用户名" @keyup.enter="handleLogin">
+                <input v-model="loginForm.username" type="text" placeholder="���? @keyup.enter="handleLogin">
 
-                <input v-model="loginForm.password" type="password" placeholder="密码" @keyup.enter="handleLogin">
+                <input v-model="loginForm.password" type="password" placeholder="�" @keyup.enter="handleLogin">
 
-                <button @click="handleLogin">登录</button>
+                <button @click="handleLogin">��</button>
 
             </div>
 
@@ -223,141 +223,141 @@
 
 
 
-        <!-- 主应用 -->
+        <!-- 主��?-->
 
         <div v-else class="app-container">
 
             <div class="header">
 
-                <h1>人才标签管理系统</h1>
+                <h1>人�签��系�</h1>
 
                 <div class="header-right">
 
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : '普通用户' }})</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管��? : '�? }})</span>
 
-                    <button class="logout-btn" @click="handleLogout">退出</button>
+                    <button class="logout-btn" @click="handleLogout">�?/button>
 
                 </div>
 
             </div>
 
-            <!-- 管理员视图 -->
+            <!-- 管���?-->
 
             <div v-if="currentUser.role === 'admin'">
 
                 <div class="tabs">
 
-                    <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">人才列表</button>
+                    <button class="tab" :class="{ active: activeTab === 'list' }" @click="activeTab = 'list'">人��</button>
 
-                    <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
+                    <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">����</button>
 
-                    <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+                    <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">贷��</button>
 
-                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
+                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">�管�?/button>
 
                 </div>
 
             </div>
 
-            <!-- 普通用户视图 -->
+            <!-- ����?-->
             <div v-else>
                 <div class="tabs">
-                    <button class="tab" :class="{ active: activeTab === 'register' }" @click="activeTab = 'register'">报名信息</button>
-                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状态</button>
+                    <button class="tab" :class="{ active: activeTab === 'register' }" @click="activeTab = 'register'">��信�</button>
+                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">����?/button>
                 </div>
 
-                <!-- 报名表单 -->
+                <!-- ��表� -->
                 <div v-if="activeTab === 'register' && registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <div v-if="currentDemand" style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center;">
                         <strong style="color: #1565c0; font-size: 16px;">{{ currentDemand.title }}</strong>
                         <div style="color: #666; font-size: 13px; margin-top: 4px;">{{ currentDemand.business_type }} · {{ currentDemand.tier }}</div>
                     </div>
                     <div v-else style="background: #fff3e0; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; color: #e65100;">
-                        未指定需求，请通过招募链接访问
+                        ���请�迾���
                     </div>
-                    <h3 style="margin-bottom: 20px; color: #333;">填写报名信息</h3>
+                    <h3 style="margin-bottom: 20px; color: #333;">塥�信�</h3>
                     <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; color: #666;">姓名</label>
-                        <input v-model="registerForm.name" type="text" placeholder="请输入姓名" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                    </div>
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; color: #666;">手机号</label>
-                        <input v-model="registerForm.phone" type="text" placeholder="请输入手机号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">�</label>
+                        <input v-model="registerForm.name" type="text" placeholder="请���? style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; color: #666;">微信号</label>
-                        <input v-model="registerForm.wechat" type="text" placeholder="请输入您的微信号" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">��?/label>
+                        <input v-model="registerForm.phone" type="text" placeholder="请���" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; color: #666;">空闲时间</label>
-                        <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚上" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">�信�?/label>
+                        <input v-model="registerForm.wechat" type="text" placeholder="请����信�" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; color: #666;">游戏经历</label>
-                        <textarea v-model="registerForm.game_experience" placeholder="请描述您的游戏经历" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                        <label style="display: block; margin-bottom: 4px; color: #666;">空���</label>
+                        <input v-model="registerForm.available_time" type="text" placeholder="��Ｈ�平���? style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                     </div>
-                    <button @click="submitRegistration" style="width: 100%; padding: 12px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">提交报名</button>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 4px; color: #666;">游��</label>
+                        <textarea v-model="registerForm.game_experience" placeholder="请�述��游���? rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+                    <button @click="submitRegistration" style="width: 100%; padding: 12px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">交��</button>
                     <div v-if="registerMessage" style="margin-top: 12px; padding: 10px; border-radius: 4px; background: #d4edda; color: #155724;">{{ registerMessage }}</div>
                 </div>
 
-                <!-- 查询状态 -->
+                <!-- ����?-->
                 <div v-if="activeTab === 'register' && !registerDemandId" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
-                    <h3 style="color: #666; margin-bottom: 8px;">请通过招募链接访问</h3>
-                    <p style="color: #999; font-size: 14px;">点击企微群中的报名链接即可填写报名信息</p>
+                    <div style="font-size: 48px; margin-bottom: 16px;"></div>
+                    <h3 style="color: #666; margin-bottom: 8px;">请�迾���</h3>
+                    <p style="color: #999; font-size: 14px;">����群中�����塥�信�?/p>
                 </div>
 
                 <div v-if="activeTab === 'mystatus'" style="max-width: 600px; margin: 40px auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
+                    <h3 style="margin-bottom: 20px; color: #333;">�����?/h3>
                     <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                        <input v-model="statusPhone" type="text" placeholder="请输入报名时填写的手机号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                        <button @click="checkMyStatus" style="padding: 10px 20px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer;">查询</button>
+                        <input v-model="statusPhone" type="text" placeholder="请���填��" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <button @click="checkMyStatus" style="padding: 10px 20px; background: #4a90d9; color: white; border: none; border-radius: 4px; cursor: pointer;">��</button>
                     </div>
                     <div v-if="statusResult && statusResult.found" style="padding: 16px; background: #f8f9fa; border-radius: 4px;">
-                        <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ (statusResult && statusResult.name) || '未知' }}</p>
-                        <p style="margin-bottom: 8px;"><strong>报名状态：</strong><span :style="{ color: statusResult.status === '已入选' ? 'green' : statusResult.status === '未入选' ? 'red' : '#666' }">{{ statusResult.status }}</span></p>
-                        <p v-if="statusResult.demand_title" style="margin-bottom: 8px;"><strong>需求名称：</strong>{{ statusResult.demand_title }}</p>
-                        <p v-if="statusResult.selected_at" style="margin-bottom: 8px;"><strong>入选时间：</strong>{{ statusResult.selected_at }}</p>
+                        <p style="margin-bottom: 8px;"><strong>��?/strong>{{ (statusResult && statusResult.name) || '' }}</p>
+                        <p style="margin-bottom: 8px;"><strong>����</strong><span :style="{ color: statusResult.status === '已��? ? 'green' : statusResult.status === '��? ? 'red' : '#666' }">{{ statusResult.status }}</span></p>
+                        <p v-if="statusResult.demand_title" style="margin-bottom: 8px;"><strong>�称�</strong>{{ statusResult.demand_title }}</p>
+                        <p v-if="statusResult.selected_at" style="margin-bottom: 8px;"><strong>����</strong>{{ statusResult.selected_at }}</p>
                     </div>
-                    <div v-else-if="statusChecked" style="padding: 16px; color: #666; text-align: center;">未找到该手机号的报名记录</div>
+                    <div v-else-if="statusChecked" style="padding: 16px; color: #666; text-align: center;">�������记�</div>
                 </div>
             </div>
 
-<!-- 人才列表 -->
+<!-- 人�� -->
 
             <div v-if="activeTab === 'list' && currentUser.role === 'admin'">
 
                 <div class="toolbar">
 
-                    <input v-model="searchQuery" type="text" placeholder="搜索姓名/学校/专业/手机号..." @input="debouncedSearch">
+                    <input v-model="searchQuery" type="text" placeholder="索�/�/��/��?.." @input="debouncedSearch">
 
                     <select v-model="filterEducation" @change="loadTalents">
 
-                        <option value="">全部学历</option>
+                        <option value="">���</option>
 
-                        <option value="本科">本科</option>
+                        <option value="�">�</option>
 
-                        <option value="硕士">硕士</option>
+                        <option value="��">��</option>
 
-                        <option value="博士">博士</option>
+                        <option value="�">�</option>
 
                     </select>
 
                     <select v-model="filterIdentity" @change="loadTalents">
 
-                        <option value="">全部身份</option>
+                        <option value="">��身�</option>
 
-                        <option value="实习生">实习生</option>
+                        <option value="���?>���?/option>
 
-                        <option value="兼职">兼职</option>
+                        <option value="��">��</option>
 
                     </select>
 
-                    <button class="btn-primary" @click="openAddModal">+ 新增人才</button>
+                    <button class="btn-primary" @click="openAddModal">+ ��人�</button>
 
-                    <button class="btn-success" @click="showImportModal = true">批量导入</button>
+                    <button class="btn-success" @click="showImportModal = true">��导�</button>
 
-                    <button class="btn-warning" @click="exportTalents">导出Excel</button>
+                    <button class="btn-warning" @click="exportTalents">导�Excel</button>
 
                 </div>
 
@@ -373,29 +373,29 @@
 
                                 <th>ID</th>
 
-                                <th>姓名</th>
+                                <th>�</th>
 
-                                <th>性别</th>
+                                <th>��</th>
 
-                                <th>年龄</th>
+                                <th>年�</th>
 
-                                <th>身份</th>
+                                <th>��</th>
 
-                                <th>城市</th>
+                                <th>�</th>
 
-                                <th>学校</th>
+                                <th>�</th>
 
-                                <th>专业</th>
+                                <th>��</th>
 
-                                <th>学历</th>
+                                <th>�</th>
 
-                                <th>毕业年</th>
+                                <th>���?/th>
 
-                                <th>手机号</th>
+                                <th>��?/th>
 
-                                <th>当月星级</th>
+                                <th>��</th>
 
-                                <th>操作</th>
+                                <th>�</th>
 
                             </tr>
 
@@ -405,13 +405,13 @@
 
                             <tr v-if="loading">
 
-                                <td colspan="13" class="loading">加载中...</td>
+                                <td colspan="13" class="loading">载�?..</td>
 
                             </tr>
 
                             <tr v-else-if="talents.length === 0">
 
-                                <td colspan="13" class="empty-state">暂无数据</td>
+                                <td colspan="13" class="empty-state">��</td>
 
                             </tr>
 
@@ -443,11 +443,11 @@
 
                                 <td class="actions">
 
-                                    <button class="btn-secondary" @click="openDetailModal(talent)">详情</button>
+                                    <button class="btn-secondary" @click="openDetailModal(talent)">�</button>
 
-                                    <button class="btn-primary" @click="openEditModal(talent)">编辑</button>
+                                    <button class="btn-primary" @click="openEditModal(talent)">��</button>
 
-                                    <button class="btn-danger" @click="deleteTalent(talent.id)">删除</button>
+                                    <button class="btn-danger" @click="deleteTalent(talent.id)"></button>
 
                                 </td>
 
@@ -463,15 +463,15 @@
 
                 <div class="pagination">
 
-                    <button @click="changePage(1)" :disabled="pagination.page === 1">首页</button>
+                    <button @click="changePage(1)" :disabled="pagination.page === 1">��</button>
 
-                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一页</button>
+                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">���?/button>
 
                     <button v-for="p in visiblePages" :key="p" :class="{ active: p === pagination.page }" @click="changePage(p)">{{ p }}</button>
 
-                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一页</button>
+                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">���?/button>
 
-                    <button @click="changePage(pagination.total_pages)" :disabled="pagination.page >= pagination.total_pages">末页</button>
+                    <button @click="changePage(pagination.total_pages)" :disabled="pagination.page >= pagination.total_pages">�</button>
 
                 </div>
 
@@ -479,7 +479,7 @@
 
 
 
-            <!-- 统计页面 -->
+            <!-- �计页 -->
 
             <div v-if="activeTab === 'stats' && currentUser.role === 'admin'">
 
@@ -487,7 +487,7 @@
 
                     <div class="stat-card">
 
-                        <h4>总人数</h4>
+                        <h4>�人�?/h4>
 
                         <div class="value">{{ stats.total || 0 }}</div>
 
@@ -495,7 +495,7 @@
 
                     <div class="stat-card">
 
-                        <h4>学历分布</h4>
+                        <h4>��</h4>
 
                         <div v-for="(count, key) in stats.education" :key="key" class="stat-detail">
 
@@ -509,7 +509,7 @@
 
                     <div class="stat-card">
 
-                        <h4>身份分布</h4>
+                        <h4>�份��</h4>
 
                         <div v-for="(count, key) in stats.identity_tag" :key="key" class="stat-detail">
 
@@ -523,7 +523,7 @@
 
                     <div class="stat-card">
 
-                        <h4>城市分布 (Top 10)</h4>
+                        <h4>�� (Top 10)</h4>
 
                         <div v-for="(count, key) in stats.city" :key="key" class="stat-detail">
 
@@ -541,14 +541,14 @@
 
 
 
-            <!-- 账号管理页面 -->
+            <!-- 贷��页� -->
 
             <div v-if="activeTab === 'users' && currentUser.role === 'admin'" style="background: white; padding: 24px; border-radius: 8px;">
 
-                <h3 style="margin-bottom: 20px;">账号管理</h3>
+                <h3 style="margin-bottom: 20px;">贷��</h3>
 
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多200个）
-                    <button class="btn-warning" @click="showUserImportModal = true" style="margin-left:12px;padding:6px 14px;">📥 批量导入账号</button>
+                <p style="color: #666; margin-bottom: 16px;">影� <strong>{{ systemUsers.length }}</strong> �贷��?00��
+                    <button class="btn-warning" @click="showUserImportModal = true" style="margin-left:12px;padding:6px 14px;"> ��导�账</button>
                 </p>
 
 
@@ -563,13 +563,13 @@
 
                                 <th>ID</th>
 
-                                <th>用户名</th>
+                                <th>���?/th>
 
-                                <th>角色</th>
+                                <th>�</th>
 
-                                <th>创建时间</th>
+                                <th>建��</th>
 
-                                <th>操作</th>
+                                <th>�</th>
 
                             </tr>
 
@@ -587,13 +587,13 @@
 
                                 <td>{{ u.created_at || '-' }}</td>
 
-                                <td><button class="btn-danger" @click="deleteUser(u.id)">删除</button></td>
+                                <td><button class="btn-danger" @click="deleteUser(u.id)"></button></td>
 
                             </tr>
 
                             <tr v-if="systemUsers.length === 0">
 
-                                <td colspan="5" class="empty-state">暂无账号</td>
+                                <td colspan="5" class="empty-state">�</td>
 
                             </tr>
 
@@ -607,35 +607,35 @@
 
                 <div style="border: 1px solid #eee; padding: 20px; border-radius: 8px;">
 
-                    <h4 style="margin-bottom: 16px;">新增账号</h4>
+                    <h4 style="margin-bottom: 16px;">���</h4>
 
                     <div class="form-grid">
 
                         <div class="form-group">
 
-                            <label>用户名</label>
+                            <label>���?/label>
 
-                            <input v-model="newUser.username" type="text" placeholder="输入用户名">
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>密码</label>
-
-                            <input v-model="newUser.password" type="password" placeholder="输入密码">
+                            <input v-model="newUser.username" type="text" placeholder="辥���?>
 
                         </div>
 
                         <div class="form-group">
 
-                            <label>角色</label>
+                            <label>�</label>
+
+                            <input v-model="newUser.password" type="password" placeholder="辥�">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>�</label>
 
                             <select v-model="newUser.role">
 
-                                <option value="user">普通用户</option>
+                                <option value="user">�?/option>
 
-                                <option value="admin">管理员</option>
+                                <option value="admin">管��?/option>
 
                             </select>
 
@@ -643,7 +643,7 @@
 
                         <div class="form-group" style="display: flex; align-items: flex-end;">
 
-                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 200">添加账号</button>
+                            <button class="btn-primary" @click="addUser" :disabled="systemUsers.length >= 200">添��</button>
 
                         </div>
 
@@ -655,46 +655,47 @@
 
             <div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                    <h2>需求管理</h2>
-                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
+                    <h2>�管�?/h2>
+                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ ��?/button>
                 </div>
                 <div class="toolbar" style="margin-bottom:12px;">
                     <select v-model="demandStatusFilter" @change="loadDemands()" style="padding:8px;border:1px solid #ddd;border-radius:4px;">
-                        <option value="">全部状态</option>
-                        <option value="pending">待报价</option>
-                        <option value="quoting">报价中</option>
-                        <option value="confirmed">已确认</option>
-                        <option value="recruiting">招募中</option>
-                        <option value="selecting">选择人才</option>
-                        <option value="done">已完成</option>
+                        <option value="">����?/option>
+                        <option value="pending">徥�?/option>
+                        <option value="quoting">�价�?/option>
+                        <option value="confirmed">已确�?/option>
+                        <option value="recruiting">�?/option>
+                        <option value="selecting">�人</option>
+                        <option value="done">已��?/option>
                     </select>
                 </div>
                 <div class="table-container">
                     <table class="data-table">
-                        <thead><tr><th>ID</th><th>标题</th><th>业务类型</th><th>档位</th><th>数量</th><th>报价</th><th>状态</th><th>截止日期</th><th>操作</th></tr></thead>
+                        <thead><tr><th>ID</th><th>�</th><th>両类</th><th>档�</th><th>��</th><th>�价</th><th>��?/th><th>止��</th><th>�</th></tr></thead>
                         <tbody>
                             <tr v-for="d in demands" :key="d.id">
                                 <td>{{ d.id }}</td>
                                 <td>{{ d.title }}</td>
                                 <td>{{ d.business_type }}</td>
                                 <td>{{ d.tier }}</td>
-                                <td>{{ d.quantity }}{{ d.brush_list ? " (刷名单)" : "" }}</td>
-                                <td><span v-if="getQuote(d.id)">￥{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">待计算</span></td>
+                                <td>{{ d.quantity }}{{ d.brush_list ? " (���?" : "" }}</td>
+                                <td><span v-if="getQuote(d.id)">�{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">�计�?/span></td>
                                 <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:d.status==='done'?'#4CAF50':d.status==='recruiting'?'#2196F3':d.status==='confirmed'?'#ff9800':'#999',color:'white'}">{{ statusLabels[d.status] || d.status }}</span></td>
                                 <td>{{ d.deadline || "-" }}</td>
                                 <td>
                                     <div class="actions">
-                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button>
-                                        <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
-                                        <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
-                                        <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
-                                        <button v-if="d.status === 'recruiting'" class="btn-warning" @click="openApplications(d.id)" style="padding:4px 8px;font-size:12px;">报名列表</button>
-                                        <button v-if="d.status === 'selecting'" class="btn-warning" @click="openEvaluateModal(d)" style="padding:4px 8px;font-size:12px;">评价</button>
-                                        <button v-if="d.status === 'recruiting' && isAdmin" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">发企微群</button>
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">�</button>
+                                        <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计�价</button>
+                                        <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">塥价</button>
+                                        <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">�认�价</button>
+                                        <button v-if="d.status === 'recruiting'" class="btn-warning" @click="openApplications(d.id)" style="padding:4px 8px;font-size:12px;">���</button>
+                                        <button v-if="d.status === 'selecting'" class="btn-warning" @click="openEvaluateModal(d)" style="padding:4px 8px;font-size:12px;">��</button>
+                                        <button v-if="d.status === 'recruiting' && isAdmin && !d.gongzhang_yiti" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">���</button>
+                                        <span v-if="d.gongzhang_yiti" style="font-size:12px;color:#999;">�已�</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">暂无需求</td></tr>
+                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">�?/td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -706,144 +707,159 @@
                 </div>
             </div>
 
-            <!-- 发布需求弹窗 -->
+            <!-- ��弹�?-->
             <div v-if="currentModal === 'demand-create'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                    <h3 style="margin:0;">发布需求</h3>
+                    <h3 style="margin:0;">��?/h3>
                     <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
                 </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">提单人 *</label>
-                            <input v-model="demandForm.tidanren" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="请填写提单人姓名" />
-                        </div>
-                        <div style="grid-column:2;">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
-                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：H73产品 甄别需求" />
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">�?*</label>
+                            <input v-model="demandForm.tidanren" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="请填人�" />
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">业务类型 *</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">产�代� *</label>
+                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="��H73" />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">���?/label>
+                            <input v-model="demandForm.parent_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="�? />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">��?/label>
+                            <input v-model="demandForm.child_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="�? />
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">両类 *</label>
                             <select v-model="demandForm.business_type" @change="onBizTypeChange" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                                <option value="">请选择</option>
+                                <option value="">请�</option>
                                 <option v-for="(tiers, biz) in demandMeta" :key="biz" :value="biz">{{ biz }}</option>
                             </select>
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">档位 *</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">档� *</label>
                             <select v-model="demandForm.tier" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                                <option value="">请选择</option>
+                                <option value="">请�</option>
                                 <option v-for="t in currentTierOptions" :key="t.label" :value="t.label">{{ t.label }}</option>
                             </select>
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">数量/场次 *</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">��/�� *</label>
                             <input v-model.number="demandForm.quantity" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">截止日期</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">止��</label>
                             <input v-model="demandForm.deadline" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
-                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访'">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">刷名单</label>
+                        <div>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">���</label>
+                            <input v-model="demandForm.execution_time" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="����3天�" />
+                        </div>
+                        <div v-if="demandForm.business_type === '' || demandForm.business_type === '��'">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">���?/label>
                             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
                                 <input type="checkbox" v-model="demandForm.brush_list" />
-                                <span style="font-size:13px;">需要刷名单（+15元/样本呼出费）</span>
+                                <span style="font-size:13px;">覷��?15�?���费�</span>
                             </label>
                         </div>
-                        <template v-if="demandForm.business_type === '实验室执行'">
+                        <template v-if="demandForm.business_type === '��室��?">
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">排期时长（小时）</label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">���尶�</label>
                                 <input v-model.number="demandForm.scheduled_hours" type="number" step="0.5" min="0" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">结束时间</label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">绶�</label>
                                 <input v-model="demandForm.end_time" type="time" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">横跨用餐时间（顿数）</label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">�跨����顿��</label>
                                 <select v-model.number="demandForm.cross_meal_count" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                                    <option :value="0">不横跨</option>
-                                    <option :value="1">1顿</option>
-                                    <option :value="2">2顿</option>
+                                    <option :value="0">���?/option>
+                                    <option :value="1">1�?/option>
+                                    <option :value="2">2�?/option>
                                 </select>
                             </div>
                         </template>
                         <div style="grid-column:1/-1;">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求描述</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">��?/label>
                             <textarea v-model="demandForm.description" rows="3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
                         </div>
                         <div style="grid-column:1/-1;">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">具体要求</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">����</label>
                             <textarea v-model="demandForm.requirements" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
                         </div>
                     </div>
                     <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
-                        <button class="btn-secondary" @click="closeModal()">取消</button>
-                        <button class="btn-primary" @click="saveDemand">保存需求</button>
+                        <button class="btn-secondary" @click="closeModal()">�</button>
+                        <button class="btn-primary" @click="saveDemand">���?/button>
                     </div>
                 </div>
             </div>
 
-            <!-- 详情弹窗 -->
+            <!-- �弹� -->
             <div v-if="currentModal === 'demand-detail'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
-                    <h3 style="margin-bottom:16px;">需求详情</h3>
+                    <h3 style="margin-bottom:16px;">��������</h3>
                     <div v-if="currentDemand" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <div><strong>标题：</strong>{{ currentDemand.title }}</div>
-                        <div><strong>业务类型：</strong>{{ currentDemand.business_type }}</div>
-                        <div><strong>档位：</strong>{{ currentDemand.tier }}</div>
-                        <div><strong>数量：</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "（刷名单）" : "" }}</div>
-                        <div><strong>截止日期：</strong>{{ currentDemand.deadline || "-" }}</div>
-                        <div><strong>状态：</strong>{{ statusLabels[currentDemand.status] || currentDemand.status }}</div>
-                        <div style="grid-column:1/-1;"><strong>描述：</strong>{{ currentDemand.description || "无" }}</div>
-                        <div style="grid-column:1/-1;"><strong>要求：</strong>{{ currentDemand.requirements || "无" }}</div>
+                        <div><strong>��Ʒ���ţ�</strong>{{ currentDemand.title }}</div>
+                        <div><strong>�ᵥ�ˣ�</strong>{{ currentDemand.tidanren || "-" }}</div>
+                        <div><strong>�����ţ�</strong>{{ currentDemand.parent_order || "-" }}</div>
+                        <div><strong>�ӵ��ţ�</strong>{{ currentDemand.child_order || "-" }}</div>
+                        <div><strong>ҵ�����ͣ�</strong>{{ currentDemand.business_type }}</div>
+                        <div><strong>��λ��</strong>{{ currentDemand.tier }}</div>
+                        <div><strong>������</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "��ˢ������" : "" }}</div>
+                        <div><strong>��ֹ���ڣ�</strong>{{ currentDemand.deadline || "-" }}</div>
+                        <div><strong>ִ��ʱ�䣺</strong>{{ currentDemand.execution_time || "Ĭ��3���" }}</div>
+                        <div><strong>״̬��</strong>{{ statusLabels[currentDemand.status] || currentDemand.status }}{{ currentDemand.gongzhang_yiti ? " / ��������" : "" }}</div>
+                        <div style="grid-column:1/-1;"><strong>������</strong>{{ currentDemand.description || "��" }}</div>
+                        <div style="grid-column:1/-1;"><strong>Ҫ��</strong>{{ currentDemand.requirements || "��" }}</div>
                         <div v-if="currentQuote" style="grid-column:1/-1;background:#f5f5f5;padding:12px;border-radius:4px;margin-top:8px;">
-                            <strong>报价：</strong>兼职工资{{ currentQuote.part_time_wage }}元 + 人力成本{{ currentQuote.human_cost }}元 = <strong>总计{{ currentQuote.total_quote }}元</strong>
+                            <strong>���ۣ�</strong>��ְ����{{ currentQuote.part_time_wage }}Ԫ + �����ɱ�{{ currentQuote.human_cost }}Ԫ = <strong>�ܼ�{{ currentQuote.total_quote }}Ԫ</strong>
                         </div>
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin-top:20px;">
-                        <button class="btn-secondary" @click="closeModal()">关闭</button>
+                        <button class="btn-secondary" @click="closeModal()">�ر�</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 报价确认弹窗 -->
             <div v-if="currentModal === 'quote'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:500px;">
-                    <h3 style="margin-bottom:16px;">填写报价（管理员）</h3>
+                    <h3 style="margin-bottom:16px;">塥价�管��?/h3>
                     <div style="margin-bottom:12px;">
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元）</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">��工���?/label>
                         <input v-model.number="quoteForm.part_time_wage" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                     </div>
                     <div style="margin-bottom:12px;">
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">人力成本（元）</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">人���?/label>
                         <input v-model.number="quoteForm.human_cost" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                     </div>
                     <div style="margin-bottom:12px;">
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">备注</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">��</label>
                         <textarea v-model="quoteForm.note" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
                     </div>
                     <div style="background:#f5f5f5;padding:12px;border-radius:4px;margin-bottom:16px;">
-                        <strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}元</strong>
+                        <strong>���{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}�?/strong>
                     </div>
                     <div style="display:flex;justify-content:space-between;gap:12px;">
-                        <button v-if="currentDemand && currentDemand.status === 'quoting' && isAdmin" class="btn-success" @click="confirmQuoteFromModal">确认报价（进入招募）</button>
+                        <button v-if="currentDemand && currentDemand.status === 'quoting' && isAdmin" class="btn-success" @click="confirmQuoteFromModal">�认�价�迥��</button>
                         <div style="display:flex;justify-content:flex-end;gap:12px;">
-                            <button class="btn-secondary" @click="closeModal()">取消</button>
-                            <button class="btn-primary" @click="saveQuote">保存报价</button>
+                            <button class="btn-secondary" @click="closeModal()">�</button>
+                            <button class="btn-primary" @click="saveQuote">�孥价</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 报名列表弹窗 -->
+            <!-- ��表弹� -->
             <div v-if="currentModal === 'applications'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:850px;max-height:90vh;overflow-y:auto;">
-                    <h3 style="margin-bottom:16px;">报名列表 - 需求 #{{ currentDemandId }}</h3>
+                    <h3 style="margin-bottom:16px;">��� - �?#{{ currentDemandId }}</h3>
                     <div class="table-container">
                         <table class="data-table">
-                            <thead><tr><th>ID</th><th>姓名</th><th>手机</th><th>星级</th><th>整体评价</th><th>报名时间</th><th>状态</th><th>操作</th></tr></thead>
+                            <thead><tr><th>ID</th><th>�</th><th></th><th>�</th><th>����</th><th>���</th><th>��?/th><th>�</th></tr></thead>
                             <tbody>
                                 <tr v-for="app in currentApplications" :key="app.id">
                                     <td>{{ app.id }}</td>
@@ -855,65 +871,69 @@
                                     <td><span :style="{padding:'3px 8px',borderRadius:'4px',fontSize:'12px',background:app.status==='selected'?'#4CAF50':app.status==='rejected'?'#f44336':'#999',color:'white'}">{{ app.status }}</span></td>
                                     <td>
                                         <div class="actions">
-                                            <button class="btn-secondary" @click="viewTalent(app.talent_id)" style="padding:4px 8px;font-size:12px;">查看</button>
-                                            <button v-if="app.status === 'applied'" class="btn-success" @click="selectTalent(app.id)" style="padding:4px 8px;font-size:12px;">选中</button>
-                                            <button v-if="app.status === 'applied'" class="btn-danger" @click="rejectTalent(app.id)" style="padding:4px 8px;font-size:12px;">拒绝</button>
+                                            <button class="btn-secondary" @click="viewTalent(app.talent_id)" style="padding:4px 8px;font-size:12px;">��</button>
+                                            <button v-if="app.status === 'applied'" class="btn-success" @click="selectTalent(app.id)" style="padding:4px 8px;font-size:12px;">�</button>
+                                            <button v-if="app.status === 'applied'" class="btn-danger" @click="rejectTalent(app.id)" style="padding:4px 8px;font-size:12px;">�</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr v-if="currentApplications.length === 0"><td colspan="8" style="text-align:center;color:#999;padding:20px;">暂无报名</td></tr>
+                                <tr v-if="currentApplications.length === 0"><td colspan="8" style="text-align:center;color:#999;padding:20px;">��</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-top:16px;">
-                        <button v-if="currentApplications.some(a => a.status === 'selected')" class="btn-warning" @click="notifyGroupForDemand()" style="padding:8px 16px;">🔔 通知菜菜拉群</button>
-                        <button class="btn-secondary" @click="closeModal()">关闭</button>
+                        <div style="display:flex;gap:8px;">
+                            <button v-if="currentApplications.some(a => a.status === 'selected') && !currentDemandGongzhangYiti" class="btn-warning" @click="notifyGroupForDemand()" style="padding:8px 16px;"> ���</button>
+                            <button v-if="currentApplications.some(a => a.status === 'selected') && !currentDemandGongzhangYiti" class="btn-danger" @click="markGongzhangYiti()" style="padding:8px 16px;">�已�</button>
+                            <span v-if="currentDemandGongzhangYiti" style="font-size:13px;color:#999;line-height:32px;">�已��该��已�</span>
+                        </div>
+                        <button class="btn-secondary" @click="closeModal()">��</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 人才详情弹窗 -->
+            <!-- 人��弹� -->
             <div v-if="currentModal === 'talent'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:700px;max-height:90vh;overflow-y:auto;">
-                    <h3 style="margin-bottom:16px;">人才详情 - {{ talentDetail.name }}</h3>
+                    <h3 style="margin-bottom:16px;">人�� - {{ talentDetail.name }}</h3>
                     <div v-if="talentDetail" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
-                        <div><strong>性别：</strong>{{ talentDetail.gender }}</div>
-                        <div><strong>手机：</strong>{{ talentDetail.phone }}</div>
-                        <div><strong>城市：</strong>{{ talentDetail.city }}</div>
-                        <div><strong>学校：</strong>{{ talentDetail.school }}</div>
-                        <div><strong>专业：</strong>{{ talentDetail.major }}</div>
-                        <div><strong>学历：</strong>{{ talentDetail.education }}</div>
-                        <div><strong>历史均星：</strong>{{ talentDetail.avg_rating }}</div>
-                        <div><strong>当月星级：</strong>{{ talentDetail.month_rating }}</div>
-                        <div style="grid-column:1/-1;"><strong>整体评价：</strong>{{ talentDetail.overall_summary || "无" }}</div>
-                        <div style="grid-column:1/-1;"><strong>详细评价：</strong>{{ talentDetail.detailed_review || "无" }}</div>
+                        <div><strong>���?/strong>{{ talentDetail.gender }}</div>
+                        <div><strong>��?/strong>{{ talentDetail.phone }}</div>
+                        <div><strong>��?/strong>{{ talentDetail.city }}</div>
+                        <div><strong>孡�?/strong>{{ talentDetail.school }}</div>
+                        <div><strong>���?/strong>{{ talentDetail.major }}</div>
+                        <div><strong>��?/strong>{{ talentDetail.education }}</div>
+                        <div><strong>���?/strong>{{ talentDetail.avg_rating }}</div>
+                        <div><strong>�级�?/strong>{{ talentDetail.month_rating }}</div>
+                        <div style="grid-column:1/-1;"><strong>���价�?/strong>{{ talentDetail.overall_summary || "�? }}</div>
+                        <div style="grid-column:1/-1;"><strong>���价�?/strong>{{ talentDetail.detailed_review || "�? }}</div>
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin-top:16px;">
-                        <button class="btn-secondary" @click="closeModal()">关闭</button>
+                        <button class="btn-secondary" @click="closeModal()">��</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 评价弹窗 -->
+            <!-- �价弹� -->
             <div v-if="currentModal === 'evaluate'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:550px;">
-                    <h3 style="margin-bottom:16px;">评价人才</h3>
+                    <h3 style="margin-bottom:16px;">�价人</h3>
                     <div v-if="selectedAppForEval" style="margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:4px;">
-                        已选中人才：<strong>{{ selectedAppForEval.name }}</strong>
+                        已��人��?strong>{{ selectedAppForEval.name }}</strong>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">评分（1-5星）</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">��?-5�</label>
                         <div style="display:flex;gap:8px;margin-top:4px;">
                             <span v-for="s in [1,2,3,4,5]" :key="s" @click="evalForm.rating = s" :style="{cursor:'pointer',fontSize:'24px',color:evalForm.rating >= s ? '#ff9800' : '#ddd'}">&#9733;</span>
                         </div>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">评价内容</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">�价��</label>
                         <textarea v-model="evalForm.comment" rows="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>
                     </div>
                     <div style="display:flex;justify-content:flex-end;gap:12px;">
-                        <button class="btn-secondary" @click="closeModal()">取消</button>
-                        <button class="btn-primary" @click="submitEvaluation">提交评价</button>
+                        <button class="btn-secondary" @click="closeModal()">�</button>
+                        <button class="btn-primary" @click="submitEvaluation">交��</button>
                     </div>
                 </div>
             </div>
@@ -922,7 +942,7 @@
 
 
 
-        <!-- 新增/编辑模态框 -->
+        <!-- ��/��模�� -->
 
         <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
 
@@ -930,7 +950,7 @@
 
                 <div class="modal-header">
 
-                    <h3>{{ editingTalent ? '编辑人才' : '新增人才' }}</h3>
+                    <h3>{{ editingTalent ? '��人�' : '��人�' }}</h3>
 
                     <button class="modal-close" @click="showModal = false">&times;</button>
 
@@ -940,13 +960,13 @@
 
                     <div class="form-section">
 
-                        <div class="form-section-title">基础信息</div>
+                        <div class="form-section-title">��信�</div>
 
                         <div class="form-grid">
 
                             <div class="form-group">
 
-                                <label>姓名 *</label>
+                                <label>� *</label>
 
                                 <input v-model="talentForm.name" type="text">
 
@@ -954,15 +974,15 @@
 
                             <div class="form-group">
 
-                                <label>性别</label>
+                                <label>��</label>
 
                                 <select v-model="talentForm.gender">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="男">男</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="女">女</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -970,7 +990,7 @@
 
                             <div class="form-group">
 
-                                <label>出生年月</label>
+                                <label>��年�</label>
 
                                 <input v-model="talentForm.birth_date" type="text" placeholder="YYYY.MM">
 
@@ -978,17 +998,17 @@
 
                             <div class="form-group">
 
-                                <label>身份标签</label>
+                                <label>�份��</label>
 
                                 <select v-model="talentForm.identity_tag">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="实习生">实习生</option>
+                                    <option value="���?>���?/option>
 
-                                    <option value="兼职">兼职</option>
+                                    <option value="��">��</option>
 
-                                    <option value="其他">其他</option>
+                                    <option value="��">��</option>
 
                                 </select>
 
@@ -996,27 +1016,27 @@
 
                             <div class="form-group">
 
-                                <label>常住城市</label>
+                                <label>常��</label>
 
-                                <input v-model="talentForm.city" type="text" placeholder="省-市">
+                                <input v-model="talentForm.city" type="text" placeholder="�?�?>
 
                             </div>
 
                             <div class="form-group">
 
-                                <label>城市级别</label>
+                                <label>�级�</label>
 
                                 <select v-model="talentForm.city_level">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="一线">一线</option>
+                                    <option value="��?>��?/option>
 
-                                    <option value="新一线">新一线</option>
+                                    <option value="���?>���?/option>
 
-                                    <option value="二线">二线</option>
+                                    <option value="��">��</option>
 
-                                    <option value="其他">其他</option>
+                                    <option value="��">��</option>
 
                                 </select>
 
@@ -1024,7 +1044,7 @@
 
                             <div class="form-group">
 
-                                <label>学校</label>
+                                <label>�</label>
 
                                 <input v-model="talentForm.school" type="text">
 
@@ -1032,7 +1052,7 @@
 
                             <div class="form-group">
 
-                                <label>专业</label>
+                                <label>��</label>
 
                                 <input v-model="talentForm.major" type="text">
 
@@ -1040,17 +1060,17 @@
 
                             <div class="form-group">
 
-                                <label>在读学历</label>
+                                <label>���</label>
 
                                 <select v-model="talentForm.education">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="本科">本科</option>
+                                    <option value="�">�</option>
 
-                                    <option value="硕士">硕士</option>
+                                    <option value="��">��</option>
 
-                                    <option value="博士">博士</option>
+                                    <option value="�">�</option>
 
                                 </select>
 
@@ -1058,15 +1078,15 @@
 
                             <div class="form-group">
 
-                                <label>预计毕业年份</label>
+                                <label>�计��年份</label>
 
-                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY年">
+                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY�?>
 
                             </div>
 
                             <div class="form-group">
 
-                                <label>手机号</label>
+                                <label>��?/label>
 
                                 <input v-model="talentForm.phone" type="text">
 
@@ -1074,7 +1094,7 @@
 
                             <div class="form-group">
 
-                                <label>微信号</label>
+                                <label>�信�?/label>
 
                                 <input v-model="talentForm.wechat" type="text">
 
@@ -1088,13 +1108,13 @@
 
                     <div class="form-section">
 
-                        <div class="form-section-title">人员评价</div>
+                        <div class="form-section-title">人���</div>
 
                         <div class="form-grid">
 
                             <div class="form-group">
 
-                                <label>业务次数</label>
+                                <label>両��</label>
 
                                 <input v-model="talentForm.project_count" type="text">
 
@@ -1102,7 +1122,7 @@
 
                             <div class="form-group">
 
-                                <label>历史平均星级</label>
+                                <label>�平�</label>
 
                                 <input v-model="talentForm.avg_rating" type="text" placeholder="1.0-5.0">
 
@@ -1110,7 +1130,7 @@
 
                             <div class="form-group">
 
-                                <label>当月星级</label>
+                                <label>��</label>
 
                                 <input v-model="talentForm.month_rating" type="text" placeholder="1.0-5.0">
 
@@ -1118,7 +1138,7 @@
 
                             <div class="form-group">
 
-                                <label>兼职考试得分</label>
+                                <label>����</label>
 
                                 <input v-model="talentForm.exam_score" type="text" placeholder="0-100">
 
@@ -1126,7 +1146,7 @@
 
                             <div class="form-group" style="grid-column: span 2;">
 
-                                <label>整体评价摘要</label>
+                                <label>���价��</label>
 
                                 <input v-model="talentForm.overall_summary" type="text">
 
@@ -1140,25 +1160,25 @@
 
                     <div class="form-section">
 
-                        <div class="form-section-title">业务能力 (程度类)</div>
+                        <div class="form-section-title">両�� (���?</div>
 
                         <div class="form-grid">
 
                             <div class="form-group">
 
-                                <label>日常跑测/基础测评</label>
+                                <label>�常��/����</label>
 
                                 <select v-model="talentForm.basic_test">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1166,19 +1186,19 @@
 
                             <div class="form-group">
 
-                                <label>桌面研究</label>
+                                <label>桢��</label>
 
                                 <select v-model="talentForm.desktop_research">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1186,19 +1206,19 @@
 
                             <div class="form-group">
 
-                                <label>问题清单执行</label>
+                                <label>�渧�</label>
 
                                 <select v-model="talentForm.issue_list">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1206,19 +1226,19 @@
 
                             <div class="form-group">
 
-                                <label>洞察提案能力</label>
+                                <label>��桽�</label>
 
                                 <select v-model="talentForm.insight_proposal">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1226,19 +1246,19 @@
 
                             <div class="form-group">
 
-                                <label>访谈执行-线上访谈</label>
+                                <label>访��-线�访�</label>
 
                                 <select v-model="talentForm.online_interview">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1246,19 +1266,19 @@
 
                             <div class="form-group">
 
-                                <label>问卷调研</label>
+                                <label>��</label>
 
                                 <select v-model="talentForm.questionnaire_analysis">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="精通">精通</option>
+                                    <option value="精�?>精�?/option>
 
-                                    <option value="进阶">进阶</option>
+                                    <option value="�">�</option>
 
-                                    <option value="基础">基础</option>
+                                    <option value="��">��</option>
 
-                                    <option value="无">无</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1272,21 +1292,21 @@
 
                     <div class="form-section">
 
-                        <div class="form-section-title">业务能力 (是否类)</div>
+                        <div class="form-section-title">両�� (�?</div>
 
                         <div class="form-grid">
 
                             <div class="form-group">
 
-                                <label>Skills生成/调试</label>
+                                <label>Skills/��</label>
 
                                 <select v-model="talentForm.skills_debug">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="是">是</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1294,15 +1314,15 @@
 
                             <div class="form-group">
 
-                                <label>Agent生成/调试</label>
+                                <label>Agent/��</label>
 
                                 <select v-model="talentForm.agent_debug">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="是">是</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1310,15 +1330,15 @@
 
                             <div class="form-group">
 
-                                <label>AI知识库建设</label>
+                                <label>AI���建�?/label>
 
                                 <select v-model="talentForm.knowledge_base">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="是">是</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1326,15 +1346,15 @@
 
                             <div class="form-group">
 
-                                <label>实验室测试-协助执行</label>
+                                <label>��室��?���</label>
 
                                 <select v-model="talentForm.lab_assist">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="是">是</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1342,15 +1362,15 @@
 
                             <div class="form-group">
 
-                                <label>实验室测试-主负责</label>
+                                <label>��室��?主��?/label>
 
                                 <select v-model="talentForm.lab_leader">
 
-                                    <option value="">请选择</option>
+                                    <option value="">请�</option>
 
-                                    <option value="是">是</option>
+                                    <option value="�?>�?/option>
 
-                                    <option value="否">否</option>
+                                    <option value="�?>�?/option>
 
                                 </select>
 
@@ -1364,9 +1384,9 @@
 
                 <div class="modal-footer">
 
-                    <button class="btn-secondary" @click="showModal = false">取消</button>
+                    <button class="btn-secondary" @click="showModal = false">�</button>
 
-                    <button class="btn-primary" @click="saveTalent">保存</button>
+                    <button class="btn-primary" @click="saveTalent">��</button>
 
                 </div>
 
@@ -1376,124 +1396,124 @@
 
 
 
-        <!-- 详情模态框 -->
+        <!-- �模�� -->
         <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
             <div class="modal" style="max-width: 1000px;">
                 <div class="modal-header">
-                    <h3>人才详情 - {{ detailTalent.name || '-' }}</h3>
+                    <h3>人�� - {{ detailTalent.name || '-' }}</h3>
                     <button class="modal-close" @click="showDetailModal = false">&times;</button>
                 </div>
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     <div class="form-section">
-                        <div class="form-section-title">基础信息</div>
+                        <div class="form-section-title">��信�</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>姓名</label><div>{{ detailTalent.name || '-' }}</div></div>
-                            <div class="form-group"><label>性别</label><div>{{ detailTalent.gender || '-' }}</div></div>
-                            <div class="form-group"><label>出生年月</label><div>{{ detailTalent.birth_date || '-' }}</div></div>
-                            <div class="form-group"><label>身份标签</label><div>{{ detailTalent.identity_tag || '-' }}</div></div>
-                            <div class="form-group"><label>常住城市</label><div>{{ detailTalent.city || '-' }}</div></div>
-                            <div class="form-group"><label>城市级别</label><div>{{ detailTalent.city_level || '-' }}</div></div>
-                            <div class="form-group"><label>学校</label><div>{{ detailTalent.school || '-' }}</div></div>
-                            <div class="form-group"><label>专业</label><div>{{ detailTalent.major || '-' }}</div></div>
-                            <div class="form-group"><label>在读学历</label><div>{{ detailTalent.education || '-' }}</div></div>
-                            <div class="form-group"><label>预计毕业年份</label><div>{{ detailTalent.graduate_year || '-' }}</div></div>
-                            <div class="form-group"><label>手机号</label><div>{{ detailTalent.phone || '-' }}</div></div>
-                            <div class="form-group"><label>微信号</label><div>{{ detailTalent.wechat || '-' }}</div></div>
+                            <div class="form-group"><label>�</label><div>{{ detailTalent.name || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.gender || '-' }}</div></div>
+                            <div class="form-group"><label>��年�</label><div>{{ detailTalent.birth_date || '-' }}</div></div>
+                            <div class="form-group"><label>�份��</label><div>{{ detailTalent.identity_tag || '-' }}</div></div>
+                            <div class="form-group"><label>常��</label><div>{{ detailTalent.city || '-' }}</div></div>
+                            <div class="form-group"><label>�级�</label><div>{{ detailTalent.city_level || '-' }}</div></div>
+                            <div class="form-group"><label>�</label><div>{{ detailTalent.school || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.major || '-' }}</div></div>
+                            <div class="form-group"><label>���</label><div>{{ detailTalent.education || '-' }}</div></div>
+                            <div class="form-group"><label>�计��年份</label><div>{{ detailTalent.graduate_year || '-' }}</div></div>
+                            <div class="form-group"><label>��?/label><div>{{ detailTalent.phone || '-' }}</div></div>
+                            <div class="form-group"><label>�信�?/label><div>{{ detailTalent.wechat || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
-                        <div class="form-section-title">人员评价</div>
+                        <div class="form-section-title">人���</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>业务次数</label><div>{{ detailTalent.project_count || '-' }}</div></div>
-                            <div class="form-group"><label>历史平均星级</label><div>{{ detailTalent.avg_rating || '-' }}</div></div>
-                            <div class="form-group"><label>当月星级</label><div>{{ detailTalent.month_rating || '-' }}</div></div>
-                            <div class="form-group"><label>兼职考试得分</label><div>{{ detailTalent.exam_score || '-' }}</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>整体评价摘要</label><div>{{ detailTalent.overall_summary || '-' }}</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>详细业务评价</label><div>{{ detailTalent.detailed_review || '-' }}</div></div>
+                            <div class="form-group"><label>両��</label><div>{{ detailTalent.project_count || '-' }}</div></div>
+                            <div class="form-group"><label>�平�</label><div>{{ detailTalent.avg_rating || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.month_rating || '-' }}</div></div>
+                            <div class="form-group"><label>����</label><div>{{ detailTalent.exam_score || '-' }}</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>���价��</label><div>{{ detailTalent.overall_summary || '-' }}</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>��両��</label><div>{{ detailTalent.detailed_review || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
-                        <div class="form-section-title">业务能力</div>
+                        <div class="form-section-title">両��</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>日常跑测/基础测评</label><div>{{ detailTalent.basic_test || '-' }}</div></div>
-                            <div class="form-group"><label>桌面研究</label><div>{{ detailTalent.desktop_research || '-' }}</div></div>
-                            <div class="form-group"><label>问题清单执行</label><div>{{ detailTalent.issue_list || '-' }}</div></div>
-                            <div class="form-group"><label>洞察提案能力</label><div>{{ detailTalent.insight_proposal || '-' }}</div></div>
-                            <div class="form-group"><label>Skills生成/调试</label><div>{{ detailTalent.skills_debug || '-' }}</div></div>
-                            <div class="form-group"><label>Agent生成/调试</label><div>{{ detailTalent.agent_debug || '-' }}</div></div>
-                            <div class="form-group"><label>AI知识库建设</label><div>{{ detailTalent.knowledge_base || '-' }}</div></div>
-                            <div class="form-group"><label>访谈执行-玩家甄别</label><div>{{ detailTalent.interview_selection || '-' }}</div></div>
-                            <div class="form-group"><label>访谈执行-线上访谈</label><div>{{ detailTalent.online_interview || '-' }}</div></div>
-                            <div class="form-group"><label>访谈执行-田野调查/外访</label><div>{{ detailTalent.field_interview || '-' }}</div></div>
-                            <div class="form-group"><label>访谈提纲/问卷设计</label><div>{{ detailTalent.questionnaire_design || '-' }}</div></div>
-                            <div class="form-group"><label>问卷调研</label><div>{{ detailTalent.questionnaire_analysis || '-' }}</div></div>
-                            <div class="form-group"><label>实验室测试协助执行</label><div>{{ detailTalent.lab_assist || '-' }}</div></div>
-                            <div class="form-group"><label>实验室测试主负/主持</label><div>{{ detailTalent.lab_leader || '-' }}</div></div>
-                            <div class="form-group"><label>数仓工作（日常报表）</label><div>{{ detailTalent.data_warehouse || '-' }}</div></div>
-                            <div class="form-group"><label>数据查询/报表开发</label><div>{{ detailTalent.data_query || '-' }}</div></div>
-                            <div class="form-group"><label>爬虫/数据收集</label><div>{{ detailTalent.web_crawl || '-' }}</div></div>
-                            <div class="form-group"><label>深度测评能力</label><div>{{ detailTalent.deep_assessment || '-' }}</div></div>
-                            <div class="form-group"><label>商业化研究与分析</label><div>{{ detailTalent.commercial_research || '-' }}</div></div>
-                            <div class="form-group"><label>Excel技能等</label><div>{{ detailTalent.excel_level || '-' }}</div></div>
-                            <div class="form-group"><label>SPSS技能等</label><div>{{ detailTalent.spss_level || '-' }}</div></div>
-                            <div class="form-group"><label>语言能力</label><div>{{ detailTalent.language_ability || '-' }}</div></div>
+                            <div class="form-group"><label>�常��/����</label><div>{{ detailTalent.basic_test || '-' }}</div></div>
+                            <div class="form-group"><label>桢��</label><div>{{ detailTalent.desktop_research || '-' }}</div></div>
+                            <div class="form-group"><label>�渧�</label><div>{{ detailTalent.issue_list || '-' }}</div></div>
+                            <div class="form-group"><label>��桽�</label><div>{{ detailTalent.insight_proposal || '-' }}</div></div>
+                            <div class="form-group"><label>Skills/��</label><div>{{ detailTalent.skills_debug || '-' }}</div></div>
+                            <div class="form-group"><label>Agent/��</label><div>{{ detailTalent.agent_debug || '-' }}</div></div>
+                            <div class="form-group"><label>AI���建�?/label><div>{{ detailTalent.knowledge_base || '-' }}</div></div>
+                            <div class="form-group"><label>访��-���</label><div>{{ detailTalent.interview_selection || '-' }}</div></div>
+                            <div class="form-group"><label>访��-线�访�</label><div>{{ detailTalent.online_interview || '-' }}</div></div>
+                            <div class="form-group"><label>访��-���/��</label><div>{{ detailTalent.field_interview || '-' }}</div></div>
+                            <div class="form-group"><label>访��/���</label><div>{{ detailTalent.questionnaire_design || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.questionnaire_analysis || '-' }}</div></div>
+                            <div class="form-group"><label>��室�诩��?/label><div>{{ detailTalent.lab_assist || '-' }}</div></div>
+                            <div class="form-group"><label>��室��主�?主�</label><div>{{ detailTalent.lab_leader || '-' }}</div></div>
+                            <div class="form-group"><label>��工�Ｅ常�表�</label><div>{{ detailTalent.data_warehouse || '-' }}</div></div>
+                            <div class="form-group"><label>���/�表��?/label><div>{{ detailTalent.data_query || '-' }}</div></div>
+                            <div class="form-group"><label>/���</label><div>{{ detailTalent.web_crawl || '-' }}</div></div>
+                            <div class="form-group"><label>深度�诽�</label><div>{{ detailTalent.deep_assessment || '-' }}</div></div>
+                            <div class="form-group"><label>�究�</label><div>{{ detailTalent.commercial_research || '-' }}</div></div>
+                            <div class="form-group"><label>Excel��</label><div>{{ detailTalent.excel_level || '-' }}</div></div>
+                            <div class="form-group"><label>SPSS��</label><div>{{ detailTalent.spss_level || '-' }}</div></div>
+                            <div class="form-group"><label>�訽�</label><div>{{ detailTalent.language_ability || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
-                        <div class="form-section-title">游戏品类</div>
+                        <div class="form-section-title">游��</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
                             <div class="form-group"><label>MOBA</label><div>{{ detailTalent.category_moba || '-' }}</div></div>
                             <div class="form-group"><label>MMORPG</label><div>{{ detailTalent.category_mmorgp || '-' }}</div></div>
-                            <div class="form-group"><label>开放世界RPG</label><div>{{ detailTalent.category_openworld_rpg || '-' }}</div></div>
-                            <div class="form-group"><label>卡牌RPG</label><div>{{ detailTalent.category_card_rpg || '-' }}</div></div>
-                            <div class="form-group"><label>战术竞技</label><div>{{ detailTalent.category_tactical || '-' }}</div></div>
-                            <div class="form-group"><label>射击</label><div>{{ detailTalent.category_shooter || '-' }}</div></div>
-                            <div class="form-group"><label>策略/SLG</label><div>{{ detailTalent.category_strategy_slg || '-' }}</div></div>
-                            <div class="form-group"><label>动作/格斗</label><div>{{ detailTalent.category_action_fight || '-' }}</div></div>
-                            <div class="form-group"><label>沙盒/生存</label><div>{{ detailTalent.category_sandbox_survival || '-' }}</div></div>
-                            <div class="form-group"><label>自走棋类</label><div>{{ detailTalent.category_autochess || '-' }}</div></div>
-                            <div class="form-group"><label>休闲益智</label><div>{{ detailTalent.category_casual_puzzle || '-' }}</div></div>
-                            <div class="form-group"><label>休闲竞技/派对</label><div>{{ detailTalent.category_party || '-' }}</div></div>
-                            <div class="form-group"><label>其他品类</label><div>{{ detailTalent.category_etc || '-' }}</div></div>
+                            <div class="form-group"><label>弾�RPG</label><div>{{ detailTalent.category_openworld_rpg || '-' }}</div></div>
+                            <div class="form-group"><label>��RPG</label><div>{{ detailTalent.category_card_rpg || '-' }}</div></div>
+                            <div class="form-group"><label>�</label><div>{{ detailTalent.category_tactical || '-' }}</div></div>
+                            <div class="form-group"><label>�</label><div>{{ detailTalent.category_shooter || '-' }}</div></div>
+                            <div class="form-group"><label>�/SLG</label><div>{{ detailTalent.category_strategy_slg || '-' }}</div></div>
+                            <div class="form-group"><label>��/��</label><div>{{ detailTalent.category_action_fight || '-' }}</div></div>
+                            <div class="form-group"><label>�/�</label><div>{{ detailTalent.category_sandbox_survival || '-' }}</div></div>
+                            <div class="form-group"><label>走��</label><div>{{ detailTalent.category_autochess || '-' }}</div></div>
+                            <div class="form-group"><label>伲�</label><div>{{ detailTalent.category_casual_puzzle || '-' }}</div></div>
+                            <div class="form-group"><label>伲�/派�</label><div>{{ detailTalent.category_party || '-' }}</div></div>
+                            <div class="form-group"><label>���</label><div>{{ detailTalent.category_etc || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
-                        <div class="form-section-title">重点游戏</div>
+                        <div class="form-section-title">�游</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>逆水寒</label><div>{{ detailTalent.key_game_1 || '-' }}</div></div>
-                            <div class="form-group"><label>燕云十六声</label><div>{{ detailTalent.key_game_2 || '-' }}</div></div>
-                            <div class="form-group"><label>一梦江湖</label><div>{{ detailTalent.key_game_3 || '-' }}</div></div>
-                            <div class="form-group"><label>阴阳师</label><div>{{ detailTalent.key_game_4 || '-' }}</div></div>
-                            <div class="form-group"><label>金铲铲之战</label><div>{{ detailTalent.key_game_5 || '-' }}</div></div>
-                            <div class="form-group"><label>蛋仔派对</label><div>{{ detailTalent.key_game_6 || '-' }}</div></div>
-                            <div class="form-group"><label>无尽冬日</label><div>{{ detailTalent.key_game_7 || '-' }}</div></div>
-                            <div class="form-group"><label>率土之滨</label><div>{{ detailTalent.key_game_8 || '-' }}</div></div>
-                            <div class="form-group"><label>王者荣耀</label><div>{{ detailTalent.key_game_9 || '-' }}</div></div>
-                            <div class="form-group"><label>英雄联盟</label><div>{{ detailTalent.key_game_10 || '-' }}</div></div>
-                            <div class="form-group"><label>明日之后</label><div>{{ detailTalent.key_game_11 || '-' }}</div></div>
-                            <div class="form-group"><label>萤火突击</label><div>{{ detailTalent.key_game_12 || '-' }}</div></div>
-                            <div class="form-group"><label>三角洲行动</label><div>{{ detailTalent.key_game_13 || '-' }}</div></div>
+                            <div class="form-group"><label>水�?/label><div>{{ detailTalent.key_game_1 || '-' }}</div></div>
+                            <div class="form-group"><label>��?/label><div>{{ detailTalent.key_game_2 || '-' }}</div></div>
+                            <div class="form-group"><label>����?/label><div>{{ detailTalent.key_game_3 || '-' }}</div></div>
+                            <div class="form-group"><label>���?/label><div>{{ detailTalent.key_game_4 || '-' }}</div></div>
+                            <div class="form-group"><label>����?/label><div>{{ detailTalent.key_game_5 || '-' }}</div></div>
+                            <div class="form-group"><label>�派�</label><div>{{ detailTalent.key_game_6 || '-' }}</div></div>
+                            <div class="form-group"><label>尽�</label><div>{{ detailTalent.key_game_7 || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.key_game_8 || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.key_game_9 || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.key_game_10 || '-' }}</div></div>
+                            <div class="form-group"><label>��</label><div>{{ detailTalent.key_game_11 || '-' }}</div></div>
+                            <div class="form-group"><label>���</label><div>{{ detailTalent.key_game_12 || '-' }}</div></div>
+                            <div class="form-group"><label>��洲��?/label><div>{{ detailTalent.key_game_13 || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
-                        <div class="form-section-title">其他信息</div>
+                        <div class="form-section-title">��信�</div>
                         <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="form-group"><label>深度游戏1</label><div>{{ detailTalent.deep_game_1 || '-' }}</div></div>
-                            <div class="form-group"><label>深度游戏2</label><div>{{ detailTalent.deep_game_2 || '-' }}</div></div>
-                            <div class="form-group"><label>深度游戏3</label><div>{{ detailTalent.deep_game_3 || '-' }}</div></div>
-                            <div class="form-group"><label>精通产品（1000h+）</label><div>{{ detailTalent.proficient_products || '-' }}</div></div>
-                            <div class="form-group"><label>熟悉产品（300h+）</label><div>{{ detailTalent.familiar_products || '-' }}</div></div>
-                            <div class="form-group" style="grid-column: span 4;"><label>其他游戏经历补充</label><div>{{ detailTalent.other_game_experience || '-' }}</div></div>
+                            <div class="form-group"><label>深度游�1</label><div>{{ detailTalent.deep_game_1 || '-' }}</div></div>
+                            <div class="form-group"><label>深度游�2</label><div>{{ detailTalent.deep_game_2 || '-' }}</div></div>
+                            <div class="form-group"><label>深度游�3</label><div>{{ detailTalent.deep_game_3 || '-' }}</div></div>
+                            <div class="form-group"><label>精�产��1000h+�?/label><div>{{ detailTalent.proficient_products || '-' }}</div></div>
+                            <div class="form-group"><label>产��?00h+�?/label><div>{{ detailTalent.familiar_products || '-' }}</div></div>
+                            <div class="form-group" style="grid-column: span 4;"><label>��游��补�</label><div>{{ detailTalent.other_game_experience || '-' }}</div></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" @click="showDetailModal = false">关闭</button>
+                    <button class="btn-secondary" @click="showDetailModal = false">��</button>
                 </div>
             </div>
         </div>
 
-        <!-- 批量导入模态框 -->
+        <!-- ��导�模� -->
 
         <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
 
@@ -1501,7 +1521,7 @@
 
                 <div class="modal-header">
 
-                    <h3>批量导入</h3>
+                    <h3>��导�</h3>
 
                     <button class="modal-close" @click="showImportModal = false">&times;</button>
 
@@ -1511,7 +1531,7 @@
 
                     <div class="form-group">
 
-                        <label>选择 Excel 文件</label>
+                        <label> Excel �</label>
 
                         <input type="file" accept=".xlsx,.xls" @change="handleFileSelect">
 
@@ -1519,7 +1539,7 @@
 
                     <p style="color: #666; font-size: 13px; margin-top: 12px;">
 
-                        请确保 Excel 文件的列名与系统字段对应。列名可以是中文或英文。
+                        请确�?Excel 件��系��段��以�丱��?
 
                     </p>
 
@@ -1527,9 +1547,9 @@
 
                 <div class="modal-footer">
 
-                    <button class="btn-secondary" @click="showImportModal = false">取消</button>
+                    <button class="btn-secondary" @click="showImportModal = false">�</button>
 
-                    <button class="btn-primary" @click="importTalents" :disabled="!importFile">导入</button>
+                    <button class="btn-primary" @click="importTalents" :disabled="!importFile">导�</button>
 
                 </div>
 
@@ -1540,62 +1560,62 @@
 
 
 
-        <!-- 用户账号弹窗 -->
+        <!-- ��账�弹� -->
         <div v-if="showUserModal" class="modal-overlay" @click.self="showUserModal=false">
             <div class="modal-content" style="max-width:480px;">
                 <div class="modal-header">
-                    <div class="modal-title">{{ editingUser ? '编辑账号' : '新建账号' }}</div>
+                    <div class="modal-title">{{ editingUser ? '���' : '�建�' }}</div>
                     <button class="modal-close" @click="showUserModal=false">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group"><label>用户名 *</label>
-                        <input v-model="userForm.username" type="text" :disabled="!!editingUser" placeholder="字母或拼音，小写" style="background:#f5f5f5;" />
+                    <div class="form-group"><label>���?*</label>
+                        <input v-model="userForm.username" type="text" :disabled="!!editingUser" placeholder="�毼���" style="background:#f5f5f5;" />
                     </div>
-                    <div class="form-group"><label>{{ editingUser ? '新密码（留空不修改）' : '密码 *' }}</label>
-                        <input v-model="userForm.password" type="password" :placeholder="editingUser ? '留空保持原密码' : '设置密码'" />
+                    <div class="form-group"><label>{{ editingUser ? '���空�俹�' : '� *' }}</label>
+                        <input v-model="userForm.password" type="password" :placeholder="editingUser ? '空���? : '设置�'" />
                     </div>
-                    <div class="form-group"><label>姓名</label>
-                        <input v-model="userForm.real_name" type="text" placeholder="真实姓名" />
+                    <div class="form-group"><label>�</label>
+                        <input v-model="userForm.real_name" type="text" placeholder="��" />
                     </div>
-                    <div class="form-group"><label>手机号</label>
-                        <input v-model="userForm.phone" type="tel" placeholder="手机号码" maxlength="11" />
+                    <div class="form-group"><label>��?/label>
+                        <input v-model="userForm.phone" type="tel" placeholder="���" maxlength="11" />
                     </div>
-                    <div class="form-group"><label>角色</label>
+                    <div class="form-group"><label>�</label>
                         <select v-model="userForm.role" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                            <option value="user">普通用户（兼职）</option>
-                            <option value="admin">管理员</option>
+                            <option value="user">�����?/option>
+                            <option value="admin">管��?/option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" @click="showUserModal=false">取消</button>
-                    <button class="btn-primary" @click="saveUser">{{ editingUser ? '保存修改' : '创建账号' }}</button>
+                    <button class="btn-secondary" @click="showUserModal=false">�</button>
+                    <button class="btn-primary" @click="saveUser">{{ editingUser ? '���' : '建账' }}</button>
                 </div>
             </div>
         </div>
 
-        <!-- 批量导入账号模态框 -->
+        <!-- ��导�账�模� -->
         <div v-if="showUserImportModal" class="modal-overlay" @click.self="showUserImportModal = false">
             <div class="modal" style="max-width:520px;">
                 <div class="modal-header">
-                    <h3>📥 批量导入账号</h3>
+                    <h3> ��导�账</h3>
                     <button class="modal-close" @click="showUserImportModal = false">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p style="color:#666;margin-bottom:16px;">请上传 Excel 文件（.xlsx / .xls），必需列：<strong>username</strong>、<strong>password</strong>，可选列：<strong>role</strong>（默认为 user）</p>
+                    <p style="color:#666;margin-bottom:16px;">请��?Excel 件�?xlsx / .xls����<strong>username</strong>�?strong>password</strong>��?strong>role</strong>��认为 user�?/p>
                     <div style="border:2px dashed #ddd;border-radius:8px;padding:32px;text-align:center;margin-bottom:16px;">
                         <input type="file" accept=".xlsx,.xls" @change="handleUserFileSelect" style="display:none;" id="userFileInput" />
                         <label for="userFileInput" style="cursor:pointer;">
-                            <div style="font-size:40px;margin-bottom:8px;">📄</div>
-                            <div style="color:#555;">{{ userImportFile ? userImportFile.name : '点击选择文件或拖拽到此处' }}</div>
+                            <div style="font-size:40px;margin-bottom:8px;"></div>
+                            <div style="color:#555;">{{ userImportFile ? userImportFile.name : '����件����' }}</div>
                         </label>
                     </div>
                     <div v-if="userImportError" style="color:#e53935;background:#ffebee;padding:10px 14px;border-radius:6px;margin-bottom:8px;font-size:14px;">{{ userImportError }}</div>
                     <div v-if="userImportResult" style="color:#2e7d32;background:#e8f5e9;padding:10px 14px;border-radius:6px;margin-bottom:8px;font-size:14px;">{{ userImportResult }}</div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" @click="showUserImportModal = false; userImportError=''; userImportResult='';">取消</button>
-                    <button class="btn-primary" @click="importUsers" :disabled="!userImportFile">导入</button>
+                    <button class="btn-secondary" @click="showUserImportModal = false; userImportError=''; userImportResult='';">�</button>
+                    <button class="btn-primary" @click="importUsers" :disabled="!userImportFile">导�</button>
                 </div>
             </div>
         </div>
@@ -1625,7 +1645,7 @@
 
             setup() {
 
-                // 状态
+                // ��?
 
                 const isLoggedIn = ref(false);
 
@@ -1672,8 +1692,8 @@
 
                 const activeTab = ref('list');
 
-                // 普通用户报名相关
-                // 初始化时直接从URL读取demand_id，避免异步时序问题
+                // �����?
+                // 姶���URL读�demand_id＿��步���?
                 const urlParams = new URLSearchParams(window.location.search);
                 const initDemandId = urlParams.get('demand_id');
                 const registerForm = ref({ name: '', phone: '', wechat: '', available_time: '', game_experience: '' });
@@ -1684,7 +1704,7 @@
                 const registerDemandId = ref(initDemandId);
                 let statusResultInitialized = false;
 
-                // 同步加载demand信息（setup阶段执行，避免onMounted只在首次加载时触发的时序问题）
+                // 步��demand信��setup����＿�onMounted��次�载�触����?
                 if (initDemandId) {
                     statusResult.value = null;
                     statusChecked.value = false;
@@ -1713,9 +1733,9 @@
                         showUserModal.value = false;
                         userForm.value = { username: '', password: '', real_name: '', phone: '', role: 'user' };
                         loadUsers();
-                        showToast(res.data.id ? '账号创建成功' : '保存成功');
+                        showToast(res.data.id ? '贷�建�' : '��');
                     } catch (e) {
-                        showToast('保存失败: ' + (e.response?.data?.error || e.message));
+                        showToast('��失败: ' + (e.response?.data?.error || e.message));
                     }
                 };
 
@@ -1723,7 +1743,7 @@
 
 
 
-                // 计算可见页码
+                // 计��页�
 
                 const visiblePages = computed(() => {
 
@@ -1745,7 +1765,7 @@
 
 
 
-                // 方法
+                // ��
 
                 const api = axios.create({ baseURL: '' });
 
@@ -1769,7 +1789,7 @@
                                 loadTalents();
                             } else {
                                 activeTab.value = 'register';
-                                // 登录后如果URL有demand_id，同步加载需求信息
+                                // ���URLdemand_id�步�载��信�?
                                 const params = new URLSearchParams(window.location.search);
                                 const demandId = params.get('demand_id');
                                 if (demandId) {
@@ -1787,7 +1807,7 @@
 
                     } catch (e) {
 
-                        loginError.value = '用户名或密码错误';
+                        loginError.value = '�����';
 
                     }
 
@@ -1927,13 +1947,13 @@
 
                         showModal.value = false;
 
-                        showToast('保存成功');
+                        showToast('��');
 
                         loadTalents();
 
                     } catch (e) {
 
-                        showToast('保存失败');
+                        showToast('��失败');
 
                     }
 
@@ -1943,19 +1963,19 @@
 
                 const deleteTalent = async (id) => {
 
-                    if (!confirm('确定要删除这条记录吗？')) return;
+                    if (!confirm('��覤����?)) return;
 
                     try {
 
                         await api.delete(`/api/talents/${id}`);
 
-                        showToast('删除成功');
+                        showToast('��');
 
                         loadTalents();
 
                     } catch (e) {
 
-                        showToast('删除失败');
+                        showToast('�失�');
 
                     }
 
@@ -1991,7 +2011,7 @@
 
                     } catch (e) {
 
-                        showToast('导入失败');
+                        showToast('导�失�');
 
                     }
 
@@ -2031,7 +2051,7 @@
 
                     } catch (e) {
 
-                        userImportError.value = e.response?.data?.error || '导入失败，请检查文件格式';
+                        userImportError.value = e.response?.data?.error || '导�失败�请��件��?;
 
                         userImportResult.value = '';
 
@@ -2053,15 +2073,15 @@
 
                         link.href = url;
 
-                        link.download = `人才库_${new Date().toISOString().slice(0,10)}.xlsx`;
+                        link.download = `人��_${new Date().toISOString().slice(0,10)}.xlsx`;
 
                         link.click();
 
-                        showToast('导出成功');
+                        showToast('导��');
 
                     } catch (e) {
 
-                        showToast('导出失败');
+                        showToast('导�失�');
 
                     }
 
@@ -2089,30 +2109,30 @@
 
                 const submitRegistration = async () => {
                 if (!registerDemandId.value) {
-                    registerMessage.value = '需求ID无效，请通过招募链接访问';
+                    registerMessage.value = '�ID�请�迾���';
                     return;
                 }
                 if (!currentDemand.value) {
-                    registerMessage.value = '需求信息加载中，请稍后刷新页面重试';
+                    registerMessage.value = '�信�载中�请��页���';
                     return;
                 }
                 try {
                     const res = await api.post('/api/demands/' + registerDemandId.value + '/apply', registerForm.value);
-                    registerMessage.value = res.data.message || '提交成功';
+                    registerMessage.value = res.data.message || '交�';
                     registerForm.value = { name: '', phone: '', wechat: '', available_time: '', game_experience: '' };
                     setTimeout(() => { registerMessage.value = ''; }, 3000);
                 } catch (e) {
-                    registerMessage.value = '提交失败: ' + (e.response?.data?.error || e.message);
+                    registerMessage.value = '交失�: ' + (e.response?.data?.error || e.message);
                 }
             };
 
             const checkMyStatus = async () => {
                 if (!statusPhone.value.trim()) {
-                    alert('请输入手机号');
+                    alert('请���');
                     return;
                 }
                 if (!registerDemandId.value) {
-                    statusResult.value = { found: false, status: '请通过招募链接访问后查询报名状态' };
+                    statusResult.value = { found: false, status: '请�迾�������? };
                     statusChecked.value = true;
                     return;
                 }
@@ -2123,7 +2143,7 @@
                     statusResult.value = res.data;
                     statusChecked.value = true;
                 } catch (e) {
-                    statusResult.value = { name: '查询失败', status: '请稍后重试' };
+                    statusResult.value = { name: '��失�', status: '请��? };
                     statusChecked.value = true;
                 }
             };
@@ -2152,7 +2172,7 @@
 
                     if (!newUser.value.username || !newUser.value.password) {
 
-                        showToast('请填写用户名和密码');
+                        showToast('请填�����?);
 
                         return;
 
@@ -2162,7 +2182,7 @@
 
                         const res = await api.post('/api/users', newUser.value);
 
-                        showToast('账号创建成功');
+                        showToast('贷�建�');
 
                         newUser.value = { username: '', password: '', role: 'user' };
 
@@ -2170,7 +2190,7 @@
 
                     } catch (e) {
 
-                        showToast(e.response?.data?.error || '创建失败');
+                        showToast(e.response?.data?.error || '建失�');
 
                     }
 
@@ -2180,19 +2200,19 @@
 
                 const deleteUser = async (id) => {
 
-                    if (!confirm('确定要删除这个账号吗？')) return;
+                    if (!confirm('��覤��贷��?)) return;
 
                     try {
 
                         await api.delete(`/api/users/${id}`);
 
-                        showToast('删除成功');
+                        showToast('��');
 
                         loadUsers();
 
                     } catch (e) {
 
-                        showToast(e.response?.data?.error || '删除失败');
+                        showToast(e.response?.data?.error || '�失�');
 
                     }
 
@@ -2200,15 +2220,16 @@
 
 
 
-                // ---- 需求管理状态 ----
+                // ---- �管��?----
                 const demands = ref([]);
                 const demandStatusFilter = ref('');
                 const currentModal = ref(null);  // null | 'demand-create' | 'demand-detail' | 'quote' | 'applications' | 'talent' | 'evaluate'
-                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'' });
+                const demandForm = ref({ title:'', parent_order:'', child_order:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', execution_time:'' });
                 const currentDemand = ref(null);
                 const quoteForm = ref({ part_time_wage:0, human_cost:0, note:'' });
                 const currentDemandId = ref(null);
                 const currentApplications = ref([]);
+                const currentDemandGongzhangYiti = ref(false);
                 const talentDetail = ref(null);
                 const evalForm = ref({ rating:5, comment:'' });
                 const selectedAppForEval = ref(null);
@@ -2216,12 +2237,12 @@
                 const demandMeta = ref({});
                 const currentTierOptions = ref([]);
                 const currentQuote = ref(null);
-                const statusLabels = ref({ pending:'待报价', quoting:'报价中', confirmed:'已确认', recruiting:'招募中', selecting:'选择人才', done:'已完成', cancelled:'已取消' });
+                const statusLabels = ref({ pending:'徥�?, quoting:'�价�?, confirmed:'已确�?, recruiting:'�?, selecting:'�人', done:'已��?, cancelled:'已��? });
                 const isAdmin = computed(() => currentUser.value && currentUser.value.role === 'admin');
                 const closeModal = () => { currentModal.value = null; };
 
 
-                // ---- 需求管理方法 ----
+                // ---- �管��?----
                 const loadDemandMeta = async () => {
                     try {
                         const res = await axios.get('/api/demand/meta');
@@ -2255,7 +2276,7 @@
                 };
                 const openDemandModal = (d) => {
                     if (d) {
-                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'' };
+                        demandForm.value = { id:d.id, title:d.title||'', parent_order:d.parent_order||'', child_order:d.child_order||'', description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'', execution_time:d.execution_time||'' };
                     } else {
                         demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'' };
                     }
@@ -2274,8 +2295,8 @@
                         await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id });
                         closeModal();
                         loadDemands();
-                        showToast('需求保存成功');
-                    } catch(e) { showToast('保存失败'); }
+                        showToast('����?);
+                    } catch(e) { showToast('��失败'); }
                 };
                 const calcAndSaveQuote = async (d) => {
                     try {
@@ -2286,8 +2307,8 @@
                         demandQuotes.value[d.id] = { total_quote: q.total, part_time_wage: q.part_time_wage, human_cost: q.human_cost };
                         await axios.put('/api/demands/' + d.id, { status: 'quoting' });
                         loadDemands();
-                        showToast('报价已计算并保存');
-                    } catch(e) { showToast('计算报价失败'); }
+                        showToast('�价已��并��');
+                    } catch(e) { showToast('计�价失败'); }
                 };
                 const openQuoteModal = (d) => {
                     currentDemand.value = d;
@@ -2301,51 +2322,63 @@
                         demandQuotes.value[currentDemand.value.id] = { total_quote: total, part_time_wage: quoteForm.value.part_time_wage, human_cost: quoteForm.value.human_cost };
                         closeModal();
                         loadDemands();
-                        showToast('报价已保存');
-                    } catch(e) { showToast('保存报价失败'); }
+                        showToast('�价已��?);
+                    } catch(e) { showToast('�孥价失败'); }
                 };
                 const confirmQuoteFromModal = async () => {
                     try {
                         await axios.post('/api/demands/' + currentDemand.value.id + '/quote/confirm');
                         try {
                             await axios.post('/api/demands/' + currentDemand.value.id + '/publish');
-                            showToast('报价已确认，招募信息已发送到企微群');
+                            showToast('�价已确认�信�已����?);
                         } catch(e2) {
-                            showToast('报价已确认，但企微发送失败，请手动发布');
+                            showToast('�价已确认����失败�请���?);
                         }
                         closeModal();
                         loadDemands();
-                    } catch(e) { showToast('确认失败'); }
+                    } catch(e) { showToast('�认失�'); }
                 };
                 const confirmQuote = async (id) => {
                     try {
                         await axios.post('/api/demands/' + id + '/quote/confirm');
                         try {
                             await axios.post('/api/demands/' + id + '/publish');
-                            showToast('报价已确认，招募信息已发送到企微群');
-                        } catch(e2) { showToast('报价已确认，但企微发送失败'); }
+                            showToast('�价已确认�信�已����?);
+                        } catch(e2) { showToast('�价已确认����失�?); }
                         loadDemands();
-                    } catch(e) { showToast('确认失败'); }
+                    } catch(e) { showToast('�认失�'); }
                 };
                 const openApplications = async (id) => {
                     currentDemandId.value = id;
-                    try { const res = await axios.get('/api/demands/' + id + '/applications'); currentApplications.value = res.data; currentModal.value = 'applications'; } catch(e) { showToast('加载报名列表失败'); }
+                    const demand = demands.value.find(d => d.id === id);
+                    currentDemandGongzhangYiti.value = !!(demand && demand.gongzhang_yiti);
+                    try { const res = await axios.get('/api/demands/' + id + '/applications'); currentApplications.value = res.data; currentModal.value = 'applications'; } catch(e) { showToast('载��表失�'); }
                 };
                 const viewTalent = async (talentId) => {
-                    try { const res = await axios.get('/api/talents/' + talentId); talentDetail.value = res.data; currentModal.value = 'talent'; } catch(e) { showToast('加载失败'); }
+                    try { const res = await axios.get('/api/talents/' + talentId); talentDetail.value = res.data; currentModal.value = 'talent'; } catch(e) { showToast('载失�'); }
                 };
                 const selectTalent = async (appId) => {
-                    try { await axios.post('/api/applications/' + appId + '/select'); openApplications(currentDemandId.value); showToast('已选中该人才'); } catch(e) { showToast('操作失败'); }
+                    try { await axios.post('/api/applications/' + appId + '/select'); openApplications(currentDemandId.value); showToast('已��该人�?); } catch(e) { showToast('�失败'); }
                 };
                 const rejectTalent = async (appId) => {
-                    try { await axios.post('/api/applications/' + appId + '/reject'); openApplications(currentDemandId.value); } catch(e) { showToast('操作失败'); }
+                    try { await axios.post('/api/applications/' + appId + '/reject'); openApplications(currentDemandId.value); } catch(e) { showToast('�失败'); }
                 };
                 const notifyGroupForDemand = async () => {
                     if (!currentDemandId.value) return;
                     try {
                         const res = await axios.post('/api/demands/' + currentDemandId.value + '/notify-group');
-                        showToast(res.data.message || '已发送企微群');
-                    } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
+                        showToast(res.data.message || '已����');
+                    } catch(e) { showToast(e.response?.data?.error || '失�?); }
+                };
+                const markGongzhangYiti = async () => {
+                    if (!currentDemandId.value) return;
+                    if (!confirm('ȷ�Ϲ������᣿���󽫱���������������΢��ť��ʧЧ����������ѡ֪ͨ��')) return;
+                    try {
+                        const res = await axios.post('/api/demands/' + currentDemandId.value + '/gongzhang-yiti');
+                        showToast(res.data.message || '�ѱ�ǹ�������');
+                        currentDemandGongzhangYiti.value = true;
+                        loadDemands();
+                    } catch(e) { showToast(e.response?.data?.error || '����ʧ��'); }
                 };
                 const openEvaluateModal = async (d) => {
                     currentDemandId.value = d.id;
@@ -2353,27 +2386,27 @@
                         const res = await axios.get('/api/demands/' + d.id + '/applications');
                         const selected = res.data.find(a => a.status === 'selected');
                         if (selected) { selectedAppForEval.value = selected; currentModal.value = 'evaluate'; }
-                        else { showToast('请先在报名列表中选中人才'); }
-                    } catch(e) { showToast('加载失败'); }
+                        else { showToast('请���表中�人�'); }
+                    } catch(e) { showToast('载失�'); }
                 };
                 const submitEvaluation = async () => {
-                    if (!selectedAppForEval.value || !evalForm.value.rating) { showToast('请填写评分'); return; }
+                    if (!selectedAppForEval.value || !evalForm.value.rating) { showToast('请填��?); return; }
                     try {
                         await axios.post('/api/demands/' + currentDemandId.value + '/evaluate', { talent_id: selectedAppForEval.value.talent_id, rating: evalForm.value.rating, comment: evalForm.value.comment, evaluated_by: currentUser.value?.id });
                         await axios.put('/api/demands/' + currentDemandId.value, { status: 'done' });
                         closeModal();
                         loadDemands();
-                        showToast('评价已提交');
-                    } catch(e) { showToast('提交失败'); }
+                        showToast('�价已�?);
+                    } catch(e) { showToast('交失�'); }
                 };
                 const publishToWecom = async (id) => {
-                    try { await axios.post('/api/demands/' + id + '/publish'); showToast('已发送到企微群'); } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
+                    try { await axios.post('/api/demands/' + id + '/publish'); showToast('已����?); } catch(e) { showToast(e.response?.data?.error || '失�?); }
                 };
                 const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
 
-                // ---- 初始化 ----
+                // ---- ��?----
                 onMounted(() => { 
-                    // 强制关闭所有弹窗（防止卡住）
+                    // 强���弹�Ｒ����?
                     currentModal.value = null;
                     loadDemandMeta(); 
                     // ESC key closes modals
@@ -2399,7 +2432,7 @@
 
 
 
-                // 检查登录状态
+                // 棥���?
 
                 onMounted(() => {
 
@@ -2508,4 +2541,4 @@
 </html>
 
 
-<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</button>
+<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧���弹�?>&#215;</button>
