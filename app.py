@@ -493,9 +493,6 @@ def init_db():
             CREATE TABLE IF NOT EXISTS demands (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
-                product_code TEXT,
-                parent_order TEXT,
-                child_order TEXT,
                 description TEXT,
                 requirements TEXT,
                 business_type TEXT NOT NULL,
@@ -510,10 +507,8 @@ def init_db():
                 budget_min REAL,
                 budget_max REAL,
                 deadline TEXT,
-                execution_time TEXT,
                 demander_id INTEGER,
                 tidanren TEXT,
-                gongzhang_yiti INTEGER DEFAULT 0,
                 status TEXT DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
@@ -581,9 +576,6 @@ def init_db():
             CREATE TABLE IF NOT EXISTS demands (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
-                product_code TEXT,
-                parent_order TEXT,
-                child_order TEXT,
                 description TEXT,
                 requirements TEXT,
                 business_type TEXT NOT NULL,
@@ -598,10 +590,8 @@ def init_db():
                 budget_min REAL,
                 budget_max REAL,
                 deadline TEXT,
-                execution_time TEXT,
                 demander_id INTEGER,
                 tidanren TEXT,
-                gongzhang_yiti INTEGER DEFAULT 0,
                 status TEXT DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -1278,17 +1268,14 @@ def create_demand():
     if DATABASE_URL:
         cursor.execute("""
             INSERT INTO demands (
-                title, product_code, parent_order, child_order,
-                description, requirements, business_type, tier,
+                title, description, requirements, business_type, tier,
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
-                deadline, execution_time,
-                demander_id, tidanren, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                deadline, demander_id, tidanren, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
         """, (
-            data.get('title', ''), data.get('product_code', ''), data.get('parent_order', ''), data.get('child_order', ''),
-            data.get('description', ''), data.get('requirements', ''),
+            data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
             data.get('quantity', 1),
             1 if data.get('brush_list') else 0,
@@ -1296,24 +1283,20 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('execution_time', ''),
-            data.get('demander_id'), data.get('tidanren'),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
         ))
         demand_id = cursor.lastrowid
     else:
         cursor.execute("""
             INSERT INTO demands (
-                title, product_code, parent_order, child_order,
-                description, requirements, business_type, tier,
+                title, description, requirements, business_type, tier,
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
-                deadline, execution_time,
-                demander_id, tidanren, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                deadline, demander_id, tidanren, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
         """, (
-            data.get('title', ''), data.get('product_code', ''), data.get('parent_order', ''), data.get('child_order', ''),
-            data.get('description', ''), data.get('requirements', ''),
+            data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
             data.get('quantity', 1),
             1 if data.get('brush_list') else 0,
@@ -1321,8 +1304,7 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('execution_time', ''),
-            data.get('demander_id'), data.get('tidanren'),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
         ))
         demand_id = cursor.lastrowid
     close_conn(conn)
@@ -1343,15 +1325,6 @@ def update_demand(demand_id):
             cursor.execute(
                 "UPDATE demands SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                 (data['status'], demand_id))
-    # 支持更新 gongzhang_yiti, product_code, parent_order, child_order, execution_time 等字段
-    allowed = ['gongzhang_yiti', 'product_code', 'parent_order', 'child_order', 'execution_time']
-    for key in allowed:
-        if key in data:
-            val = 1 if key == 'gongzhang_yiti' else data[key]
-            if DATABASE_URL:
-                cursor.execute(f"UPDATE demands SET {key} = %s, updated_at = NOW() WHERE id = %s", (val, demand_id))
-            else:
-                cursor.execute(f"UPDATE demands SET {key} = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (val, demand_id))
     close_conn(conn)
     return jsonify({'message': '更新成功'})
 
@@ -1663,15 +1636,13 @@ def select_talent(app_id):
     else:
         cursor.execute("UPDATE demand_applications SET status = 'selected', selected_at = CURRENT_TIMESTAMP WHERE id = ?", (app_id,))
 
-    # 获取需求标题、提单人、产品代号
+    # 获取需求标题
     if DATABASE_URL:
-        cursor.execute("SELECT title, tidanren, product_code FROM demands WHERE id = %s", (demand_id,))
+        cursor.execute("SELECT title FROM demands WHERE id = %s", (demand_id,))
     else:
-        cursor.execute("SELECT title, tidanren, product_code FROM demands WHERE id = ?", (demand_id,))
+        cursor.execute("SELECT title FROM demands WHERE id = ?", (demand_id,))
     demand_row = fetchone_dict(cursor)
     demand_title = demand_row['title'] if demand_row else '未知需求'
-    tidanren = demand_row.get('tidanren', '') if demand_row else ''
-    product_code = demand_row.get('product_code', '') if demand_row else ''
 
     # 获取所有已入选的兼职信息
     if DATABASE_URL:
@@ -1692,7 +1663,7 @@ def select_talent(app_id):
     close_conn(conn)
 
     # 发送企微执行群通知
-    notify_result = send_wecom_group_notification(demand_title, demand_title, tidanren, product_code, selected_list)
+    notify_result = send_wecom_group_notification(demand_title, demand_title, selected_list)
 
     return jsonify({'message': '已选中该人才', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
 
@@ -1715,18 +1686,16 @@ def notify_group_for_demand(demand_id):
     conn = get_db()
     cursor = conn.cursor()
 
-    # 获取需求标题、提单人、产品代号
+    # 获取需求标题
     if DATABASE_URL:
-        cursor.execute("SELECT title, tidanren, product_code FROM demands WHERE id = %s", (demand_id,))
+        cursor.execute("SELECT title FROM demands WHERE id = %s", (demand_id,))
     else:
-        cursor.execute("SELECT title, tidanren, product_code FROM demands WHERE id = ?", (demand_id,))
+        cursor.execute("SELECT title FROM demands WHERE id = ?", (demand_id,))
     demand_row = fetchone_dict(cursor)
     if not demand_row:
         close_conn(conn)
         return jsonify({'error': '需求不存在'}), 404
     demand_title = demand_row['title']
-    tidanren = demand_row.get('tidanren', '') or ''
-    product_code = demand_row.get('product_code', '') or ''
 
     # 获取所有已入选的兼职
     if DATABASE_URL:
@@ -1749,7 +1718,7 @@ def notify_group_for_demand(demand_id):
     if not selected_list:
         return jsonify({'error': '暂无已入选的兼职'}), 400
 
-    result = send_wecom_group_notification(demand_title, demand_title, tidanren, product_code, selected_list)
+    result = send_wecom_group_notification(demand_title, demand_title, selected_list)
     if 'error' in result:
         return jsonify({'error': result['error']}), 500
     return jsonify({'message': '已发送企微执行群', 'count': len(selected_list)})
@@ -1764,65 +1733,6 @@ def notify_group_for_demand(demand_id):
         cursor.execute("UPDATE demand_applications SET status = 'rejected' WHERE id = ?", (app_id,))
     close_conn(conn)
     return jsonify({'message': '已拒绝'})
-
-
-@app.route('/api/demands/<int:demand_id>/gongzhang-yiti', methods=['POST'])
-def gongzhang_yiti(demand_id):
-    """公账已提：标记需求结束，禁用企微发布，自动推送兼职评价"""
-    conn = get_db()
-    cursor = conn.cursor()
-
-    # 查询需求信息
-    if DATABASE_URL:
-        cursor.execute("SELECT title, tidanren, product_code, status FROM demands WHERE id = %s", (demand_id,))
-    else:
-        cursor.execute("SELECT title, tidanren, product_code, status FROM demands WHERE id = ?", (demand_id,))
-    demand_row = fetchone_dict(cursor)
-    if not demand_row:
-        close_conn(conn)
-        return jsonify({'error': '需求不存在'}), 404
-
-    # 更新状态为已完成，并标记公账已提
-    if DATABASE_URL:
-        cursor.execute(
-            "UPDATE demands SET status = 'done', gongzhang_yiti = 1, updated_at = NOW() WHERE id = %s",
-            (demand_id,))
-    else:
-        cursor.execute(
-            "UPDATE demands SET status = 'done', gongzhang_yiti = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            (demand_id,))
-
-    # 获取所有已入选的兼职
-    if DATABASE_URL:
-        cursor.execute("""
-            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
-            FROM demand_applications da
-            JOIN talents t ON da.talent_id = t.id
-            WHERE da.demand_id = %s AND da.status = 'selected'
-        """, (demand_id,))
-    else:
-        cursor.execute("""
-            SELECT t.name, t.phone, COALESCE(t.wechat, '') as wechat
-            FROM demand_applications da
-            JOIN talents t ON da.talent_id = t.id
-            WHERE da.demand_id = ? AND da.status = 'selected'
-        """, (demand_id,))
-    selected_list = fetchall_dicts(cursor)
-    close_conn(conn)
-
-    demand_title = demand_row['title']
-    tidanren = demand_row.get('tidanren', '') or ''
-    product_code = demand_row.get('product_code', '') or ''
-
-    # 发送入选通知（包含更多字段）
-    if selected_list:
-        send_wecom_group_notification(demand_title, demand_title, tidanren, product_code, selected_list)
-
-    return jsonify({
-        'message': '已标记公账已提，需求已结束',
-        'gongzhang_yiti': True,
-        'selected_count': len(selected_list)
-    })
 
 
 # ---- 评价 API ----
@@ -1918,40 +1828,26 @@ def send_wecom_message(content):
         return {'error': str(e)}
 
 
-def send_wecom_group_notification(title, demand_title, tidanren, product_code, selected_list):
+def send_wecom_group_notification(title, demand_title, selected_list):
     """入选后发送企微群通知（通过群机器人）
     selected_list: [{'name': '张三', 'phone': '138xxx', 'wechat': 'zhangsan'}]
     """
-    # 优先用 wecom_group_webhook_url，没有则复用 wecom_webhook_url（群机器人与个人机器人共享同一key）
-    wecom_group_url = get_setting('wecom_group_webhook_url') or get_setting('wecom_webhook_url')
+    wecom_group_url = get_setting('wecom_group_webhook_url')
     if not wecom_group_url:
-        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写 wecom_webhook_url'}
+        return {'error': '企微执行群 Webhook URL 未配置，请在系统设置中配置 wecom_group_webhook_url'}
 
     msg = f"### ✅ 入选通知\n"
-    msg += f"**产品代号：** {product_code or '待定'}\n"
-    msg += f"**提单人：** {tidanren or '待定'}\n"
-    msg += f"**需求标题：** {demand_title}\n"
+    msg += f"**需求：** {demand_title}\n"
     msg += f"**入选人数：** {len(selected_list)} 人\n\n"
     msg += "**入选名单：**\n"
     for i, t in enumerate(selected_list, 1):
         wechat_info = f"（微信号：{t['wechat']}）" if t.get('wechat') else "（暂无微信号）"
-        msg += f"{i}. **{t['name']}** | {t['phone']} {wechat_info}\n"
+        msg += f"{i}. {t['name']} | {t['phone']} {wechat_info}\n"
     msg += f"\n请相关执行负责人尽快拉群并通知以上人员。"
 
     try:
-        import urllib.request
-        import json as json_lib
-        payload = {'msgtype': 'markdown', 'markdown': {'content': msg}}
-        req = urllib.request.Request(
-            wecom_group_url,
-            data=json_lib.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            result = json_lib.loads(resp.read().decode('utf-8'))
-            if result.get('errcode') == 0:
-                return {'success': True}
-            return {'error': result.get('errmsg', '发送失败')}
+        resp = requests.post(wecom_group_url, json={'msgtype': 'markdown', 'markdown': {'content': msg}}, timeout=10)
+        return resp.json()
     except Exception as e:
         return {'error': str(e)}
 
@@ -1993,34 +1889,30 @@ def publish_to_wecom(demand_id):
     quote = quote if quote else None
 
     brush_str = "（刷名单）" if demand['brush_list'] else ""
+    msg_title = demand['title'] or ""
     msg_biz = demand['business_type'] or ""
     msg_tier = demand['tier'] or ""
     msg_qty = demand['quantity'] or 0
     msg_deadline = demand['deadline'] or "待定"
     msg_desc = demand['description'] or "无"
     msg_demander_tidan = demand.get('tidanren', '') or demand.get('demander_name', '')
-    product_code = demand.get('product_code', '') or "待定"
-    # 执行时间：优先用 execution_time，没有则默认未来3天
-    execution_time = demand.get('execution_time', '')
-    if not execution_time:
-        from datetime import timedelta
-        execution_time = (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
 
     if quote:
         pw = quote['part_time_wage'] or 0
-        unit_price_str = "%s元/单" % pw
+        hc = quote['human_cost'] or 0
+        total = quote['total_quote'] or 0
+        quote_str = "%s元（兼职工资%s元 + 人力成本%s元）" % (total, pw, hc)
     else:
-        unit_price_str = "待确认"
+        quote_str = "待确认"
 
     msg = "### New 需求发布\n"
-    msg += "**产品代号：** %s\n" % product_code
     msg += "**提单人：** %s\n" % msg_demander_tidan
+    msg += "**需求标题：** %s\n" % msg_title
     msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
     msg += "**数量：** %s\n" % msg_qty
-    msg += "**单价：** %s\n" % unit_price_str
-    msg += "**执行时间：** %s\n" % execution_time
     msg += "**截止日期：** %s\n" % msg_deadline
     msg += "**需求描述：** %s\n" % msg_desc
+    msg += "**报价：** %s\n" % quote_str
     msg += "---\n"
     msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
     msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
@@ -2139,31 +2031,6 @@ def init_wecom_settings():
             close_conn(conn)
 
 
-def migrate_add_missing_columns():
-    """Idempotent migration: 添加缺失字段到 demands 表"""
-    if not DATABASE_URL:
-        return  # SQLite 本地不需要
-    conn = get_db()
-    cursor = conn.cursor()
-    new_cols = {
-        'product_code': 'TEXT',
-        'parent_order': 'TEXT',
-        'child_order': 'TEXT',
-        'execution_time': 'TEXT',
-        'gongzhang_yiti': 'INTEGER DEFAULT 0',
-    }
-    for col, col_type in new_cols.items():
-        try:
-            cursor.execute(f"ALTER TABLE demands ADD COLUMN {col} {col_type}")
-            conn.commit()
-        except psycopg2.errors.DuplicateColumn:
-            conn.rollback()
-        except Exception:
-            conn.rollback()
-    close_conn(conn)
-
-
 if __name__ == '__main__':
-    migrate_add_missing_columns()
     init_wecom_settings()
     app.run(host='0.0.0.0', port=5000, debug=True)
