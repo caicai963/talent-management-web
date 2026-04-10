@@ -2100,3 +2100,7 @@ if __name__ == '__main__':
     migrate_add_missing_columns()
     init_wecom_settings()
     app.run(host='0.0.0.0', port=5000, debug=True)
+else:
+    with app.app_context():
+        migrate_add_missing_columns()
+        init_wecom_settings()
