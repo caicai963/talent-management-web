@@ -4627,11 +4627,10 @@ def gongzhang_yiti_email(demand_id):
                 lines.append("")
                 for t in (selected_list or []):
                     name = t.get('name') or "未知"
-                    rid = t.get('id') or 0
                     lines.append(name + "：1-5分（评分）+评语（填空，非必答）")
-                    lines.append("    评价链接：" + base_url + "/evaluate?demand_id=" + str(demand_id) + "&talent_id=" + str(rid))
                     lines.append("")
                 tb = "\n".join(lines)
+                tb += "\n评价链接：" + base_url + "/evaluate?demand_id=" + str(demand_id) + " 点此评价"
                 hl = ["<html><body>",
                       "<p>哈喽" + demander_name + "：</p>",
                       "<p>您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价</p>"]
@@ -4640,10 +4639,10 @@ def gongzhang_yiti_email(demand_id):
                 hl.append("<ul>")
                 for t in (selected_list or []):
                     name = t.get('name') or "未知"
-                    rid = t.get('id') or 0
                     hl.append("<li>" + name + "：1-5分（评分）+评语（填空，非必答）</li>")
-                    hl.append("<li><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "&talent_id=" + str(rid) + "'>评价链接</a></li>")
-                hl.append("</ul></body></html>")
+                hl.append("</ul>")
+                hl.append("<p><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "'>点此评价</a></p>")
+                hl.append("</body></html>")
                 hb = "".join(hl)
                 ok, r = send_email(de, subj, hb, tb)
                 if not ok:
