@@ -2287,7 +2287,7 @@
                 };
                 const saveDemand = async () => {
                     try {
-                        await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id });
+                        await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id, tidanren: currentUser.value?.username });
                         closeModal();
                         loadDemands();
                         showToast('需求保存成功');
@@ -2303,7 +2303,7 @@
                 };;
                 const saveDemandAndGongzhang = async () => {
                     try {
-                        const res = await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id });
+                        const res = await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id, tidanren: currentUser.value?.username });
                         const demandId = res.data?.id || demandForm.value.id;
                         if (demandId) {
                             await axios.post('/api/demands/' + demandId + '/gongzhang-yiti');
