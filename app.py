@@ -1955,14 +1955,13 @@ def publish_to_wecom(demand_id):
 
 
         msg = "### New 需求发布\n"
-        msg += "**产品代号：** %s\n" % product_code
         msg_demander_tidan = demand.get('tidanren') or demand.get('demander_name', '')
         msg += "**提单人：** %s\n" % msg_demander_tidan
-        msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
+        msg += "**业务类型：** %s\n" % msg_biz
         msg += "**数量：** %s\n" % msg_qty
         if quote:
             pw = quote.get('part_time_wage', 0) or 0
-            msg += "**单价：** %s元/单\n" % pw
+            msg += "**单价：** %s元/样本\n" % pw
         msg += "**执行时间：** %s\n" % execution_time
         msg += "**截止日期：** %s\n" % msg_deadline
         msg += "**需求描述：** %s\n" % msg_desc
