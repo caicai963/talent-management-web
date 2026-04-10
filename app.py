@@ -1950,6 +1950,7 @@ def publish_to_wecom(demand_id):
 
         msg = "### New 需求发布\n"
         msg += "**产品代号：** %s\n" % product_code
+        msg_demander_tidan = demand.get('tidanren') or demand.get('demander_name', '')
         msg += "**提单人：** %s\n" % msg_demander_tidan
         msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
         msg += "**数量：** %s\n" % msg_qty
