@@ -585,6 +585,7 @@
 
                                 <td>{{ u.role }}</td>
 
+                                <td>{{ u.email || '-' }}</td>
                                 <td>{{ u.created_at || '-' }}</td>
 
                                 <td><button class="btn-danger" @click="deleteUser(u.id)">删除</button></td>
@@ -593,7 +594,7 @@
 
                             <tr v-if="systemUsers.length === 0">
 
-                                <td colspan="5" class="empty-state">暂无账号</td>
+                                <td colspan="6" class="empty-state">暂无账号</td>
 
                             </tr>
 
@@ -640,6 +641,14 @@
                                 <option value="admin">管理员</option>
 
                             </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>电字</label>
+
+                            <input v-model="newUser.email" type="email" placeholder="输入电字">
 
                         </div>
 
@@ -1716,7 +1725,7 @@
 
                 const systemUsers = ref([]);
 
-                const newUser = ref({ username: '', password: '', role: 'user' });
+                const newUser = ref({ username: '', password: '', role: 'user', email: '' });
 
                 const showUserModal = ref(false);
                 const editingUser = ref(null);
@@ -2179,7 +2188,7 @@
 
                         showToast('账号创建成功');
 
-                        newUser.value = { username: '', password: '', role: 'user' };
+                        newUser.value = { username: '', password: '', role: 'user', email: '' };
 
                         loadUsers();
 
