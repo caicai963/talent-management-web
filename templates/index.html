@@ -437,7 +437,7 @@
 
                                 <td>{{ talent.graduate_year || '-' }}</td>
 
-                                <td>{{ talent.phone || '-' }}</td>
+                                <td v-if="currentUser.role !== 'demander'">{{ talent.phone || '-' }}</td>
 
                                 <td>{{ talent.month_rating || '-' }}</td>
 
