@@ -1947,6 +1947,12 @@ def publish_to_wecom(demand_id):
             from datetime import datetime, timedelta
             execution_time = (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
 
+        msg_biz = demand.get('business_type') or ''
+        msg_tier = demand.get('tier') or ''
+        msg_qty = demand.get('quantity') or 0
+        msg_deadline = demand.get('deadline') or ''
+        msg_desc = demand.get('description') or ''
+
 
         msg = "### New 需求发布\n"
         msg += "**产品代号：** %s\n" % product_code
