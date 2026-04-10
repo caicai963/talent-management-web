@@ -1899,70 +1899,86 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 @app.route('/api/demands/<int:demand_id>/publish', methods=['POST'])
 def publish_to_wecom(demand_id):
-    wecom_url = get_setting('wecom_webhook_url')
-    if not wecom_url:
-        return jsonify({'error': '企微 Webhook URL 未配置'}), 400
+    try:
+        wecom_url = get_setting('wecom_webhook_url')
+        if not wecom_url:
+            return jsonify({'error': '企微 Webhook URL 未配置'}), 400
 
-    conn = get_db()
-    cursor = conn.cursor()
-    if DATABASE_URL:
-        cursor.execute("""
-            SELECT d.*, u.username as demander_name
-            FROM demands d
-            LEFT JOIN users u ON d.demander_id = u.id
-            WHERE d.id = %s
-        """, (demand_id,))
-    else:
-        cursor.execute("""
-            SELECT d.*, u.username as demander_name
-            FROM demands d
-            LEFT JOIN users u ON d.demander_id = u.id
-            WHERE d.id = ?
-        """, (demand_id,))
-    demand = fetchone_dict(cursor)
-    if not demand:
+
+        conn = get_db()
+        cursor = conn.cursor()
+        if DATABASE_URL:
+            cursor.execute("""
+                SELECT d.*, u.username as demander_name
+                FROM demands d
+                LEFT JOIN users u ON d.demander_id = u.id
+                WHERE d.id = %s
+            """, (demand_id,))
+        else:
+            cursor.execute("""
+                SELECT d.*, u.username as demander_name
+                FROM demands d
+                LEFT JOIN users u ON d.demander_id = u.id
+                WHERE d.id = ?
+            """, (demand_id,))
+        demand = fetchone_dict(cursor)
+        if not demand:
+            close_conn(conn)
+            return jsonify({'error': '需求不存在'}), 404
+
+
+        if DATABASE_URL:
+            cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = %s AND status = 'confirmed'", (demand_id,))
+        else:
+            cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = ? AND status = 'confirmed'", (demand_id,))
+        quote = fetchone_dict(cursor)
         close_conn(conn)
-        return jsonify({'error': '需求不存在'}), 404
 
-    if DATABASE_URL:
-        cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = %s AND status = 'confirmed'", (demand_id,))
-    else:
-        cursor.execute("SELECT * FROM demand_quotes WHERE demand_id = ? AND status = 'confirmed'", (demand_id,))
-    quote = fetchone_dict(cursor)
-    close_conn(conn)
+
+        quote = quote if quote else None
 
-    quote = quote if quote else None
+
+        brush_str = "（刷名单）" if demand['brush_list'] else ""
 
-    brush_str = "（刷名单）" if demand['brush_list'] else ""
-
-    product_code = demand.get('product_code') or demand.get('title', '')
-    execution_time = demand.get('execution_time') or ''
-    if not execution_time:
-        from datetime import datetime, timedelta
-        execution_time = (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
-
-    msg = "### New 需求发布\n"
-    msg += "**产品代号：** %s\n" % product_code
-    msg += "**提单人：** %s\n" % msg_demander_tidan
-    msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
-    msg += "**数量：** %s\n" % msg_qty
-    if quote:
-        pw = quote.get('part_time_wage', 0) or 0
-        msg += "**单价：** %s元/单\n" % pw
-    msg += "**执行时间：** %s\n" % execution_time
-    msg += "**截止日期：** %s\n" % msg_deadline
-    msg += "**需求描述：** %s\n" % msg_desc
-    msg += "---\n"
-    msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
-    msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
-
-    result = send_wecom_message(msg)
-    if 'error' in result:
-        return jsonify(result), 500
-    return jsonify({'message': '已发送到企微群', 'result': result})
+
+        product_code = demand.get('product_code') or demand.get('title', '')
+        execution_time = demand.get('execution_time') or ''
+        if not execution_time:
+            from datetime import datetime, timedelta
+            execution_time = (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
+
+
+        msg = "### New 需求发布\n"
+        msg += "**产品代号：** %s\n" % product_code
+        msg += "**提单人：** %s\n" % msg_demander_tidan
+        msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
+        msg += "**数量：** %s\n" % msg_qty
+        if quote:
+            pw = quote.get('part_time_wage', 0) or 0
+            msg += "**单价：** %s元/单\n" % pw
+        msg += "**执行时间：** %s\n" % execution_time
+        msg += "**截止日期：** %s\n" % msg_deadline
+        msg += "**需求描述：** %s\n" % msg_desc
+        msg += "---\n"
+        msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
+        msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
+
+
+        result = send_wecom_message(msg)
+        if 'error' in result:
+            return jsonify(result), 500
+        return jsonify({'message': '已发送到企微群', 'result': result})
+
+
+
+
+    # ---- 人才端：我的报名 & 我的评价 ----
 
 
-# ---- 人才端：我的报名 & 我的评价 ----
+    except Exception as e:
+        import traceback
+        return jsonify({'error': 'Publish failed: ' + str(e), 'trace': traceback.format_exc()[-500:]}), 500
+
 
 @app.route('/api/talents/<int:talent_id>/my-applications', methods=['GET'])
 def my_applications(talent_id):
