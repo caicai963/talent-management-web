@@ -4602,17 +4602,49 @@ def gongzhang_yiti_email(demand_id):
         selected_list = fetchall_dicts(cursor)
         try:
             de = ""
+            demander_name = ""
             if demand.get('demander_id'):
-                cursor.execute("SELECT email FROM users WHERE id = %s", (demand.get('demander_id'),))
+                cursor.execute("SELECT email, username FROM users WHERE id = %s", (demand.get('demander_id'),))
                 ur = fetchone_dict(cursor)
-                if ur and ur.get('email'):
-                    de = ur['email']
+                if ur:
+                    de = ur.get('email') or ""
+                    demander_name = ur.get('username') or ""
             if de:
                 dt = demand.get('title') or demand.get('product_code') or ""
-                tn = ", ".join([t['name'] for t in selected_list]) if selected_list else "none"
-                subj = "[needs completion] " + dt
-                tb = "Your need " + dt + " completed. Selected " + str(len(selected_list)) + " persons: " + tn + " Rate: http://talent-management-web.onrender.com/evaluate?demand_id=" + str(demand_id)
-                hb = "<html><body><h3>Demand Completed</h3><p>Your need " + dt + " is done.</p><p>Selected " + str(len(selected_list)) + " persons: " + tn + "</p><p><a href='http://talent-management-web.onrender.com/evaluate?demand_id=" + str(demand_id) + "'>Rate here</a></p></body></html>"
+                biz = demand.get('biz_type') or demand.get('business_type') or ""
+                parent_oid = demand.get('parent_order') or ""
+                base_url = "http://talent-management-web.onrender.com"
+                subj = dt + " 兼职需求已完结，请评价"
+                # Plain text email
+                po_line = ("【父单单号】" + parent_oid + " " if parent_oid else "")
+                lines = [
+                    "哈喽" + demander_name + "：",
+                    "您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价",
+                    "",
+                ]
+                if biz:
+                    lines.append("【业务类型】" + biz)
+                lines.append("")
+                for t in (selected_list or []):
+                    name = t.get('name') or "未知"
+                    rid = t.get('id') or 0
+                    lines.append(name + "：1-5分（评分）+评语（填空，非必答）")
+                    lines.append("    评价链接：" + base_url + "/evaluate?demand_id=" + str(demand_id) + "&talent_id=" + str(rid))
+                    lines.append("")
+                tb = "\n".join(lines)
+                hl = ["<html><body>",
+                      "<p>哈喽" + demander_name + "：</p>",
+                      "<p>您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价</p>"]
+                if biz:
+                    hl.append("<p>【业务类型】" + biz + "</p>")
+                hl.append("<ul>")
+                for t in (selected_list or []):
+                    name = t.get('name') or "未知"
+                    rid = t.get('id') or 0
+                    hl.append("<li>" + name + "：1-5分（评分）+评语（填空，非必答）</li>")
+                    hl.append("<li><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "&talent_id=" + str(rid) + "'>评价链接</a></li>")
+                hl.append("</ul></body></html>")
+                hb = "".join(hl)
                 ok, r = send_email(de, subj, hb, tb)
                 if not ok:
                     print("Email failed:", r)
