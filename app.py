@@ -10553,19 +10553,6 @@ def migrate_add_missing_columns():
 
 
 
-    close_conn(conn)
-
-
-
-
-
-
-
-
-
-
-
-
     user_cols = {
         'email': 'TEXT',
     }
