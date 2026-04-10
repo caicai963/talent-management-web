@@ -1837,10 +1837,10 @@ def get_setting(key, default=''):
 
 
 def send_wecom_message(content):
-    wecom_url = get_setting('wecom_webhook_url')
-    if not wecom_url:
-        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
     try:
+        wecom_url = get_setting('wecom_webhook_url')
+        if not wecom_url:
+            return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
         import urllib.request
         import json as json_lib
         payload = {
