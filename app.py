@@ -10573,7 +10573,13 @@ def migrate_add_missing_columns():
     for col, col_type in user_cols.items():
         try:
             if DATABASE_URL:
-                cursor.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
+                cursor.execute("""
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name = 'users' AND column_name = %s LIMIT 1
+                """, (col,))
+                exists = cursor.fetchone() is not None
+                if not exists:
+                    cursor.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
             else:
                 cursor.execute(f"PRAGMA table_info(users)")
                 existing_cols = [row['name'] for row in fetchall_dicts(cursor)]
