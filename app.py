@@ -3548,7 +3548,7 @@ def system_status():
 
 
 
-        cursor.execute("SELECT id, username, role FROM users")
+        cursor.execute("SELECT id, username, role, email FROM users")
 
 
 
@@ -3558,7 +3558,7 @@ def system_status():
 
 
 
-        cursor.execute("SELECT id, username, role FROM users")
+        cursor.execute("SELECT id, username, role, email FROM users")
 
 
 
