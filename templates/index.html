@@ -2247,6 +2247,7 @@
                     try {
                         const params = {};
                         if (demandStatusFilter.value) params.status = demandStatusFilter.value;
+                        if (currentUser.value && currentUser.value.role === 'demander') params.tidanren = currentUser.value.username;
                         const res = await axios.get('/api/demands', { params });
                         demands.value = res.data.data || [];
                         for (const d of demands.value) {

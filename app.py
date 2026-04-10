@@ -1228,33 +1228,58 @@ def get_demands():
         per_page = request.args.get('per_page', 20, type=int)
         status = request.args.get('status', '')
         role = request.args.get('role', '')
+        tidanren = request.args.get('tidanren', '')
 
         conn = get_db()
         cursor = conn.cursor()
 
         if DATABASE_URL:
             if status:
-                cursor.execute("SELECT COUNT(*) FROM demands WHERE status = %s", (status,))
+                if tidanren:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE status = %s AND tidanren = %s", (status, tidanren))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE status = %s", (status,))
             else:
-                cursor.execute("SELECT COUNT(*) FROM demands")
+                if tidanren:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE tidanren = %s", (tidanren,))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM demands")
         else:
             if status:
-                cursor.execute("SELECT COUNT(*) FROM demands WHERE status = ?", (status,))
+                if tidanren:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE status = ? AND tidanren = ?", (status, tidanren))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE status = ?", (status,))
             else:
-                cursor.execute("SELECT COUNT(*) FROM demands")
+                if tidanren:
+                    cursor.execute("SELECT COUNT(*) FROM demands WHERE tidanren = ?", (tidanren,))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM demands")
 
         total = cursor.fetchone()[0]
 
         if DATABASE_URL:
             if status:
-                cursor.execute(f"SELECT * FROM demands WHERE status = %s ORDER BY id DESC LIMIT %s OFFSET %s", (status, per_page, (page-1)*per_page))
+                if tidanren:
+                    cursor.execute(f"SELECT * FROM demands WHERE status = %s AND tidanren = %s ORDER BY id DESC LIMIT %s OFFSET %s", (status, tidanren, per_page, (page-1)*per_page))
+                else:
+                    cursor.execute(f"SELECT * FROM demands WHERE status = %s ORDER BY id DESC LIMIT %s OFFSET %s", (status, per_page, (page-1)*per_page))
             else:
-                cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT %s OFFSET %s", (per_page, (page-1)*per_page))
+                if tidanren:
+                    cursor.execute(f"SELECT * FROM demands WHERE tidanren = %s ORDER BY id DESC LIMIT %s OFFSET %s", (tidanren, per_page, (page-1)*per_page))
+                else:
+                    cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT %s OFFSET %s", (per_page, (page-1)*per_page))
         else:
             if status:
-                cursor.execute(f"SELECT * FROM demands WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?", (status, per_page, (page-1)*per_page))
+                if tidanren:
+                    cursor.execute(f"SELECT * FROM demands WHERE status = ? AND tidanren = ? ORDER BY id DESC LIMIT ? OFFSET ?", (status, tidanren, per_page, (page-1)*per_page))
+                else:
+                    cursor.execute(f"SELECT * FROM demands WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?", (status, per_page, (page-1)*per_page))
             else:
-                cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, (page-1)*per_page))
+                if tidanren:
+                    cursor.execute(f"SELECT * FROM demands WHERE tidanren = ? ORDER BY id DESC LIMIT ? OFFSET ?", (tidanren, per_page, (page-1)*per_page))
+                else:
+                    cursor.execute(f"SELECT * FROM demands ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, (page-1)*per_page))
 
         rows = fetchall_dicts(cursor)
         close_conn(conn)
