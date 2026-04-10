@@ -10573,16 +10573,7 @@ def migrate_add_missing_columns():
     for col, col_type in user_cols.items():
         try:
             if DATABASE_URL:
-                # Check pg_attribute for column existence (more reliable than information_schema for Supabase)
-                cursor.execute("""
-                    SELECT 1 FROM pg_attribute
-                    WHERE attrelid = 'users'::regclass
-                    AND attname = %s
-                    AND NOT attisdropped
-                """, (col,))
-                exists = cursor.fetchone() is not None
-                if not exists:
-                    cursor.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
             else:
                 cursor.execute(f"PRAGMA table_info(users)")
                 existing_cols = [row['name'] for row in fetchall_dicts(cursor)]
@@ -10591,7 +10582,11 @@ def migrate_add_missing_columns():
             conn.commit()
         except Exception as mig_err:
             conn.rollback()
-            print(f"Migration note for users.{col}: {mig_err}")
+            err_str = str(mig_err)
+            if 'already exists' in err_str or 'duplicate' in err_str.lower():
+                pass  # column already exists, ignore
+            else:
+                print(f"Migration error for users.{col}: {mig_err}")
     close_conn(conn)
 
 
