@@ -233,7 +233,7 @@
 
                 <div class="header-right">
 
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : role === 'demander' ? '需求方' : '兼职' }})</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : currentUser.role === 'demander' ? '需求方' : '兼职' }})</span>
 
                     <button class="logout-btn" @click="handleLogout">退出</button>
 
