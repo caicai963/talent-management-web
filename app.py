@@ -4603,6 +4603,7 @@ def gongzhang_yiti_email(demand_id):
         try:
             de = ""
             demander_name = ""
+            print("DEBUG email: demand_id=%s, demander_id=%s" % (demand_id, demand.get('demander_id')))
             if demand.get('demander_id'):
                 cursor.execute("SELECT email, username FROM users WHERE id = %s", (demand.get('demander_id'),))
                 ur = fetchone_dict(cursor)
