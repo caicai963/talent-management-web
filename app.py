@@ -4578,10 +4578,6 @@ def send_email(to_email, subject, html_body, text_body):
         srv.sendmail(su, [to_email], msg.as_string())
         srv.quit()
         return True, "sent"
-    except smtplib.SMTPAuthError as ex:
-        return False, "auth failed: " + str(ex)
-    except smtplib.SMTPException as ex:
-        return False, "SMTP error: " + str(ex)
     except Exception as ex:
         return False, str(ex)
 
