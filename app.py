@@ -4551,11 +4551,11 @@ def send_email(to_email, subject, html_body, text_body):
     import smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
-    sh = get_setting("smtp_host", "smtp.mesg.corp.netease.com")
+    sh = get_setting("smtp_host", "smtp.163.com")
     sp = int(get_setting("smtp_port", "465"))
-    su = get_setting("smtp_user", "wb.liujing23@mesg.corp.netease.com")
-    sppw = get_setting("smtp_password", "rvxEYc6sa7eTX5wn")
-    ss = get_setting("smtp_sender", "\xe9\x9c\x80\xe6\xb1\x82\xe7\xae\xa1\xe7\x90\x86\xe5\xb9\xb3\xe5\x8f\xb0")
+    su = get_setting("smtp_user", "j9415821108@163.com")
+    sppw = get_setting("smtp_password", "XTT5B8AiKmxBkfHE")
+    ss = get_setting("smtp_sender", "j9415821108@163.com")
     us = get_setting("smtp_use_ssl", "true").lower() == "true"
     if not to_email or not sh:
         return False, "no config"
