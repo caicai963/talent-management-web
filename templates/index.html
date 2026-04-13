@@ -827,44 +827,43 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-top:20px;">
                         <button class="btn-dangerous" @click="markGongzhangYiti(currentDemand.id)" style="background:#e74c3c;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">公账已提</button>
-                        <button class="btn-warning" @click="openEvalForDemand(currentDemand.id)" style="background:#f39c12;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">�}职评价</button>
+                        <button class="btn-warning" @click="openEvalForDemand(currentDemand.id)" style="background:#f39c12;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">兼职评价</button>
                         <button class="btn-secondary" @click="closeModal()">关闭</button>
                     </div>
                 </div>
             </div>
 
-            
-            <!-- �}职评价弹窗 -->
-            <div v-if="currentModal === 'eval'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:80vh;overflow-y:auto;">
-                    <h3 style="margin-bottom:16px;">�}职评价</h3>
-                    <div v-if="evalDemandId" style="margin-bottom:16px;font-size:13px;color:#666;">
-                        选中了 <strong>{{ selectedForEval.length }}</strong> 人
-                    </div>
-                    <div v-for="app in selectedForEval" :key="app.id" style="border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:12px;">
-                        <div style="font-weight:bold;margin-bottom:12px;">{{ app.name }} <span style="color:#888;font-size:12px;">{{ app.phone }}</span></div>
-                        <div style="margin-bottom:12px;">
-                            <div style="font-size:13px;color:#555;">态度 <span style="color:#aaa;font-size:12px;">(管理评, 权重：30%)</span></div>
-                            <div style="display:flex;gap:4px;margin-top:4px;">
-                                <span v-for="s in [1,2,3,4,5]" :key="s" @click="setAttitudeRating(app.id, s)"
-                                    :style="{cursor:'pointer',fontSize:'22px',color: getAttitudeRating(app.id) >= s ? '#ff9800' : '#ddd'}">★</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="font-size:13px;color:#555;">质量 <span style="color:#aaa;font-size:12px;">(需求方评, 权重：70%)</span></div>
-                            <div style="display:flex;gap:4px;margin-top:4px;">
-                                <span v-for="s in [1,2,3,4,5]" :key="s" @click="setQualityRating(app.id, s)"
-                                    :style="{cursor:'pointer',fontSize:'22px',color: getQualityRating(app.id) >= s ? '#ff9800' : '#ddd'}">★</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
-                        <button class="btn-secondary" @click="closeModal()">取消</button>
-                        <button class="btn-primary" @click="submitDemandEvaluations">提交评价</button>
-                    </div>
-                </div>
-            </div>
-
+            
+            <!-- 兼职评价弹窗 -->
+            <div v-if="currentModal === 'eval'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:80vh;overflow-y:auto;">
+                <h3 style="margin-bottom:16px;">兼职评价</h3>
+                <div v-if="evalDemandId" style="margin-bottom:16px;font-size:13px;color:#666;">
+                    选中了 <strong>{{ selectedForEval.length }}</strong> 人
+                </div>
+                <div v-for="app in selectedForEval" :key="app.id" style="border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:12px;">
+                    <div style="font-weight:bold;margin-bottom:12px;">{{ app.name }} <span style="color:#888;font-size:12px;">{{ app.phone }}</span></div>
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:13px;color:#555;">态度 <span style="color:#aaa;font-size:12px;">(管理员评, 权重：30%)</span></div>
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                            <span v-for="s in [1,2,3,4,5]" :key="s" @click="setAttitudeRating(app.id, s)"
+                                :style="{cursor:'pointer',fontSize:'22px',color: getAttitudeRating(app.id) >= s ? '#ff9800' : '#ddd'}">⭐</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;color:#555;">质量 <span style="color:#aaa;font-size:12px;">(需求方评, 权重：70%)</span></div>
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                            <span v-for="s in [1,2,3,4,5]" :key="s" @click="setQualityRating(app.id, s)"
+                                :style="{cursor:'pointer',fontSize:'22px',color: getQualityRating(app.id) >= s ? '#ff9800' : '#ddd'}">⭐</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
+                    <button class="btn-secondary" @click="closeModal()">取消</button>
+                    <button class="btn-primary" @click="submitDemandEvaluations">提交评价</button>
+                </div>
+                </div>
+            </div>
 <!-- 报价确认弹窗 --><!-- 报价确认弹窗 -->
             <div v-if="currentModal === 'quote'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:500px;">
@@ -2448,44 +2447,42 @@
                         showToast('评价已提交');
                     } catch(e) { showToast('提交失败'); }
                 };
-                // ---- �}职双维评价 ----
-                const openEvalForDemand = async (demandId) => {
-                    evalDemandId.value = demandId;
-                    attitudeRatings.value = {};
-                    qualityRatings.value = {};
-                    try {
-                        const res = await axios.get(`/api/demands/${demandId}/applications`);
-                        selectedForEval.value = (res.data || []).filter(a => a.status === 'selected');
-                        currentModal.value = 'eval';
-                    } catch(e) { showToast('加载已选人失败'); }
-                };
-                const setAttitudeRating = (appId, rating) => { attitudeRatings.value[appId] = rating; };
-                const setQualityRating = (appId, rating) => { qualityRatings.value[appId] = rating; };
-                const getAttitudeRating = (appId) => attitudeRatings.value[appId] || 0;
-                const getQualityRating = (appId) => qualityRatings.value[appId] || 0;
-                const submitDemandEvaluations = async () => {
-                    if (!selectedForEval.value.length) { showToast('沠有选中的�}职'); return; }
-                    // check all have both ratings
-                    for (const app of selectedForEval.value) {
-                        if (!attitudeRatings.value[app.id] || !qualityRatings.value[app.id]) {
-                            showToast('请尽内选中�}职的态度和质量评分'); return;
-                        }
-                    }
-                    try {
-                        for (const app of selectedForEval.value) {
-                            await axios.post(`/api/demands/${evalDemandId.value}/evaluate`, {
-                                talent_id: app.talent_id,
-                                attitude_rating: attitudeRatings.value[app.id],
-                                quality_rating: qualityRatings.value[app.id],
-                                comment: '',
-                                evaluated_by: currentUser.value ? currentUser.value.id : null,
-                            });
-                        }
-                        closeModal();
-                        showToast('评价已提交');
-                    } catch(e) { showToast('提交失败'); }
-                };
-
+                const openEvalForDemand = async (demandId) => {
+                    evalDemandId.value = demandId;
+                    attitudeRatings.value = {};
+                    qualityRatings.value = {};
+                    try {
+                        const res = await axios.get(`/api/demands/${demandId}/applications`);
+                        selectedForEval.value = (res.data || []).filter(a => a.status === 'selected');
+                        currentModal.value = 'eval';
+                    } catch(e) { showToast('加载已选人失败'); }
+                };
+                const setAttitudeRating = (appId, rating) => { attitudeRatings.value[appId] = rating; };
+                const setQualityRating = (appId, rating) => { qualityRatings.value[appId] = rating; };
+                const getAttitudeRating = (appId) => attitudeRatings.value[appId] || 0;
+                const getQualityRating = (appId) => qualityRatings.value[appId] || 0;
+                const submitDemandEvaluations = async () => {
+                    if (!selectedForEval.value.length) { showToast('没有选中的兼职'); return; }
+                    for (const app of selectedForEval.value) {
+                        if (!attitudeRatings.value[app.id] || !qualityRatings.value[app.id]) {
+                            showToast('请确保选中兼职的态度和质量分数'); return;
+                        }
+                    }
+                    try {
+                        for (const app of selectedForEval.value) {
+                            await axios.post(`/api/demands/${evalDemandId.value}/evaluate`, {
+                                talent_id: app.talent_id,
+                                attitude_rating: attitudeRatings.value[app.id],
+                                quality_rating: qualityRatings.value[app.id],
+                                comment: '',
+                                evaluated_by: currentUser.value ? currentUser.value.id : null,
+                            });
+                        }
+                        closeModal();
+                        showToast('评价已提交');
+                    } catch(e) { showToast('提交失败'); }
+                };
+
                 const publishToWecom = async (id) => {
                     try { await axios.post('/api/demands/' + id + '/publish'); showToast('已发送到企微群'); } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
                 };
