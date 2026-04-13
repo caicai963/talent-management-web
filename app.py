@@ -4569,10 +4569,10 @@ def send_email(to_email, subject, html_body, text_body):
         try:
             srv = smtplib.SMTP(sh, sp, timeout=timeout)
             srv.starttls()
-        except (ConnectionRefused, smtplib.SMTPConnectError, OSError, TimeoutError):
+        except (OSError, TimeoutError):
             try:
                 srv = smtplib.SMTP_SSL(sh, 465, timeout=timeout)
-            except (ConnectionRefused, smtplib.SMTPConnectError, OSError, TimeoutError) as e:
+            except (OSError, TimeoutError) as e:
                 return False, "SMTP connection failed: " + str(e)
         srv.login(su, sppw)
         srv.sendmail(su, [to_email], msg.as_string())
