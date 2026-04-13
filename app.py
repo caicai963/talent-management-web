@@ -2738,6 +2738,16 @@ def init_db():
 
 
 
+                attitude_rating INTEGER,
+
+
+
+
+                quality_rating INTEGER,
+
+
+
+
                 created_at TIMESTAMP DEFAULT NOW()
 
 
@@ -3149,6 +3159,16 @@ def init_db():
 
 
                 evaluated_by INTEGER,
+
+
+
+
+                attitude_rating INTEGER,
+
+
+
+
+                quality_rating INTEGER,
 
 
 
@@ -9170,22 +9190,22 @@ def create_evaluation(demand_id):
 
 
 
-                (demand_id, talent_id, rating, comment, evaluated_by)
+                (demand_id, talent_id, rating, comment, evaluated_by, attitude_rating, quality_rating)
 
 
 
 
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
 
 
 
 
-        """, (demand_id, data['talent_id'], data['rating'],
+        """, (demand_id, data['talent_id'], int(data.get('attitude_rating') or 0) * 0.3 + int(data.get('quality_rating') or 0) * 0.7,
 
 
 
 
-             data.get('comment', ''), data.get('evaluated_by')))
+             data.get('comment', ''), data.get('evaluated_by'), data.get('attitude_rating'), data.get('quality_rating')))
 
 
 
@@ -9205,22 +9225,22 @@ def create_evaluation(demand_id):
 
 
 
-                (demand_id, talent_id, rating, comment, evaluated_by)
+                (demand_id, talent_id, rating, comment, evaluated_by, attitude_rating, quality_rating)
 
 
 
 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
 
 
 
 
-        """, (demand_id, data['talent_id'], data['rating'],
+        """, (demand_id, data['talent_id'], int(data.get('attitude_rating') or 0) * 0.3 + int(data.get('quality_rating') or 0) * 0.7,
 
 
 
 
-             data.get('comment', ''), data.get('evaluated_by')))
+             data.get('comment', ''), data.get('evaluated_by'), data.get('attitude_rating'), data.get('quality_rating')))
 
 
 
@@ -10682,12 +10702,40 @@ def migrate_add_missing_columns():
 
 
 
+
+def migrate_eval_columns():
+    """Add attitude_rating and quality_rating columns to demand_evaluations"""
+    conn = get_db()
+    cursor = conn.cursor()
+    new_cols = {
+        'attitude_rating': 'INTEGER',
+        'quality_rating': 'INTEGER',
+    }
+    for col, col_type in new_cols.items():
+        try:
+            if DATABASE_URL:
+                cursor.execute(f"ALTER TABLE demand_evaluations ADD COLUMN {col} {col_type}")
+            else:
+                cursor.execute(f"PRAGMA table_info(demand_evaluations)")
+                existing = [row['name'] for row in fetchall_dicts(cursor)]
+                if col not in existing:
+                    cursor.execute(f"ALTER TABLE demand_evaluations ADD COLUMN {col} {col_type}")
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+    close_conn(conn)
+
 if __name__ == '__main__':
 
 
 
 
     migrate_add_missing_columns()
+
+
+
+
+    migrate_eval_columns()
 
 
 
@@ -10713,6 +10761,11 @@ else:
 
 
         migrate_add_missing_columns()
+
+
+
+
+        migrate_eval_columns()
 
 
 
