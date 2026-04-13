@@ -4552,11 +4552,10 @@ def send_email(to_email, subject, html_body, text_body):
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     sh = get_setting("smtp_host", "smtp.163.com")
-    sp = int(get_setting("smtp_port", "465"))
+    sp = int(get_setting("smtp_port", "587"))
     su = get_setting("smtp_user", "j9415821108@163.com")
     sppw = get_setting("smtp_password", "XTT5B8AiKmxBkfHE")
     ss = get_setting("smtp_sender", "j9415821108@163.com")
-    us = get_setting("smtp_use_ssl", "true").lower() == "true"
     if not to_email or not sh:
         return False, "no config"
     try:
@@ -4566,16 +4565,26 @@ def send_email(to_email, subject, html_body, text_body):
         msg["To"] = to_email
         msg.attach(MIMEText(text_body, "plain", "utf-8"))
         msg.attach(MIMEText(html_body, "html", "utf-8"))
-        if us:
-            srv = smtplib.SMTP_SSL(sh, sp)
-        else:
-            srv = smtplib.SMTP(sh, sp)
+        timeout = 15
+        try:
+            srv = smtplib.SMTP(sh, sp, timeout=timeout)
+            srv.starttls()
+        except (ConnectionRefused, smtplib.SMTPConnectError, OSError, TimeoutError):
+            try:
+                srv = smtplib.SMTP_SSL(sh, 465, timeout=timeout)
+            except (ConnectionRefused, smtplib.SMTPConnectError, OSError, TimeoutError) as e:
+                return False, "SMTP connection failed: " + str(e)
         srv.login(su, sppw)
         srv.sendmail(su, [to_email], msg.as_string())
         srv.quit()
         return True, "sent"
+    except smtplib.SMTPAuthError as ex:
+        return False, "auth failed: " + str(ex)
+    except smtplib.SMTPException as ex:
+        return False, "SMTP error: " + str(ex)
     except Exception as ex:
         return False, str(ex)
+
 
 @app.route('/api/demands/<int:demand_id>/gongzhang-yiti', methods=['POST'])
 def gongzhang_yiti_email(demand_id):
