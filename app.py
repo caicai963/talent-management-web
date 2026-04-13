@@ -4656,6 +4656,64 @@ def gongzhang_yiti_email(demand_id):
 
 
 
+
+@app.route('/api/debug/demand/<int:demand_id>/email-info', methods=['GET'])
+def debug_email_info(demand_id):
+    """诊断公账已提邮件为什么没发"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        if DATABASE_URL:
+            cursor.execute("SELECT * FROM demands WHERE id = %s", (demand_id,))
+        else:
+            cursor.execute("SELECT * FROM demands WHERE id = ?", (demand_id,))
+        demand = fetchone_dict(cursor)
+        if not demand:
+            close_conn(conn)
+            return jsonify({'error': 'Demand not found'}), 404
+
+        result = {
+            'demand_id': demand_id,
+            'title': demand.get('title'),
+            'product_code': demand.get('product_code'),
+            'demander_id': demand.get('demander_id'),
+            'tidanren': demand.get('tidanren'),
+        }
+
+        # Check user email
+        if demand.get('demander_id'):
+            if DATABASE_URL:
+                cursor.execute("SELECT id, username, email FROM users WHERE id = %s", (demand.get('demander_id'),))
+            else:
+                cursor.execute("SELECT id, username, email FROM users WHERE id = ?", (demand.get('demander_id'),))
+            ur = fetchone_dict(cursor)
+            if ur:
+                result['user'] = {'id': ur['id'], 'username': ur.get('username'), 'email': ur.get('email')}
+                result['email_will_send'] = bool(ur.get('email'))
+            else:
+                result['user'] = None
+                result['email_will_send'] = False
+                result['reason'] = 'user not found'
+        else:
+            result['email_will_send'] = False
+            result['reason'] = 'demander_id is empty/None'
+
+        # Check selected talents
+        if DATABASE_URL:
+            cursor.execute("SELECT name, phone FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = %s AND da.status = 'selected'", (demand_id,))
+        else:
+            cursor.execute("SELECT name, phone FROM demand_applications da JOIN talents t ON da.talent_id = t.id WHERE da.demand_id = ? AND da.status = 'selected'", (demand_id,))
+        selected = fetchall_dicts(cursor)
+        result['selected_count'] = len(selected)
+        result['selected_talents'] = selected
+
+        close_conn(conn)
+        return jsonify(result)
+    except Exception as e:
+        import traceback
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()[-500:]}), 500
+
+
 # ---- 人才管理 API ----
 
 
