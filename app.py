@@ -1263,6 +1263,16 @@ def calc_quote(demand_data):
 
 
 
+        # 甄别+外呼：0.5元/呼出 + 10或20元/样本
+        if brush:
+            if tier in ("10分钟以内", "30分钟以内"):
+                brush_fee_per_sample = 10
+            else:
+                brush_fee_per_sample = 20
+            price_per_sample = 0.5 + brush_fee_per_sample
+            part_time_wage = price_per_sample * quantity
+            wage_note = (f"(0.5/呼出+{brush_fee_per_sample}/样本)×{quantity}={int(part_time_wage)}元，"
+                         f"呼出费用根据实际拨打难度有所差异，以实际产生结算")
         human_cost = h * 1200
 
 
@@ -1303,6 +1313,13 @@ def calc_quote(demand_data):
 
 
 
+        # 电访+外呼：0.5元/呼出 + 20元/样本
+        if brush:
+            brush_fee_per_sample = 20
+            price_per_sample = 0.5 + brush_fee_per_sample
+            part_time_wage = price_per_sample * quantity
+            wage_note = (f"(0.5/呼出+{brush_fee_per_sample}/样本)×{quantity}={int(part_time_wage)}元，"
+                         f"呼出费用根据实际拨打难度有所差异，以实际产生结算")
         human_cost = h * 1200
 
 
@@ -9933,13 +9950,11 @@ def publish_to_wecom(demand_id):
 
             pw = quote.get('part_time_wage', 0) or 0
 
-
-
-            per_sample = pw // msg_qty if msg_qty else 0
-
-
-
-            msg += "**单价：** %s元/样本\n" % per_sample
+            if demand.get('brush_list'):
+                msg += "**单价：** 0.5/呼出+10/样本\\n"
+            else:
+                per_sample = pw // msg_qty if msg_qty else 0
+                msg += "**单价：** %s元/样本\\n" % per_sample
 
 
 
