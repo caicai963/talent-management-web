@@ -9200,7 +9200,7 @@ def create_evaluation(demand_id):
 
 
 
-        """, (demand_id, data['talent_id'], int(data.get('attitude_rating') or 0) * 0.3 + int(data.get('quality_rating') or 0) * 0.7,
+        """, (demand_id, data['talent_id'], (lambda a, q: a * 0.3 + q * 0.7 if (a and q) else (a or q))(int(data.get('attitude_rating') or 0), int(data.get('quality_rating') or 0)),
 
 
 
@@ -9235,7 +9235,7 @@ def create_evaluation(demand_id):
 
 
 
-        """, (demand_id, data['talent_id'], int(data.get('attitude_rating') or 0) * 0.3 + int(data.get('quality_rating') or 0) * 0.7,
+        """, (demand_id, data['talent_id'], (lambda a, q: a * 0.3 + q * 0.7 if (a and q) else (a or q))(int(data.get('attitude_rating') or 0), int(data.get('quality_rating') or 0)),
 
 
 

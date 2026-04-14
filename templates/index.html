@@ -3331,7 +3331,7 @@
 
                     <div style="font-weight:bold;margin-bottom:12px;">{{ app.name }} <span style="color:#888;font-size:12px;">{{ app.phone }}</span></div>
 
-                    <div style="margin-bottom:12px;">
+                    <div v-if="currentUser.role === 'admin'" style="margin-bottom:12px;">
 
                         <div style="font-size:13px;color:#555;">态度 <span style="color:#aaa;font-size:12px;">(管理员评, 权重：30%)</span></div>
 
@@ -3345,7 +3345,7 @@
 
                     </div>
 
-                    <div>
+                    <div v-if="currentUser.role === 'demander'">
 
                         <div style="font-size:13px;color:#555;">质量 <span style="color:#aaa;font-size:12px;">(需求方评, 权重：70%)</span></div>
 
@@ -9713,13 +9713,26 @@
                     if (!selectedForEval.value.length) { showToast('没有选中的兼职'); return; }
 
 
+                    const isAdminUser = currentUser.value && currentUser.value.role === 'admin';
+
+
+                    // Validate only the relevant rating
                     for (const app of selectedForEval.value) {
 
 
-                        if (!attitudeRatings.value[app.id] || !qualityRatings.value[app.id]) {
+                        if (isAdminUser && !attitudeRatings.value[app.id]) {
 
 
-                            showToast('请确保选中兼职的态度和质量分数'); return;
+                            showToast('请为所有兼职打分（态度分）'); return;
+
+
+                        }
+
+
+                        if (!isAdminUser && !qualityRatings.value[app.id]) {
+
+
+                            showToast('请为所有兼职打分（质量分）'); return;
 
 
                         }
@@ -9734,16 +9747,10 @@
                         for (const app of selectedForEval.value) {
 
 
-                            await axios.post(`/api/demands/${evalDemandId.value}/evaluate`, {
+                            const payload = {
 
 
                                 talent_id: app.talent_id,
-
-
-                                attitude_rating: attitudeRatings.value[app.id],
-
-
-                                quality_rating: qualityRatings.value[app.id],
 
 
                                 comment: '',
@@ -9752,7 +9759,31 @@
                                 evaluated_by: currentUser.value ? currentUser.value.id : null,
 
 
-                            });
+                            };
+
+
+                            if (isAdminUser) {
+
+
+                                payload.attitude_rating = attitudeRatings.value[app.id];
+
+
+                                payload.quality_rating = 0; // not rated by admin, set to 0
+
+
+                            } else {
+
+
+                                payload.attitude_rating = 0; // not rated by demander, set to 0
+
+
+                                payload.quality_rating = qualityRatings.value[app.id];
+
+
+                            }
+
+
+                            await axios.post(`/api/demands/${evalDemandId.value}/evaluate`, payload);
 
 
                         }
@@ -9764,7 +9795,7 @@
                         showToast('评价已提交');
 
 
-                    } catch(e) { showToast('提交失败'); }
+                    } catch(e) { showToast('提交失败: ' + (e.response?.data?.error || e.message)); }
 
 
                 };
