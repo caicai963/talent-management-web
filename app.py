@@ -9969,10 +9969,10 @@ def publish_to_wecom(demand_id):
 
             if demand.get('brush_list'):
                 sample_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
-                msg += "**单价：** 0.5/呼出+%d/样本\\n" % sample_price
+                msg += "**单价：** 0.5/呼出+%d/样本\n" % sample_price
             else:
                 per_sample = pw // msg_qty if msg_qty else 0
-                msg += "**单价：** %s元/样本\\n" % per_sample
+                msg += "**单价：** %s元/样本\n" % per_sample
 
 
 
