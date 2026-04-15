@@ -9872,10 +9872,10 @@ def publish_to_wecom(demand_id):
         def get_sample_price(biz_type, tier):
             sample_prices = {
                 "电访": {
-                    "30mins以内": 50,   # 20(呼出费)+30
-                    "30~60mins": 65,   # 20+45
-                    "60~90mins": 100,  # 20+80
-                    "90~120mins": 120, # 20+100
+                    "30mins以内": 30,   # 样本单价
+                    "30~60mins": 45,   # 样本单价
+                    "60~90mins": 80,  # 样本单价
+                    "90~120mins": 100, # 样本单价
                 }
             }
             if biz_type in sample_prices:
