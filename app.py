@@ -1315,10 +1315,10 @@ def calc_quote(demand_data):
 
         # 电访+外呼：0.5元/呼出 + 20元/样本
         if brush:
-            brush_fee_per_sample = unit_price  # 30/45/80/100 based on tier
-            price_per_sample = 0.5 + brush_fee_per_sample
-            part_time_wage = price_per_sample * quantity
-            wage_note = (f"(0.5/呼出+{int(brush_fee_per_sample)}/样本)×{quantity}={int(part_time_wage)}元，"
+            brush_fee_per_sample = 20 + unit_price  # 20元呼出费 + 样本单价
+            price_per_sample = 0.5 + unit_price  # 显示用: 0.5/呼出 + 样本单价
+            part_time_wage = brush_fee_per_sample * quantity  # 按50元/样本算
+            wage_note = (f"(0.5/呼出+{int(unit_price)}/样本,按{int(brush_fee_per_sample)}元/样本预估)×{quantity}={int(part_time_wage)}元，"
                          f"呼出费用根据实际拨打难度有所差异，以实际产生结算")
         human_cost = h * 1200
 
@@ -9872,10 +9872,10 @@ def publish_to_wecom(demand_id):
         def get_sample_price(biz_type, tier):
             sample_prices = {
                 "电访": {
-                    "30mins以内": 30,
-                    "30~60mins": 45,
-                    "60~90mins": 80,
-                    "90~120mins": 100,
+                    "30mins以内": 50,   # 20(呼出费)+30
+                    "30~60mins": 65,   # 20+45
+                    "60~90mins": 100,  # 20+80
+                    "90~120mins": 120, # 20+100
                 }
             }
             if biz_type in sample_prices:
