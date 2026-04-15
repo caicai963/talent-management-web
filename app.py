@@ -9976,11 +9976,11 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg += "**执行时间：** %s\n" % execution_time
+        msg += "\n**执行时间：** %s\n" % execution_time
 
 
 
-        msg += "**截止日期：** %s\n" % msg_deadline
+        msg += "\n**截止日期：** %s\n" % msg_deadline
 
 
 
