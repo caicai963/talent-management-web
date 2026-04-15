@@ -9897,7 +9897,7 @@ def publish_to_wecom(demand_id):
 
 
 
-        execution_time = demand.get('execution_time') or ''
+        execution_time = (demand.get('execution_time') or '').strip()
 
 
 
@@ -9933,7 +9933,7 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg_deadline = demand.get('deadline') or ''
+        msg_deadline = (demand.get('deadline') or '').strip()
 
 
 
