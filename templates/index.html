@@ -1010,7 +1010,9 @@
 
 
 
-                    <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+                    <div v-if="currentUser.role === 'admin'">
+                        <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+                    </div>
 
 
 
@@ -2178,7 +2180,7 @@
 
 
 
-            <div v-if="activeTab === 'users' && (currentUser.role === 'admin' || currentUser.role === 'demander')" style="background: white; padding: 24px; border-radius: 8px;">
+            <div v-if="activeTab === 'users' && currentUser.role === 'admin'" style="background: white; padding: 24px; border-radius: 8px;">
 
 
 
