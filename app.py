@@ -1263,16 +1263,11 @@ def calc_quote(demand_data):
 
 
 
-        # 甄别+外呼：0.5元/呼出 + 10或20元/样本
+        # 甄别刷单：(基数+0.5)×n，呼出费含在公式里
         if brush:
-            if tier in ("10分钟以内", "30分钟以内"):
-                brush_fee_per_sample = 10
-            else:
-                brush_fee_per_sample = 20
-            price_per_sample = 0.5 + brush_fee_per_sample
-            part_time_wage = price_per_sample * quantity
-            wage_note = (f"(0.5/呼出+{brush_fee_per_sample}/样本)×{quantity}={int(part_time_wage)}元，"
-                         f"呼出费用根据实际拨打难度有所差异，以实际产生结算")
+            part_time_wage = (unit_price + 0.5) * quantity
+            wage_note = (f"({unit_price}+0.5)/样本×{quantity}={int(part_time_wage)}元，"
+                         f"呼出费含在公式里")
         human_cost = h * 1200
 
 
@@ -1313,13 +1308,11 @@ def calc_quote(demand_data):
 
 
 
-        # 电访+外呼：0.5元/呼出 + 20元/样本
+        # 电访刷单：(基数+0.5)×n，呼出费含在公式里
         if brush:
-            brush_fee_per_sample = unit_price + 0   # 基数单狂加上0.5元/呼出
-            price_per_sample = 0.5 + unit_price  # 显示: 0.5/呼出 + 基数/样本
-            part_time_wage = (unit_price + 0.5) * quantity  # 基数+呼出费
-            wage_note = (f"(0.5/呼出+{unit_price}/个)×{quantity}={int(part_time_wage)}元，"
-                         f"呼出费用根据实际拨打难度有所差异，以实际产生结算")
+            part_time_wage = (unit_price + 0.5) * quantity
+            wage_note = (f"({unit_price}+0.5)/个×{quantity}={int(part_time_wage)}元，"
+                         f"呼出费含在公式里")
         human_cost = h * 1200
 
 
@@ -9969,7 +9962,7 @@ def publish_to_wecom(demand_id):
 
             if demand.get('brush_list'):
                 sample_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
-                msg += "**单价：** 0.5/呼出+%d元/个\n" % unit_price
+                msg += "**单价：** (基数+0.5)/个\n" % sample_price
             else:
                 msg_unit_price = tier_data.get("price", 0)
                 msg += "**总报价：** %s元/单\n" % pw
