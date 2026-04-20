@@ -1250,10 +1250,10 @@ def calc_quote(demand_data):
 
         h = vlookup_h(gmv, LUT_ZHENBIE)
 
-        # 甄别+外呼：(0.5/呼出+样本单价)×n + 20元固定外呼费
+        # 甄别+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
         if brush:
-            part_time_wage = (unit_price + 0.5) * quantity + 20
-            wage_note = (f"(0.5/呼出+{unit_price}/样本)×{quantity} + 20元外呼 = {int(part_time_wage)}元")
+            part_time_wage = (unit_price + 20) * quantity
+            wage_note = (f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元")
 
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
@@ -1269,10 +1269,10 @@ def calc_quote(demand_data):
 
         h = vlookup_h(gmv, LUT_DIANFANG)
 
-        # 电访+外呼：(0.5/呼出+样本单价)×n + 20元固定外呼费
+        # 电访+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
         if brush:
-            part_time_wage = (unit_price + 0.5) * quantity + 20
-            wage_note = (f"(0.5/呼出+{unit_price}/个)×{quantity} + 20元外呼 = {int(part_time_wage)}元")
+            part_time_wage = (unit_price + 20) * quantity
+            wage_note = (f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元")
 
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
@@ -9909,16 +9909,17 @@ def publish_to_wecom(demand_id):
             pw = quote.get('part_time_wage', 0) or 0
 
 
+
             if demand.get('brush_list'):
-                # 刷单（+外呼）：显示每样本报价
+                # 刷单（+外呼）：显示每样本报价，(单价+20元呼出预估)/样本
                 unit_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
                 biz = demand.get("business_type","")
                 if biz == '电访':
-                    msg += "**单价：** (0.5/呼出+{unit_price}/个)\n".format()
+                    msg += "**单价：** ({unit_price}+20元呼出)/个\n".format()
                 elif biz == '甄别':
-                    msg += "**单价：** (0.5/呼出+{unit_price}/样本)\n".format()
+                    msg += "**单价：** ({unit_price}+20元呼出)/样本\n".format()
                 else:
-                    msg += "**单价：** (0.5+基数)/样本\n".format()
+                    msg += "**单价：** (基数+20元呼出)/样本\n".format()
             else:
                 # 非刷单：显示总报价
                 msg += "**总报价：** %s元/单\n" % pw
