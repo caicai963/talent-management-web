@@ -1252,6 +1252,16 @@ def calc_quote(demand_data):
 
 
 
+    elif biz == "甄别+外呼":
+        outer_tiers = TALENT_PRICE_TABLE.get("甄别+外呼", [])
+        outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
+        unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
+        part_time_wage = (unit_price + 20) * quantity
+        wage_note = f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元"
+        h = vlookup_h(gmv, LUT_ZHENBIE)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+
     elif biz == "甄别":
 
 
@@ -1271,6 +1281,16 @@ def calc_quote(demand_data):
 
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+    elif biz == "电访+外呼":
+        outer_tiers = TALENT_PRICE_TABLE.get("电访+外呼", [])
+        outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
+        unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
+        part_time_wage = (unit_price + 20) * quantity
+        wage_note = f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元"
+        h = vlookup_h(gmv, LUT_DIANFANG)
+        human_cost = h * 1200
+        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+
     elif biz == "电访":
 
 
