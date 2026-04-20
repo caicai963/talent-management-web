@@ -1072,7 +1072,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz in ("甄别", "电访", "街访执行", "测试执行") and not gmv:
+    if biz in ("甄别", "甄别+外呼", "电访", "电访+外呼", "街访执行", "测试执行") and not gmv:
 
 
 
