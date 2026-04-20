@@ -671,6 +671,20 @@ TALENT_PRICE_TABLE = {
     ],
 
 
+    "甄别+外呼": [
+        {"label": "5~10mins/个", "price": 10},
+        {"label": "10~20mins/个", "price": 10},
+        {"label": "20~30mins/个", "price": 16},
+        {"label": ">30mins/个", "price": 20},
+    ],
+
+    "电访+外呼": [
+        {"label": "30mins以内/个", "price": 30},
+        {"label": "30~60mins/个", "price": 45},
+        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
+        {"label": "90~120mins/个", "price": 100},
+    ],
+
 
 
     "邀约拉新": [
