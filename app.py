@@ -443,22 +443,22 @@ TALENT_PRICE_TABLE = {
 
 
 
-        {"label": "5~10mins/个", "price": 30},
+        {"label": "30mins以内/个", "price": 30},
 
 
 
 
-        {"label": "10~20mins/个", "price": 45},
+        {"label": "30~60mins/个", "price": 45},
 
 
 
 
-        {"label": "20~30mins/个", "price": 80},
+        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
 
 
 
 
-        {"label": ">30mins/个", "price": 100},
+        {"label": "90~120mins/个", "price": 100},
 
 
 
@@ -1241,93 +1241,41 @@ def calc_quote(demand_data):
     elif biz == "甄别":
 
 
-
-
         unit_price = tier_data.get("price", 0)
 
 
-
-
+        # 甄别（无外呼）：纯样本单价×数量，无呼出费
         part_time_wage = unit_price * quantity
-
-
-
-
-        wage_note = f"0.5/呼出+{unit_price}元/样本×{quantity}个"
-
-
-
+        wage_note = f"{unit_price}元/样本×{quantity}个 = {int(part_time_wage)}元"
 
         h = vlookup_h(gmv, LUT_ZHENBIE)
 
-
-
-
-        # 甄别刷单：(基数+0.5)×n，呼出费含在公式里
+        # 甄别+外呼：(0.5/呼出+样本单价)×n + 20元固定外呼费
         if brush:
-            part_time_wage = (unit_price + 0.5) * quantity
-            wage_note = (f"({unit_price}+0.5)/样本×{quantity}={int(part_time_wage)}元，"
-                         f"呼出费含在公式里")
+            part_time_wage = (unit_price + 0.5) * quantity + 20
+            wage_note = (f"(0.5/呼出+{unit_price}/样本)×{quantity} + 20元外呼 = {int(part_time_wage)}元")
+
         human_cost = h * 1200
-
-
-
-
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-
-
-
-
-
-
-
-
-
     elif biz == "电访":
-
-
 
 
         unit_price = tier_data.get("price", 0)
 
 
-
-
+        # 电访（无外呼）：纯样本单价×数量，无呼出费
         part_time_wage = unit_price * quantity
-
-
-
-
-        wage_note = f"{unit_price}元/个× {quantity}个"
-
-
-
+        wage_note = f"{unit_price}元/个×{quantity}个 = {int(part_time_wage)}元"
 
         h = vlookup_h(gmv, LUT_DIANFANG)
 
-
-
-
-        # 电访刷单：(基数+0.5)×n，呼出费含在公式里
+        # 电访+外呼：(0.5/呼出+样本单价)×n + 20元固定外呼费
         if brush:
-            part_time_wage = (unit_price + 0.5) * quantity
-            wage_note = (f"({unit_price}+0.5)/个×{quantity}={int(part_time_wage)}元，"
-                         f"呼出费含在公式里")
+            part_time_wage = (unit_price + 0.5) * quantity + 20
+            wage_note = (f"(0.5/呼出+{unit_price}/个)×{quantity} + 20元外呼 = {int(part_time_wage)}元")
+
         human_cost = h * 1200
-
-
-
-
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-
-
-
-
-
-
-
-
-
     elif biz == "街访执行":
 
 
@@ -9865,10 +9813,10 @@ def publish_to_wecom(demand_id):
         def get_sample_price(biz_type, tier):
             sample_prices = {
                 "电访": {
-                    "30mins以内": 30,   # 样本单价
-                    "30~60mins": 45,   # 样本单价
-                    "60~90mins": 80,  # 样本单价
-                    "90~120mins": 100, # 样本单价
+                    "30mins以内/个": 30,
+                    "30~60mins/个": 45,
+                    "60~90mins/个（仅限5星兼职）": 80,
+                    "90~120mins/个": 100,
                 }
             }
             if biz_type in sample_prices:
@@ -9960,14 +9908,20 @@ def publish_to_wecom(demand_id):
 
             pw = quote.get('part_time_wage', 0) or 0
 
+
             if demand.get('brush_list'):
-                sample_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
-                msg += "**单价：** (基数+0.5)/个\n" % sample_price
+                # 刷单（+外呼）：显示每样本报价
+                unit_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
+                biz = demand.get("business_type","")
+                if biz == '电访':
+                    msg += "**单价：** (0.5/呼出+{unit_price}/个)\n".format()
+                elif biz == '甄别':
+                    msg += "**单价：** (0.5/呼出+{unit_price}/样本)\n".format()
+                else:
+                    msg += "**单价：** (0.5+基数)/样本\n".format()
             else:
-                msg_unit_price = tier_data.get("price", 0)
+                # 非刷单：显示总报价
                 msg += "**总报价：** %s元/单\n" % pw
-
-
 
         msg += "\n**执行时间：** %s\n" % execution_time
 
