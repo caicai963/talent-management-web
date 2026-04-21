@@ -2764,7 +2764,7 @@
 
 
 
-                                <td>{{ d.quantity }}{{ d.brush_list ? " (刷名单)" : "" }}</td>
+                                <td>{{ d.quantity }}</td>
 
 
 
@@ -3261,7 +3261,7 @@
 
 
 
-                        <div><strong>数量：</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "（刷名单）" : "" }}</div>
+                        <div><strong>数量：</strong>{{ currentDemand.quantity }}</div>
 
 
 
@@ -8959,7 +8959,7 @@
 
 
 
-                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', parent_order:'', child_order:'', execution_time:'' });
+                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', parent_order:'', child_order:'', execution_time:'' });
 
 
 
@@ -9183,7 +9183,7 @@
 
 
 
-                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'', parent_order:d.parent_order||'', child_order:d.child_order||'', execution_time:d.execution_time||'' };
+                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'', parent_order:d.parent_order||'', child_order:d.child_order||'', execution_time:d.execution_time||'' };
 
 
 
@@ -9191,7 +9191,7 @@
 
 
 
-                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'', parent_order:'', child_order:'', execution_time:'' };
+                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'', parent_order:'', child_order:'', execution_time:'' };
 
 
 
