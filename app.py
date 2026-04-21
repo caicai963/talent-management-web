@@ -9851,7 +9851,25 @@ def publish_to_wecom(demand_id):
                     "30~60mins/个": 45,
                     "60~90mins/个（仅限5星兼职）": 80,
                     "90~120mins/个": 100,
-                }
+                },
+                "甄别": {
+                    "5~10mins/个": 8,
+                    "10~20mins/个": 12,
+                    "20~30mins/个": 16,
+                    ">30mins/个": 26,
+                },
+                "电访+外呼": {
+                    "30mins以内/个": 30,
+                    "30~60mins/个": 45,
+                    "60~90mins/个（仅限5星兼职）": 80,
+                    "90~120mins/个": 100,
+                },
+                "甄别+外呼": {
+                    "5~10mins/个": 10,
+                    "10~20mins/个": 10,
+                    "20~30mins/个": 16,
+                    ">30mins/个": 20,
+                },
             }
             if biz_type in sample_prices:
                 for key, price in sample_prices[biz_type].items():
@@ -9944,19 +9962,19 @@ def publish_to_wecom(demand_id):
 
 
 
-            if demand.get('brush_list'):
-                # 刷单（+外呼）：显示每样本报价，(单价+20元呼出预估)/样本
-                unit_price = get_sample_price(demand.get("business_type",""), demand.get("tier",""))
-                biz = demand.get("business_type","")
-                if biz == '电访':
-                    msg += "**单价：** ({unit_price}+20元呼出)/个\n".format()
-                elif biz == '甄别':
-                    msg += "**单价：** ({unit_price}+20元呼出)/样本\n".format()
+            # Always show 单价 only in 企微 push
+            biz = demand.get("business_type","")
+            unit_price = get_sample_price(biz, demand.get("tier",""))
+            if biz and "外呼" in biz:
+                if "电访" in biz:
+                    msg += "**单价：** (0.5/呼出+%s/个)\n" % unit_price
                 else:
-                    msg += "**单价：** (基数+20元呼出)/样本\n".format()
+                    msg += "**单价：** (0.5/呼出+%s/样本)\n" % unit_price
             else:
-                # 非刷单：显示总报价
-                msg += "**总报价：** %s元/单\n" % pw
+                if "电访" in biz:
+                    msg += "**单价：** %s/个\n" % unit_price
+                elif "甄别" in biz:
+                    msg += "**单价：** %s/样本\n" % unit_price
 
         msg += "\n**执行时间：** %s\n" % execution_time
 
