@@ -3070,74 +3070,36 @@
 
 
                         <template v-if="demandForm.business_type === '实验室执行'">
-
-
-
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div>
-
-
-
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">排期时长（小时）</label>
-
-
-
-                                <input v-model.number="demandForm.scheduled_hours" type="number" step="0.5" min="0" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
-
-
-
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">开始日期</label>
+                                <input v-model="demandForm.start_date" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
-
-
-
                             <div>
-
-
-
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">结束时间</label>
-
-
-
-                                <input v-model="demandForm.end_time" type="time" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
-
-
-
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">结束日期</label>
+                                <input v-model="demandForm.end_date" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
-
-
-
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
                             <div>
-
-
-
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">横跨用餐时间（顿数）</label>
-
-
-
-                                <select v-model.number="demandForm.cross_meal_count" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-
-
-
-                                    <option :value="0">不横跨</option>
-
-
-
-                                    <option :value="1">1顿</option>
-
-
-
-                                    <option :value="2">2顿</option>
-
-
-
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">兼职人数</label>
+                                <input v-model.number="demandForm.parttimer_count" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每人场数</label>
+                                <input v-model.number="demandForm.sessions_per_parttimer" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            </div>
+                            <div>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每天餐%E6%95%B0</label>
+                                <select v-model.number="demandForm.meals_per_day" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                    <option :value="0">不满%E5%A4%9A</option>
+                                    <option :value="1">1%E9%A4%9D</option>
+                                    <option :value="2">2%E9%A4%9D</option>
+                                    <option :value="3">3%E9%A4%9D</option>
                                 </select>
-
-
-
                             </div>
-
-
-
-                        </template>
+                        </div>
+                    </template>
 
 
 
@@ -8935,7 +8897,7 @@
 
 
 
-                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', parent_order:'', child_order:'', execution_time:'' });
+                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, gmv:0, deadline:'', parent_order:'', child_order:'', execution_time:'', parttimer_count:1, sessions_per_parttimer:1, meals_per_day:1, start_date:'', end_date:'' });
 
 
 
@@ -9159,7 +9121,7 @@
 
 
 
-                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'', parent_order:d.parent_order||'', child_order:d.child_order||'', execution_time:d.execution_time||'' };
+                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, gmv:d.gmv||0, parttimer_count:d.parttimer_count||1, sessions_per_parttimer:d.sessions_per_parttimer||1, meals_per_day:d.meals_per_day||1, start_date:d.start_date||'', end_date:d.end_date||'', deadline:d.deadline||'', tidanren:d.tidanren||'', parent_order:d.parent_order||'', child_order:d.child_order||'', execution_time:d.execution_time||'' };
 
 
 

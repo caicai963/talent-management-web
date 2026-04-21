@@ -1467,43 +1467,32 @@ def calc_quote(demand_data):
 
     elif biz == "实验室执行":
 
-
-
-
         unit_price = tier_data.get("price", 0)
+        parttimer_count = demand_data.get("parttimer_count", 1)
+        sessions = demand_data.get("sessions_per_parttimer", 1)
+        meals_per_day = demand_data.get("meals_per_day", 1)
+        start_date_str = demand_data.get("start_date", "")
+        end_date_str = demand_data.get("end_date", "")
 
+        days = 1
+        if start_date_str and end_date_str:
+            try:
+                from datetime import datetime
+                s = datetime.strptime(start_date_str, "%Y-%m-%d")
+                e = datetime.strptime(end_date_str, "%Y-%m-%d")
+                delta = (e - s).days + 1
+                days = max(1, delta)
+            except:
+                days = 1
 
+        base_wage = sessions * unit_price
+        meal_fee = 30 * meals_per_day * days
+        transport_fee = 50 * days
+        part_time_wage = parttimer_count * (base_wage + meal_fee + transport_fee)
+        wage_note = f"{parttimer_count}人×({sessions}场×{unit_price}元+30×{meals_per_day}餐×{days}天+50×{days}天) = {int(part_time_wage)}元"
 
-
-        part_time_wage = unit_price * quantity
-
-
-
-
-        wage_note = f"{unit_price}元/场× {quantity}场"
-
-
-
-
-        lab_extra = calc_human_cost_lab(tier, end_time, cross_meal, scheduled_hours)
-
-
-
-
-        human_cost = lab_extra["subtotal"]
-
-
-
-
-        human_note = lab_extra["note"]
-
-
-
-
-
-
-
-
+        human_cost = 0
+        human_note = "无人力成本"
 
     else:
 
