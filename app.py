@@ -490,187 +490,6 @@ TALENT_PRICE_TABLE = {
 
     ],
 
-
-
-
-    "测试执行": [
-
-
-
-
-        {"label": "2H以内/场", "price": 150},
-
-
-
-
-        {"label": "2~4小时/场", "price": 200},
-
-
-
-
-        {"label": "4~6小时/场", "price": 250},
-
-
-
-
-    ],
-
-
-
-
-    "街访执行": [
-
-
-
-
-        # 街访1（拦截+访谈）
-
-
-
-
-        {"label": "10分钟以内", "price": 30, "base": 120},
-
-
-
-
-        {"label": "30分钟以内", "price": 65, "base": 120},
-
-
-
-
-        {"label": "30~60分钟", "price": 104, "base": 120},
-
-
-
-
-        # 街访2（只拦截不访谈）
-
-
-
-
-        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
-
-
-
-
-        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
-
-
-
-
-        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
-
-
-
-
-        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
-
-
-
-
-    ],
-
-
-
-
-    "街访1": [
-
-
-
-
-        {"label": "10分钟以内", "price": 30, "base": 120},
-
-
-
-
-        {"label": "30分钟以内", "price": 65, "base": 120},
-
-
-
-
-        {"label": "30~60分钟", "price": 104, "base": 120},
-
-
-
-
-    ],
-
-
-
-
-    "街访2": [
-
-
-
-
-        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
-
-
-
-
-        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
-
-
-
-
-        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
-
-
-
-
-        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
-
-
-
-
-    ],
-
-
-
-
-    "舆情打标": [
-
-
-
-
-        {"label": "条", "price": 0.3},
-
-
-
-
-    ],
-
-
-
-
-    "洞察收集/桌面研究": [
-
-
-
-
-        {"label": "<0.5H/人", "price": 10},
-
-
-
-
-        {"label": "<1H/人", "price": 30},
-
-
-
-
-        {"label": "1~3H/人", "price": 100},
-
-
-
-
-        {"label": "3~6H/人", "price": 150},
-
-
-
-
-    ],
-
-
     "甄别+外呼": [
         {"label": "5~10mins/个", "price": 10},
         {"label": "10~20mins/个", "price": 10},
@@ -687,7 +506,7 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "邀约拉新": [
+    "邀约拉群": [
 
 
 
@@ -1493,6 +1312,14 @@ def calc_quote(demand_data):
 
         human_cost = 0
         human_note = "无人力成本"
+
+    elif biz == "邀约拉群":
+        unit_price = 3
+        part_time_wage = unit_price * quantity
+        wage_note = f"3元/人×{quantity} = {int(part_time_wage)}元"
+        h = vlookup_h(gmv, LUT_ZHENBIE)
+        human_cost = h * 1200
+        human_note = f"标本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
     else:
 
@@ -6656,12 +6483,7 @@ def create_demand():
 
 
 
-                quantity, brush_list, gmv,
-
-
-
-
-                scheduled_hours, end_time, cross_meal_count,
+                quantity, gmv,
 
 
 
@@ -6706,17 +6528,7 @@ def create_demand():
 
 
 
-            1 if data.get('brush_list') else 0,
-
-
-
-
             data.get('gmv', 0),
-
-
-
-
-            data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
 
 
 
@@ -6737,6 +6549,11 @@ def create_demand():
 
 
             data.get('product_code', ''), data.get('parent_order', ''), data.get('child_order', ''), data.get('execution_time', ''),
+            data.get('parttimer_count', 1),
+            data.get('sessions_per_parttimer', 1),
+            data.get('meals_per_day', 1),
+            data.get('start_date', ''),
+            data.get('end_date', '')
 
 
 
@@ -6771,12 +6588,7 @@ def create_demand():
 
 
 
-                quantity, brush_list, gmv,
-
-
-
-
-                scheduled_hours, end_time, cross_meal_count,
+                quantity, gmv,
 
 
 
@@ -6816,17 +6628,7 @@ def create_demand():
 
 
 
-            1 if data.get('brush_list') else 0,
-
-
-
-
             data.get('gmv', 0),
-
-
-
-
-            data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
 
 
 
@@ -9228,30 +9030,67 @@ def create_evaluation(demand_id):
 
     eval_id = cursor.lastrowid
 
-
-
+    # 计算并更新人才的month_rating和avg_rating
+    try:
+        from datetime import datetime
+        if DATABASE_URL:
+            cursor.execute("SELECT created_at FROM demand_evaluations WHERE id = %s", (eval_id,))
+            row = cursor.fetchone()
+            if row and row[0]:
+                eval_dt = row[0]
+                eval_year, eval_month = str(eval_dt.year), str(eval_dt.month).zfill(2)
+            else:
+                now = datetime.now()
+                eval_year, eval_month = str(now.year), str(now.month).zfill(2)
+            cursor.execute("SELECT AVG(rating) FROM demand_evaluations WHERE talent_id = %s AND EXTRACT(YEAR FROM created_at) = %s AND EXTRACT(MONTH FROM created_at) = %s", (data['talent_id'], eval_year, eval_month))
+            r = cursor.fetchone()
+            month_rating_val = round(float(r[0]), 1) if r and r[0] is not None else None
+            if month_rating_val is None:
+                y, m = int(eval_year), int(eval_month)
+                if m == 1: y, m = y - 1, 12
+                else: m = m - 1
+                cursor.execute("SELECT AVG(rating) FROM demand_evaluations WHERE talent_id = %s AND EXTRACT(YEAR FROM created_at) = %s AND EXTRACT(MONTH FROM created_at) = %s", (data['talent_id'], str(y), str(m)))
+                r = cursor.fetchone()
+                month_rating_val = round(float(r[0]), 1) if r and r[0] is not None else 4.0
+            else:
+                month_rating_val = float(month_rating_val)
+            cursor.execute("SELECT AVG(month_avg) FROM (SELECT AVG(rating) as month_avg FROM demand_evaluations WHERE talent_id = %s GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)) sub", (data['talent_id'],))
+            r = cursor.fetchone()
+            avg_rating_val = round(float(r[0]), 1) if r and r[0] is not None else 4.0
+            cursor.execute("UPDATE talents SET month_rating = %s, avg_rating = %s, updated_at = NOW() WHERE id = %s", (month_rating_val, avg_rating_val, data['talent_id']))
+        else:
+            from datetime import datetime
+            cursor.execute("SELECT created_at FROM demand_evaluations WHERE id = ?", (eval_id,))
+            row = cursor.fetchone()
+            if row and row[0]:
+                s = str(row[0]); eval_year, eval_month = s[:4], s[5:7]
+            else:
+                now = datetime.now(); eval_year, eval_month = str(now.year), str(now.month).zfill(2)
+            cursor.execute("SELECT AVG(rating) FROM demand_evaluations WHERE talent_id = ? AND strftime('%%Y', created_at) = ? AND strftime('%%m', created_at) = ?", (data['talent_id'], eval_year, eval_month))
+            r = cursor.fetchone()
+            month_rating_val = round(float(r[0]), 1) if r and r[0] is not None else None
+            if month_rating_val is None:
+                y, m = int(eval_year), int(eval_month)
+                if m == 1: y, m = y - 1, 12
+                else: m = m - 1
+                cursor.execute("SELECT AVG(rating) FROM demand_evaluations WHERE talent_id = ? AND strftime('%%Y', created_at) = ? AND strftime('%%m', created_at) = ?", (data['talent_id'], str(y), str(m)))
+                r = cursor.fetchone()
+                month_rating_val = round(float(r[0]), 1) if r and r[0] is not None else 4.0
+            else:
+                month_rating_val = float(month_rating_val)
+            cursor.execute("SELECT AVG(month_avg) FROM (SELECT AVG(rating) as month_avg FROM demand_evaluations WHERE talent_id = ? GROUP BY strftime('%%Y', created_at), strftime('%%m', created_at)) sub", (data['talent_id'],))
+            r = cursor.fetchone()
+            avg_rating_val = round(float(r[0]), 1) if r and r[0] is not None else 4.0
+            cursor.execute("UPDATE talents SET month_rating = ?, avg_rating = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (month_rating_val, avg_rating_val, data['talent_id']))
+    except Exception as star_err:
+        print("Star rating update error:", star_err)
 
     close_conn(conn)
 
+    return jsonify({'id': eval_id, 'message': '评价已保存', 'month_rating': month_rating_val if 'month_rating_val' in dir() else None, 'avg_rating': avg_rating_val if 'avg_rating_val' in dir() else None})
 
 
-
-    return jsonify({'id': eval_id, 'message': '评价已保存'})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ---- 企微 Webhook ----
+# ---- 企微 Webhook ----# ---- 企微 Webhook ----
 
 
 
@@ -10635,6 +10474,11 @@ def migrate_add_missing_columns():
 
         'gongzhang_yiti': 'INTEGER DEFAULT 0',
         'email': 'TEXT',
+        'parttimer_count': 'INTEGER DEFAULT 1',
+        'sessions_per_parttimer': 'INTEGER DEFAULT 1',
+        'meals_per_day': 'INTEGER DEFAULT 1',
+        'start_date': 'TEXT',
+        'end_date': 'TEXT',
 
 
 
