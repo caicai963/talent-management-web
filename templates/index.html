@@ -174,7 +174,7 @@
 
 
 
-        /* 登录�?*/
+        /* 登录页 */
 
 
 
@@ -246,7 +246,7 @@
 
 
 
-        /* 操作�?*/
+        /* 操作栏 */
 
 
 
@@ -654,7 +654,7 @@
 
 
 
-        /* 标签�?*/
+        /* 标签页 */
 
 
 
@@ -726,7 +726,7 @@
 
 
 
-        /* 空状�?*/
+        /* 空状态 */
 
 
 
@@ -810,7 +810,7 @@
 
 
 
-        <!-- 登录�?-->
+        <!-- 登录页 -->
 
 
 
@@ -850,7 +850,7 @@
 
 
 
-                <input v-model="loginForm.username" type="text" placeholder="用户�? @keyup.enter="handleLogin">
+                <input v-model="loginForm.username" type="text" placeholder="用户名" @keyup.enter="handleLogin">
 
 
 
@@ -898,7 +898,7 @@
 
 
 
-        <!-- 主应�?-->
+        <!-- 主应用 -->
 
 
 
@@ -938,7 +938,7 @@
 
 
 
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理�? : currentUser.role === 'demander' ? '需求方' : '兼职' }})</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : currentUser.role === 'demander' ? '需求方' : '兼职' }})</span>
 
 
 
@@ -946,7 +946,7 @@
 
 
 
-                    <button class="logout-btn" @click="handleLogout">退�?/button>
+                    <button class="logout-btn" @click="handleLogout">退出</button>
 
 
 
@@ -970,7 +970,7 @@
 
 
 
-            <!-- 管理员视�?-->
+            <!-- 管理员视图 -->
 
 
 
@@ -1020,7 +1020,7 @@
 
 
 
-                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管�?/button>
+                    <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
 
 
 
@@ -1060,7 +1060,7 @@
 
 
 
-                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状�?/button>
+                    <button class="tab" :class="{ active: activeTab === 'mystatus' }" @click="activeTab = 'mystatus'">查询状态</button>
 
 
 
@@ -1120,7 +1120,7 @@
 
 
 
-                        <input v-model="registerForm.name" type="text" placeholder="请输入姓�? style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <input v-model="registerForm.name" type="text" placeholder="请输入姓名" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
 
 
 
@@ -1132,7 +1132,7 @@
 
 
 
-                        <label style="display: block; margin-bottom: 4px; color: #666;">手机�?/label>
+                        <label style="display: block; margin-bottom: 4px; color: #666;">手机号</label>
 
 
 
@@ -1148,7 +1148,7 @@
 
 
 
-                        <label style="display: block; margin-bottom: 4px; color: #666;">微信�?/label>
+                        <label style="display: block; margin-bottom: 4px; color: #666;">微信号</label>
 
 
 
@@ -1168,7 +1168,7 @@
 
 
 
-                        <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚�? style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <input v-model="registerForm.available_time" type="text" placeholder="例如：周末、平时晚上" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
 
 
 
@@ -1184,7 +1184,7 @@
 
 
 
-                        <textarea v-model="registerForm.game_experience" placeholder="请描述您的游戏经�? rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+                        <textarea v-model="registerForm.game_experience" placeholder="请描述您的游戏经历" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
 
 
 
@@ -1208,7 +1208,7 @@
 
 
 
-                <!-- 查询状�?-->
+                <!-- 查询状态 -->
 
 
 
@@ -1224,7 +1224,7 @@
 
 
 
-                    <p style="color: #999; font-size: 14px;">点击企微群中的报名链接即可填写报名信�?/p>
+                    <p style="color: #999; font-size: 14px;">点击企微群中的报名链接即可填写报名信息</p>
 
 
 
@@ -1240,7 +1240,7 @@
 
 
 
-                    <h3 style="margin-bottom: 20px; color: #333;">查询报名状�?/h3>
+                    <h3 style="margin-bottom: 20px; color: #333;">查询报名状态</h3>
 
 
 
@@ -1264,11 +1264,11 @@
 
 
 
-                        <p style="margin-bottom: 8px;"><strong>姓名�?/strong>{{ (statusResult && statusResult.name) || '未知' }}</p>
+                        <p style="margin-bottom: 8px;"><strong>姓名：</strong>{{ (statusResult && statusResult.name) || '未知' }}</p>
 
 
 
-                        <p style="margin-bottom: 8px;"><strong>报名状态：</strong><span :style="{ color: statusResult.status === '已入�? ? 'green' : statusResult.status === '未入�? ? 'red' : '#666' }">{{ statusResult.status }}</span></p>
+                        <p style="margin-bottom: 8px;"><strong>报名状态：</strong><span :style="{ color: statusResult.status === '已入选' ? 'green' : statusResult.status === '未入选' ? 'red' : '#666' }">{{ statusResult.status }}</span></p>
 
 
 
@@ -1324,7 +1324,7 @@
 
 
 
-                    <input v-model="searchQuery" type="text" placeholder="搜索姓名/学校/专业/手机�?.." @input="debouncedSearch">
+                    <input v-model="searchQuery" type="text" placeholder="搜索姓名/学校/专业/手机号..." @input="debouncedSearch">
 
 
 
@@ -1396,7 +1396,7 @@
 
 
 
-                        <option value="实习�?>实习�?/option>
+                        <option value="实习生">实习生</option>
 
 
 
@@ -1564,7 +1564,7 @@
 
 
 
-                                <th>毕业�?/th>
+                                <th>毕业年</th>
 
 
 
@@ -1572,7 +1572,7 @@
 
 
 
-                                <th>手机�?/th>
+                                <th>手机号</th>
 
 
 
@@ -1628,7 +1628,7 @@
 
 
 
-                                <td colspan="13" class="loading">加载�?..</td>
+                                <td colspan="13" class="loading">加载中...</td>
 
 
 
@@ -1868,7 +1868,7 @@
 
 
 
-                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一�?/button>
+                    <button @click="changePage(pagination.page - 1)" :disabled="pagination.page === 1">上一页</button>
 
 
 
@@ -1884,7 +1884,7 @@
 
 
 
-                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一�?/button>
+                    <button @click="changePage(pagination.page + 1)" :disabled="pagination.page >= pagination.total_pages">下一页</button>
 
 
 
@@ -1956,7 +1956,7 @@
 
 
 
-                        <h4>总人�?/h4>
+                        <h4>总人数</h4>
 
 
 
@@ -2196,7 +2196,7 @@
 
 
 
-                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最�?00个）
+                <p style="color: #666; margin-bottom: 16px;">当前共有 <strong>{{ systemUsers.length }}</strong> 个账号（最多200个）
 
 
 
@@ -2260,7 +2260,7 @@
 
 
 
-                                <th>用户�?/th>
+                                <th>用户名</th>
 
 
 
@@ -2464,7 +2464,7 @@
 
 
 
-                            <label>用户�?/label>
+                            <label>用户名</label>
 
 
 
@@ -2472,7 +2472,7 @@
 
 
 
-                            <input v-model="newUser.username" type="text" placeholder="输入用户�?>
+                            <input v-model="newUser.username" type="text" placeholder="输入用户名">
 
 
 
@@ -2560,7 +2560,7 @@
 
 
 
-                                <option value="admin">管理�?/option>
+                                <option value="admin">管理员</option>
 
 
 
@@ -2672,11 +2672,11 @@
 
 
 
-                    <h2>需求管�?/h2>
+                    <h2>需求管理</h2>
 
 
 
-                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需�?/button>
+                    <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
 
 
 
@@ -2692,23 +2692,23 @@
 
 
 
-                        <option value="">全部状�?/option>
+                        <option value="">全部状态</option>
 
 
 
-                        <option value="pending">待报�?/option>
+                        <option value="pending">待报价</option>
 
 
 
-                        <option value="quoting">报价�?/option>
+                        <option value="quoting">报价中</option>
 
 
 
-                        <option value="confirmed">已确�?/option>
+                        <option value="confirmed">已确认</option>
 
 
 
-                        <option value="recruiting">招募�?/option>
+                        <option value="recruiting">招募中</option>
 
 
 
@@ -2716,7 +2716,7 @@
 
 
 
-                        <option value="done">已完�?/option>
+                        <option value="done">已完成</option>
 
 
 
@@ -2736,7 +2736,7 @@
 
 
 
-                        <thead><tr><th>ID</th><th>标题</th><th>业务类型</th><th>档位</th><th>数量</th><th>报价</th><th>状�?/th><th>截止日期</th><th>操作</th></tr></thead>
+                        <thead><tr><th>ID</th><th>标题</th><th>业务类型</th><th>档位</th><th>数量</th><th>报价</th><th>状态</th><th>截止日期</th><th>操作</th></tr></thead>
 
 
 
@@ -2768,7 +2768,7 @@
 
 
 
-                                <td><span v-if="getQuote(d.id)">￥{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">待计�?/span></td>
+                                <td><span v-if="getQuote(d.id)">￥{{ getQuote(d.id).total_quote }}</span><span v-else style="color:#999;">待计算</span></td>
 
 
 
@@ -2829,7 +2829,7 @@
 
 
 
-                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">暂无需�?/td></tr>
+                            <tr v-if="demands.length === 0"><td colspan="9" style="text-align:center;color:#999;padding:20px;">暂无需求</td></tr>
 
 
 
@@ -2877,7 +2877,7 @@
 
 
 
-            <!-- 发布需求弹�?-->
+            <!-- 发布需求弹窗 -->
 
 
 
@@ -2893,7 +2893,7 @@
 
 
 
-                    <h3 style="margin:0;">发布需�?/h3>
+                    <h3 style="margin:0;">发布需求</h3>
 
 
 
@@ -2913,7 +2913,7 @@
 
 
 
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">提单�?*</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">提单人 *</label>
 
 
 
@@ -2943,10 +2943,10 @@
                         <div>
 
 
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">父单�?/label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">父单号</label>
 
 
-                            <input v-model="demandForm.parent_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="非必�? />
+                            <input v-model="demandForm.parent_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="非必填" />
 
 
                         </div>
@@ -2955,10 +2955,10 @@
                         <div>
 
 
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">子单�?/label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">子单号</label>
 
 
-                            <input v-model="demandForm.child_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="非必�? />
+                            <input v-model="demandForm.child_order" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="非必填" />
 
 
                         </div>
@@ -2970,7 +2970,7 @@
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">执行时间</label>
 
 
-                            <input v-model="demandForm.execution_time" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="不填默认未来3�? />
+                            <input v-model="demandForm.execution_time" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="不填默认未来3天" />
 
 
                         </div>
@@ -3069,10 +3069,10 @@
 
 
 
-                        <template v-if="demandForm.business_type === '实验室执�?">
+                        <template v-if="demandForm.business_type === '实验室执行'">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">开始日�?/label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">开始日期</label>
                                 <input v-model="demandForm.start_date" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
                             <div>
@@ -3090,12 +3090,12 @@
                                 <input v-model.number="demandForm.sessions_per_parttimer" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每天餐补数</label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每天餐%E6%95%B0</label>
                                 <select v-model.number="demandForm.meals_per_day" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                                    <option :value="0">无餐补</option>
-                                    <option :value="1">1顿</option>
-                                    <option :value="2">2顿</option>
-                                    <option :value="3">3顿</option>
+                                    <option :value="0">不满%E5%A4%9A</option>
+                                    <option :value="1">1%E9%A4%9D</option>
+                                    <option :value="2">2%E9%A4%9D</option>
+                                    <option :value="3">3%E9%A4%9D</option>
                                 </select>
                             </div>
                         </div>
@@ -3107,7 +3107,7 @@
 
 
 
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求描�?/label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求描述</label>
 
 
 
@@ -3179,7 +3179,7 @@
 
 
 
-                    <h3 style="margin-bottom:16px;">需求详�?/h3>
+                    <h3 style="margin-bottom:16px;">需求详情</h3>
 
 
 
@@ -3187,23 +3187,23 @@
 
 
 
-                        <div><strong>标题�?/strong>{{ currentDemand.title }}</div>
+                        <div><strong>标题：</strong>{{ currentDemand.title }}</div>
 
 
 
-                        <div><strong>业务类型�?/strong>{{ currentDemand.business_type }}</div>
+                        <div><strong>业务类型：</strong>{{ currentDemand.business_type }}</div>
 
 
 
-                        <div><strong>档位�?/strong>{{ currentDemand.tier }}</div>
+                        <div><strong>档位：</strong>{{ currentDemand.tier }}</div>
 
 
 
-                        <div><strong>数量�?/strong>{{ currentDemand.quantity }}</div>
+                        <div><strong>数量：</strong>{{ currentDemand.quantity }}</div>
 
 
 
-                        <div><strong>截止日期�?/strong>{{ currentDemand.deadline || "-" }}</div>
+                        <div><strong>截止日期：</strong>{{ currentDemand.deadline || "-" }}</div>
 
 
 
@@ -3211,11 +3211,11 @@
 
 
 
-                        <div style="grid-column:1/-1;"><strong>描述�?/strong>{{ currentDemand.description || "�? }}</div>
+                        <div style="grid-column:1/-1;"><strong>描述：</strong>{{ currentDemand.description || "无" }}</div>
 
 
 
-                        <div style="grid-column:1/-1;"><strong>要求�?/strong>{{ currentDemand.requirements || "�? }}</div>
+                        <div style="grid-column:1/-1;"><strong>要求：</strong>{{ currentDemand.requirements || "无" }}</div>
 
 
 
@@ -3223,7 +3223,7 @@
 
 
 
-                            <strong>报价�?/strong>兼职工资{{ currentQuote.part_time_wage }}�?+ 人力成本{{ currentQuote.human_cost }}�?= <strong>总计{{ currentQuote.total_quote }}�?/strong>
+                            <strong>报价：</strong>兼职工资{{ currentQuote.part_time_wage }}元 + 人力成本{{ currentQuote.human_cost }}元 = <strong>总计{{ currentQuote.total_quote }}元</strong>
 
 
 
@@ -3263,7 +3263,8 @@
 
                 <div v-if="evalDemandId" style="margin-bottom:16px;font-size:13px;color:#666;">
 
-                    选中�?<strong>{{ selectedForEval.length }}</strong> �?
+                    选中了 <strong>{{ selectedForEval.length }}</strong> 人
+
                 </div>
 
                 <div v-for="app in selectedForEval" :key="app.id" style="border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:12px;">
@@ -3272,13 +3273,13 @@
 
                     <div v-if="currentUser.role === 'admin'" style="margin-bottom:12px;">
 
-                        <div style="font-size:13px;color:#555;">态度 <span style="color:#aaa;font-size:12px;">(管理员评, 权重�?0%)</span></div>
+                        <div style="font-size:13px;color:#555;">态度 <span style="color:#aaa;font-size:12px;">(管理员评, 权重：30%)</span></div>
 
                         <div style="display:flex;gap:4px;margin-top:4px;">
 
                             <span v-for="s in [1,2,3,4,5]" :key="s" @click="setAttitudeRating(app.id, s)"
 
-                                :style="{cursor:'pointer',fontSize:'28px',color: getAttitudeRating(app.id) >= s ? '#ff9800' : '#ddd',margin:'0 3px',display:'inline-block'}">�?/span>
+                                :style="{cursor:'pointer',fontSize:'28px',color: getAttitudeRating(app.id) >= s ? '#ff9800' : '#ddd',margin:'0 3px',display:'inline-block'}">★</span>
 
                         </div>
 
@@ -3286,13 +3287,13 @@
 
                     <div v-if="currentUser.role === 'demander'">
 
-                        <div style="font-size:13px;color:#555;">质量 <span style="color:#aaa;font-size:12px;">(需求方�? 权重�?0%)</span></div>
+                        <div style="font-size:13px;color:#555;">质量 <span style="color:#aaa;font-size:12px;">(需求方评, 权重：70%)</span></div>
 
                         <div style="display:flex;gap:4px;margin-top:4px;">
 
                             <span v-for="s in [1,2,3,4,5]" :key="s" @click="setQualityRating(app.id, s)"
 
-                                :style="{cursor:'pointer',fontSize:'28px',color: getQualityRating(app.id) >= s ? '#ff9800' : '#ddd',margin:'0 3px',display:'inline-block'}">�?/span>
+                                :style="{cursor:'pointer',fontSize:'28px',color: getQualityRating(app.id) >= s ? '#ff9800' : '#ddd',margin:'0 3px',display:'inline-block'}">★</span>
 
                         </div>
 
@@ -3324,7 +3325,7 @@
 
 
 
-                    <h3 style="margin-bottom:16px;">填写报价（管理员�?/h3>
+                    <h3 style="margin-bottom:16px;">填写报价（管理员）</h3>
 
 
 
@@ -3332,7 +3333,7 @@
 
 
 
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元�?/label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">兼职工资（元）</label>
 
 
 
@@ -3348,7 +3349,7 @@
 
 
 
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">人力成本（元�?/label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">人力成本（元）</label>
 
 
 
@@ -3380,7 +3381,7 @@
 
 
 
-                        <strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}�?/strong>
+                        <strong>总计：{{ ((quoteForm.part_time_wage||0)+(quoteForm.human_cost||0)).toFixed(2) }}元</strong>
 
 
 
@@ -3440,7 +3441,7 @@
 
 
 
-                    <h3 style="margin-bottom:16px;">报名列表 - 需�?#{{ currentDemandId }}</h3>
+                    <h3 style="margin-bottom:16px;">报名列表 - 需求 #{{ currentDemandId }}</h3>
 
 
 
@@ -3452,7 +3453,7 @@
 
 
 
-                            <thead><tr><th>ID</th><th>姓名</th><th>手机</th><th>星级</th><th>整体评价</th><th>报名时间</th><th>状�?/th><th>操作</th></tr></thead>
+                            <thead><tr><th>ID</th><th>姓名</th><th>手机</th><th>星级</th><th>整体评价</th><th>报名时间</th><th>状态</th><th>操作</th></tr></thead>
 
 
 
@@ -3588,43 +3589,43 @@
 
 
 
-                        <div><strong>性别�?/strong>{{ talentDetail.gender }}</div>
+                        <div><strong>性别：</strong>{{ talentDetail.gender }}</div>
 
 
 
-                        <div><strong>手机�?/strong>{{ talentDetail.phone }}</div>
+                        <div><strong>手机：</strong>{{ talentDetail.phone }}</div>
 
 
 
-                        <div><strong>城市�?/strong>{{ talentDetail.city }}</div>
+                        <div><strong>城市：</strong>{{ talentDetail.city }}</div>
 
 
 
-                        <div><strong>学校�?/strong>{{ talentDetail.school }}</div>
+                        <div><strong>学校：</strong>{{ talentDetail.school }}</div>
 
 
 
-                        <div><strong>专业�?/strong>{{ talentDetail.major }}</div>
+                        <div><strong>专业：</strong>{{ talentDetail.major }}</div>
 
 
 
-                        <div><strong>学历�?/strong>{{ talentDetail.education }}</div>
+                        <div><strong>学历：</strong>{{ talentDetail.education }}</div>
 
 
 
-                        <div><strong>历史均星�?/strong>{{ talentDetail.avg_rating }}</div>
+                        <div><strong>历史均星：</strong>{{ talentDetail.avg_rating }}</div>
 
 
 
-                        <div><strong>当月星级�?/strong>{{ talentDetail.month_rating }}</div>
+                        <div><strong>当月星级：</strong>{{ talentDetail.month_rating }}</div>
 
 
 
-                        <div style="grid-column:1/-1;"><strong>整体评价�?/strong>{{ talentDetail.overall_summary || "�? }}</div>
+                        <div style="grid-column:1/-1;"><strong>整体评价：</strong>{{ talentDetail.overall_summary || "无" }}</div>
 
 
 
-                        <div style="grid-column:1/-1;"><strong>详细评价�?/strong>{{ talentDetail.detailed_review || "�? }}</div>
+                        <div style="grid-column:1/-1;"><strong>详细评价：</strong>{{ talentDetail.detailed_review || "无" }}</div>
 
 
 
@@ -3676,7 +3677,7 @@
 
 
 
-                        已选中人才�?strong>{{ selectedAppForEval.name }}</strong>
+                        已选中人才：<strong>{{ selectedAppForEval.name }}</strong>
 
 
 
@@ -3688,7 +3689,7 @@
 
 
 
-                        <label style="display:block;margin-bottom:4px;font-size:13px;">评分�?-5星）</label>
+                        <label style="display:block;margin-bottom:4px;font-size:13px;">评分（1-5星）</label>
 
 
 
@@ -3920,7 +3921,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="男">男</option>
 
 
 
@@ -3928,7 +3929,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="女">女</option>
 
 
 
@@ -4016,7 +4017,7 @@
 
 
 
-                                    <option value="实习�?>实习�?/option>
+                                    <option value="实习生">实习生</option>
 
 
 
@@ -4072,7 +4073,7 @@
 
 
 
-                                <input v-model="talentForm.city" type="text" placeholder="�?�?>
+                                <input v-model="talentForm.city" type="text" placeholder="省-市">
 
 
 
@@ -4120,7 +4121,7 @@
 
 
 
-                                    <option value="一�?>一�?/option>
+                                    <option value="一线">一线</option>
 
 
 
@@ -4128,7 +4129,7 @@
 
 
 
-                                    <option value="新一�?>新一�?/option>
+                                    <option value="新一线">新一线</option>
 
 
 
@@ -4320,7 +4321,7 @@
 
 
 
-                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY�?>
+                                <input v-model="talentForm.graduate_year" type="text" placeholder="YYYY年">
 
 
 
@@ -4344,7 +4345,7 @@
 
 
 
-                                <label>手机�?/label>
+                                <label>手机号</label>
 
 
 
@@ -4376,7 +4377,7 @@
 
 
 
-                                <label>微信�?/label>
+                                <label>微信号</label>
 
 
 
@@ -4640,7 +4641,7 @@
 
 
 
-                        <div class="form-section-title">业务能力 (程度�?</div>
+                        <div class="form-section-title">业务能力 (程度类)</div>
 
 
 
@@ -4688,7 +4689,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -4712,7 +4713,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -4768,7 +4769,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -4792,7 +4793,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -4848,7 +4849,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -4872,7 +4873,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -4928,7 +4929,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -4952,7 +4953,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -5008,7 +5009,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -5032,7 +5033,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -5088,7 +5089,7 @@
 
 
 
-                                    <option value="精�?>精�?/option>
+                                    <option value="精通">精通</option>
 
 
 
@@ -5112,7 +5113,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="无">无</option>
 
 
 
@@ -5168,7 +5169,7 @@
 
 
 
-                        <div class="form-section-title">业务能力 (是否�?</div>
+                        <div class="form-section-title">业务能力 (是否类)</div>
 
 
 
@@ -5216,7 +5217,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="是">是</option>
 
 
 
@@ -5224,7 +5225,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="否">否</option>
 
 
 
@@ -5280,7 +5281,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="是">是</option>
 
 
 
@@ -5288,7 +5289,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="否">否</option>
 
 
 
@@ -5320,7 +5321,7 @@
 
 
 
-                                <label>AI知识库建�?/label>
+                                <label>AI知识库建设</label>
 
 
 
@@ -5344,7 +5345,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="是">是</option>
 
 
 
@@ -5352,7 +5353,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="否">否</option>
 
 
 
@@ -5384,7 +5385,7 @@
 
 
 
-                                <label>实验室测�?协助执行</label>
+                                <label>实验室测试-协助执行</label>
 
 
 
@@ -5408,7 +5409,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="是">是</option>
 
 
 
@@ -5416,7 +5417,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="否">否</option>
 
 
 
@@ -5448,7 +5449,7 @@
 
 
 
-                                <label>实验室测�?主负�?/label>
+                                <label>实验室测试-主负责</label>
 
 
 
@@ -5472,7 +5473,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="是">是</option>
 
 
 
@@ -5480,7 +5481,7 @@
 
 
 
-                                    <option value="�?>�?/option>
+                                    <option value="否">否</option>
 
 
 
@@ -5668,11 +5669,11 @@
 
 
 
-                            <div class="form-group"><label>手机�?/label><div v-if="currentUser.role !== 'demander'">{{ detailTalent.phone || '-' }}</div></div>
+                            <div class="form-group"><label>手机号</label><div v-if="currentUser.role !== 'demander'">{{ detailTalent.phone || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>微信�?/label><div v-if="currentUser.role !== 'demander'">{{ detailTalent.wechat || '-' }}</div></div>
+                            <div class="form-group"><label>微信号</label><div v-if="currentUser.role !== 'demander'">{{ detailTalent.wechat || '-' }}</div></div>
 
 
 
@@ -5764,7 +5765,7 @@
 
 
 
-                            <div class="form-group"><label>AI知识库建�?/label><div>{{ detailTalent.knowledge_base || '-' }}</div></div>
+                            <div class="form-group"><label>AI知识库建设</label><div>{{ detailTalent.knowledge_base || '-' }}</div></div>
 
 
 
@@ -5788,11 +5789,11 @@
 
 
 
-                            <div class="form-group"><label>实验室测试协助执�?/label><div>{{ detailTalent.lab_assist || '-' }}</div></div>
+                            <div class="form-group"><label>实验室测试协助执行</label><div>{{ detailTalent.lab_assist || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>实验室测试主�?主持</label><div>{{ detailTalent.lab_leader || '-' }}</div></div>
+                            <div class="form-group"><label>实验室测试主负/主持</label><div>{{ detailTalent.lab_leader || '-' }}</div></div>
 
 
 
@@ -5800,7 +5801,7 @@
 
 
 
-                            <div class="form-group"><label>数据查询/报表开�?/label><div>{{ detailTalent.data_query || '-' }}</div></div>
+                            <div class="form-group"><label>数据查询/报表开发</label><div>{{ detailTalent.data_query || '-' }}</div></div>
 
 
 
@@ -5920,23 +5921,23 @@
 
 
 
-                            <div class="form-group"><label>逆水�?/label><div>{{ detailTalent.key_game_1 || '-' }}</div></div>
+                            <div class="form-group"><label>逆水寒</label><div>{{ detailTalent.key_game_1 || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>燕云十六�?/label><div>{{ detailTalent.key_game_2 || '-' }}</div></div>
+                            <div class="form-group"><label>燕云十六声</label><div>{{ detailTalent.key_game_2 || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>一梦江�?/label><div>{{ detailTalent.key_game_3 || '-' }}</div></div>
+                            <div class="form-group"><label>一梦江湖</label><div>{{ detailTalent.key_game_3 || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>阴阳�?/label><div>{{ detailTalent.key_game_4 || '-' }}</div></div>
+                            <div class="form-group"><label>阴阳师</label><div>{{ detailTalent.key_game_4 || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>金铲铲之�?/label><div>{{ detailTalent.key_game_5 || '-' }}</div></div>
+                            <div class="form-group"><label>金铲铲之战</label><div>{{ detailTalent.key_game_5 || '-' }}</div></div>
 
 
 
@@ -5968,7 +5969,7 @@
 
 
 
-                            <div class="form-group"><label>三角洲行�?/label><div>{{ detailTalent.key_game_13 || '-' }}</div></div>
+                            <div class="form-group"><label>三角洲行动</label><div>{{ detailTalent.key_game_13 || '-' }}</div></div>
 
 
 
@@ -6004,11 +6005,11 @@
 
 
 
-                            <div class="form-group"><label>精通产品（1000h+�?/label><div>{{ detailTalent.proficient_products || '-' }}</div></div>
+                            <div class="form-group"><label>精通产品（1000h+）</label><div>{{ detailTalent.proficient_products || '-' }}</div></div>
 
 
 
-                            <div class="form-group"><label>熟悉产品�?00h+�?/label><div>{{ detailTalent.familiar_products || '-' }}</div></div>
+                            <div class="form-group"><label>熟悉产品（300h+）</label><div>{{ detailTalent.familiar_products || '-' }}</div></div>
 
 
 
@@ -6156,7 +6157,8 @@
 
 
 
-                        请确�?Excel 文件的列名与系统字段对应。列名可以是中文或英文�?
+                        请确保 Excel 文件的列名与系统字段对应。列名可以是中文或英文。
+
 
 
 
@@ -6271,7 +6273,7 @@
 
 
 
-                    <div class="form-group"><label>用户�?*</label>
+                    <div class="form-group"><label>用户名 *</label>
 
 
 
@@ -6287,7 +6289,7 @@
 
 
 
-                        <input v-model="userForm.password" type="password" :placeholder="editingUser ? '留空保持原密�? : '设置密码'" />
+                        <input v-model="userForm.password" type="password" :placeholder="editingUser ? '留空保持原密码' : '设置密码'" />
 
 
 
@@ -6307,7 +6309,7 @@
 
 
 
-                    <div class="form-group"><label>手机�?/label>
+                    <div class="form-group"><label>手机号</label>
 
 
 
@@ -6331,7 +6333,7 @@
 
 
 
-                            <option value="admin">管理�?/option>
+                            <option value="admin">管理员</option>
 
 
 
@@ -6407,7 +6409,7 @@
 
 
 
-                    <p style="color:#666;margin-bottom:16px;">请上�?Excel 文件�?xlsx / .xls），必需列：<strong>username</strong>�?strong>password</strong>，可选列�?strong>role</strong>（默认为 user�?/p>
+                    <p style="color:#666;margin-bottom:16px;">请上传 Excel 文件（.xlsx / .xls），必需列：<strong>username</strong>、<strong>password</strong>，可选列：<strong>role</strong>（默认为 user）</p>
 
 
 
@@ -6579,7 +6581,8 @@
 
 
 
-                // 状�?
+                // 状态
+
 
 
 
@@ -6770,7 +6773,8 @@
 
 
 
-                // 初始化时直接从URL读取demand_id，避免异步时序问�?
+                // 初始化时直接从URL读取demand_id，避免异步时序问题
+
 
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -6813,7 +6817,8 @@
 
 
 
-                // 同步加载demand信息（setup阶段执行，避免onMounted只在首次加载时触发的时序问题�?
+                // 同步加载demand信息（setup阶段执行，避免onMounted只在首次加载时触发的时序问题）
+
 
 
                 if (initDemandId) {
@@ -7152,7 +7157,8 @@
 
 
 
-                                // 登录后如果URL有demand_id，同步加载需求信�?
+                                // 登录后如果URL有demand_id，同步加载需求信息
+
 
 
                                 const params = new URLSearchParams(window.location.search);
@@ -7847,7 +7853,7 @@
 
 
 
-                    if (!confirm('确定要删除这条记录吗�?)) return;
+                    if (!confirm('确定要删除这条记录吗？')) return;
 
 
 
@@ -8199,7 +8205,7 @@
 
 
 
-                        userImportError.value = e.response?.data?.error || '导入失败，请检查文件格�?;
+                        userImportError.value = e.response?.data?.error || '导入失败，请检查文件格式';
 
 
 
@@ -8523,7 +8529,7 @@
 
 
 
-                    statusResult.value = { found: false, status: '请通过招募链接访问后查询报名状�? };
+                    statusResult.value = { found: false, status: '请通过招募链接访问后查询报名状态' };
 
 
 
@@ -8567,7 +8573,7 @@
 
 
 
-                    statusResult.value = { name: '查询失败', status: '请稍后重�? };
+                    statusResult.value = { name: '查询失败', status: '请稍后重试' };
 
 
 
@@ -8683,7 +8689,7 @@
 
 
 
-                        showToast('请填写用户名和密�?);
+                        showToast('请填写用户名和密码');
 
 
 
@@ -8795,7 +8801,7 @@
 
 
 
-                    if (!confirm('确定要删除这个账号吗�?)) return;
+                    if (!confirm('确定要删除这个账号吗？')) return;
 
 
 
@@ -8875,7 +8881,7 @@
 
 
 
-                // ---- 需求管理状�?----
+                // ---- 需求管理状态 ----
 
 
 
@@ -8955,7 +8961,7 @@
 
 
 
-                const statusLabels = ref({ pending:'待报�?, quoting:'报价�?, confirmed:'已确�?, recruiting:'招募�?, selecting:'选择人才', done:'已完�?, cancelled:'已取�? });
+                const statusLabels = ref({ pending:'待报价', quoting:'报价中', confirmed:'已确认', recruiting:'招募中', selecting:'选择人才', done:'已完成', cancelled:'已取消' });
 
 
 
@@ -8975,7 +8981,7 @@
 
 
 
-                // ---- 需求管理方�?----
+                // ---- 需求管理方法 ----
 
 
 
@@ -9191,7 +9197,7 @@
 
 
 
-                        showToast('需求保存成�?);
+                        showToast('需求保存成功');
 
 
 
@@ -9211,7 +9217,7 @@
 
                         loadDemands();
 
-                        showToast('已标记公账已�?);
+                        showToast('已标记公账已提');
 
                     } catch(e) { showToast('操作失败'); }
 
@@ -9235,7 +9241,7 @@
 
                         loadDemands();
 
-                        showToast('需求已保存，公账已�?);
+                        showToast('需求已保存，公账已提');
 
                     } catch(e) { showToast('操作失败'); }
 
@@ -9339,7 +9345,7 @@
 
 
 
-                        showToast('报价已保�?);
+                        showToast('报价已保存');
 
 
 
@@ -9371,7 +9377,7 @@
 
 
 
-                            showToast('报价已确认，招募信息已发送到企微�?);
+                            showToast('报价已确认，招募信息已发送到企微群');
 
 
 
@@ -9379,7 +9385,7 @@
 
 
 
-                            showToast('报价已确认，但企微发送失败，请手动发�?);
+                            showToast('报价已确认，但企微发送失败，请手动发布');
 
 
 
@@ -9423,11 +9429,11 @@
 
 
 
-                            showToast('报价已确认，招募信息已发送到企微�?);
+                            showToast('报价已确认，招募信息已发送到企微群');
 
 
 
-                        } catch(e2) { showToast('报价已确认，但企微发送失�?); }
+                        } catch(e2) { showToast('报价已确认，但企微发送失败'); }
 
 
 
@@ -9475,7 +9481,7 @@
 
 
 
-                    try { await axios.post('/api/applications/' + appId + '/select'); openApplications(currentDemandId.value); showToast('已选中该人�?); } catch(e) { showToast('操作失败'); }
+                    try { await axios.post('/api/applications/' + appId + '/select'); openApplications(currentDemandId.value); showToast('已选中该人才'); } catch(e) { showToast('操作失败'); }
 
 
 
@@ -9515,7 +9521,7 @@
 
 
 
-                    } catch(e) { showToast(e.response?.data?.error || '发送失�?); }
+                    } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
 
 
 
@@ -9563,7 +9569,7 @@
 
 
 
-                    if (!selectedAppForEval.value || !evalForm.value.rating) { showToast('请填写评�?); return; }
+                    if (!selectedAppForEval.value || !evalForm.value.rating) { showToast('请填写评分'); return; }
 
 
 
@@ -9587,7 +9593,7 @@
 
 
 
-                        showToast('评价已提�?);
+                        showToast('评价已提交');
 
 
 
@@ -9644,7 +9650,7 @@
                 const submitDemandEvaluations = async () => {
 
 
-                    if (!selectedForEval.value.length) { showToast('没有选中的兼�?); return; }
+                    if (!selectedForEval.value.length) { showToast('没有选中的兼职'); return; }
 
 
                     const isAdminUser = currentUser.value && currentUser.value.role === 'admin';
@@ -9726,7 +9732,7 @@
                         closeModal();
 
 
-                        showToast('评价已提�?);
+                        showToast('评价已提交');
 
 
                     } catch(e) { showToast('提交失败: ' + (e.response?.data?.error || e.message)); }
@@ -9742,7 +9748,7 @@
 
 
 
-                    try { await axios.post('/api/demands/' + id + '/publish'); showToast('已发送到企微�?); } catch(e) { showToast(e.response?.data?.error || '发送失�?); }
+                    try { await axios.post('/api/demands/' + id + '/publish'); showToast('已发送到企微群'); } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
 
 
 
@@ -9758,7 +9764,7 @@
 
 
 
-                // ---- 初始�?----
+                // ---- 初始化 ----
 
 
 
@@ -9766,7 +9772,8 @@
 
 
 
-                    // 强制关闭所有弹窗（防止卡住�?
+                    // 强制关闭所有弹窗（防止卡住）
+
 
 
                     currentModal.value = null;
@@ -9869,7 +9876,8 @@
 
 
 
-                // 检查登录状�?
+                // 检查登录状态
+
 
 
 
@@ -10304,4 +10312,4 @@
 
 
 
-<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹�?>&#215;</button>
+<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</button>
