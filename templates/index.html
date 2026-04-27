@@ -3090,12 +3090,12 @@
                                 <input v-model.number="demandForm.sessions_per_parttimer" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                             </div>
                             <div>
-                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每天餐%E6%95%B0</label>
+                                <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">每天餐数</label>
                                 <select v-model.number="demandForm.meals_per_day" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                                    <option :value="0">不满%E5%A4%9A</option>
-                                    <option :value="1">1%E9%A4%9D</option>
-                                    <option :value="2">2%E9%A4%9D</option>
-                                    <option :value="3">3%E9%A4%9D</option>
+                                    <option :value="0">无餐补</option>
+                                    <option :value="1">1顿</option>
+                                    <option :value="2">2顿</option>
+                                    <option :value="3">3顿</option>
                                 </select>
                             </div>
                         </div>
