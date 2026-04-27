@@ -6448,6 +6448,7 @@ def create_demand():
 
 
 
+    migrate_add_missing_columns()
     data = request.json
 
 
