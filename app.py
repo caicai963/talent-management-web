@@ -6578,88 +6578,73 @@ def create_demand():
 
 
 
-
             INSERT INTO demands (
-
-
 
 
                 title, description, requirements, business_type, tier,
 
 
+                quantity, gmv, human_cost, budget_min, budget_max,
 
 
-                quantity, gmv,
+                deadline, demander_id, tidanren, status,
 
 
+                product_code, parent_order, child_order, execution_time,
 
 
-                human_cost, budget_min, budget_max,
-
-
-
-
-                deadline, demander_id, tidanren, status
-
-
+                parttimer_count, sessions_per_parttimer, meals_per_day, start_date, end_date
 
 
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 
-
-
         """, (
-
-
 
 
             data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
 
 
-
-
             data.get('business_type', ''), data.get('tier', ''),
-
-
 
 
             data.get('quantity', 1),
 
 
-
-
             data.get('gmv', 0),
-
-
 
 
             data.get('human_cost', 0),
 
 
-
-
             data.get('budget_min'), data.get('budget_max'),
-
-
 
 
             data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
 
 
+            data.get('product_code', ''), data.get('parent_order', ''), data.get('child_order', ''), data.get('execution_time', ''),
+
+
+            data.get('parttimer_count', 1),
+
+
+            data.get('sessions_per_parttimer', 1),
+
+
+            data.get('meals_per_day', 1),
+
+
+            data.get('start_date', ''),
+
+
+            data.get('end_date', '')
 
 
         ))
 
 
-
-
         demand_id = cursor.lastrowid
-
-
-
-
-    close_conn(conn)
 
 
 
