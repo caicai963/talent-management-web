@@ -6499,12 +6499,10 @@ def create_demand():
 
 
 
-                product_code, parent_order, child_order, execution_time
-
-
-
-
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                product_code, parent_order, child_order, execution_time,
+                parttimer_count, sessions_per_parttimer, meals_per_day,
+                start_date, end_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s, %s, %s)
 
 
 
@@ -6596,7 +6594,7 @@ def create_demand():
                 parttimer_count, sessions_per_parttimer, meals_per_day, start_date, end_date
 
 
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)
 
 
         """, (
