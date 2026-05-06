@@ -436,7 +436,7 @@ TALENT_PRICE_TABLE = {
     ],
 
 
-"电訪执行": [
+"电访执行": [
 
 
 
@@ -487,7 +487,7 @@ TALENT_PRICE_TABLE = {
         {"label": "10~20mins/?", "price": 10},
         {"label": "20~30mins/?", "price": 16},
         {"label": ">30mins/?", "price": 20},
- "电訪执行加外呼": [
+ "电访执行加外呼": [
         {"label": "30mins??/?", "price": 30},
         {"label": "30~60mins/?", "price": 45},
         {"label": "60~90mins/????5????", "price": 80},
