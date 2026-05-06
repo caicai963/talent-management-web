@@ -1,19 +1,19 @@
-﻿"""
+"""
 
 
 
 
-人才标签管理系统 - Flask 后端
+???????? - Flask ??
 
 
 
 
-包含：人才管理 + 需求接单流程
+??????? + ??????
 
 
 
 
-支持：SQLite（本地） / PostgreSQL（Supabase 云数据库）
+???SQLite???? / PostgreSQL?Supabase ?????
 
 
 
@@ -88,7 +88,7 @@ CORS(app)
 
 
 
-# 配置 Jinja2 使用 <% %> 替代 {{ }}，避免与 Vue 冲突
+# ?? Jinja2 ?? <% %> ?? {{ }}???? Vue ??
 
 
 
@@ -108,7 +108,7 @@ app.jinja_env.variable_end_string = '%>'
 
 
 
-# 数据库配置：优先使用 DATABASE_URL（Supabase PostgreSQL），否则用本地 SQLite
+# ?????????? DATABASE_URL?Supabase PostgreSQL??????? SQLite
 
 
 
@@ -128,7 +128,7 @@ def get_db():
 
 
 
-    """返回数据库连接（自动在行结束时关闭）"""
+    """??????????????????"""
 
 
 
@@ -313,7 +313,7 @@ def close_conn(conn):
 
 
 
-    """关闭连接（psycopg2 需要 commit+close，sqlite3 只管 close）"""
+    """?????psycopg2 ?? commit+close?sqlite3 ?? close?"""
 
 
 
@@ -373,7 +373,7 @@ def shutdown_session(exception=None):
 
 
 
-    # Flask 请求结束后自动清理连接（通过 request context）
+    # Flask ?????????????? request context?
 
 
 
@@ -393,7 +393,7 @@ def shutdown_session(exception=None):
 
 
 
-# 人才工资单价表（单位：元）
+# ?????????????
 
 
 
@@ -408,57 +408,27 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "用别地执行": [
+    "甄别执行": [
 
 
 
 
-        {"label": "5~10mins/个", "price": 8},
+        {"label": "5~10mins/?", "price": 8},
 
 
 
 
-        {"label": "10~20mins/个", "price": 12},
+        {"label": "10~20mins/?", "price": 12},
 
 
 
 
-        {"label": "20~30mins/个", "price": 16},
+        {"label": "20~30mins/?", "price": 16},
 
 
 
 
-        {"label": ">30mins/个", "price": 26},
-
-
-
-
-    ],
-
-
-
-
-    "电訪地执行": [
-
-
-
-
-        {"label": "30mins以内/个", "price": 30},
-
-
-
-
-        {"label": "30~60mins/个", "price": 45},
-
-
-
-
-        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
-
-
-
-
-        {"label": "90~120mins/个", "price": 100},
+        {"label": ">30mins/?", "price": 26},
 
 
 
@@ -466,52 +436,73 @@ TALENT_PRICE_TABLE = {
     ],
 
 
-
-
-    "实验室执行": [
-
-
-
-
-        {"label": "2H以内/场", "price": 150},
+"电訪执行": [
 
 
 
 
-        {"label": "2~4小时/场", "price": 200},
+        {"label": "30mins??/?", "price": 30},
 
 
 
 
-        {"label": "4~6小时/场", "price": 250},
+        {"label": "30~60mins/?", "price": 45},
+
+
+
+
+        {"label": "60~90mins/????5????", "price": 80},
+
+
+
+
+        {"label": "90~120mins/?", "price": 100},
 
 
 
 
     ],
-
-    "用别地执行+外呼": [
-        {"label": "5~10mins/个", "price": 10},
-        {"label": "10~20mins/个", "price": 10},
-        {"label": "20~30mins/个", "price": 16},
-        {"label": ">30mins/个", "price": 20},
-    ],
-
-    "电訪地执行+外呼": [
-        {"label": "30mins以内/个", "price": 30},
-        {"label": "30~60mins/个", "price": 45},
-        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
-        {"label": "90~120mins/个", "price": 100},
-    ],
-
-
-
-    "邀约拉群": [
+    ],"实验室执行": [
 
 
 
 
-        {"label": "条", "price": 3},
+        {"label": "2H??/?", "price": 150},
+
+
+
+
+        {"label": "2~4??/?", "price": 200},
+
+
+
+
+        {"label": "4~6??/?", "price": 250},
+
+
+
+
+    "甄别执行加外呼": [
+        {"label": "5~10mins/?", "price": 10},
+        {"label": "10~20mins/?", "price": 10},
+        {"label": "20~30mins/?", "price": 16},
+        {"label": ">30mins/?", "price": 20},
+ "电訪执行加外呼": [
+        {"label": "30mins??/?", "price": 30},
+        {"label": "30~60mins/?", "price": 45},
+        {"label": "60~90mins/????5????", "price": 80},
+        {"label": "90~120mins/?", "price": 100},
+    ]"舆情打标": [
+
+
+
+
+        {"label": "?", "price": 3},
+
+
+
+
+    ],       {"label": "?", "price": 3},
 
 
 
@@ -551,7 +542,7 @@ TRANSPORT_SUBSIDY = 50
 
 
 
-LAB_TIER_HOURS = {"2H以内/场": 2, "2~4小时/场": 4, "4~6小时/场": 6}
+LAB_TIER_HOURS = {"2H??/?": 2, "2~4??/?": 4, "4~6??/?": 6}
 
 
 
@@ -616,7 +607,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-        note_parts.append(f"超时{int(overtime_hours)}小时×50={overtime_fee}元")
+        note_parts.append(f"??{int(overtime_hours)}???50={overtime_fee}?")
 
 
 
@@ -626,7 +617,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-        note_parts.append(f"餐补{cross_meal_count}顿×30={meal_fee}元")
+        note_parts.append(f"??{cross_meal_count}??30={meal_fee}?")
 
 
 
@@ -656,7 +647,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-                note_parts.append(f"交通补贴50元")
+                note_parts.append(f"????50?")
 
 
 
@@ -676,7 +667,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-    note = "，".join(note_parts) if note_parts else "无额外补贴"
+    note = "?".join(note_parts) if note_parts else "?????"
 
 
 
@@ -891,7 +882,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz in ("用别地执行", "用别地执行+外呼", "电訪地执行", "电訪地执行+外呼", "街访执行", "测试执行") and not gmv:
+    if biz in ("?????", "?????+??", "?????", "?????+??", "????", "????") and not gmv:
 
 
 
@@ -926,7 +917,7 @@ def calc_quote(demand_data):
 
 
 
-        return {"error": f"未知业务类型: {biz}"}
+        return {"error": f"??????: {biz}"}
 
 
 
@@ -946,7 +937,7 @@ def calc_quote(demand_data):
 
 
 
-        return {"error": f"未知档位: {tier}"}
+        return {"error": f"????: {tier}"}
 
 
 
@@ -981,7 +972,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz == "街访1":
+    if biz == "??1":
 
 
 
@@ -1001,7 +992,7 @@ def calc_quote(demand_data):
 
 
 
-        wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
+        wage_note = f"120?/???+ {price}?/?? {quantity}?"
 
 
 
@@ -1011,7 +1002,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "街访2":
+    elif biz == "??2":
 
 
 
@@ -1046,7 +1037,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
+            wage_note = f"120?/???+ GMV({gmv}?)?{gmv_rate*100:.0f}%"
 
 
 
@@ -1061,7 +1052,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ 固定{fixed}元"
+            wage_note = f"120?/???+ ??{fixed}?"
 
 
 
@@ -1071,65 +1062,65 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "用别地执行+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("用别地执行+外呼", [])
+    elif biz == "?????+??":
+        outer_tiers = TALENT_PRICE_TABLE.get("?????+??", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
-        wage_note = f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"({unit_price}+20???)/???{quantity} = {int(part_time_wage)}?"
         h = vlookup_h(gmv, LUT_ZHENBIE)
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
 
-    elif biz == "用别地执行":
+    elif biz == "?????":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 用别地执行（无外呼）：纯样本单价×数量，无呼出费
+        # ????????????????????????
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/样本×{quantity}个 = {int(part_time_wage)}元"
+        wage_note = f"{unit_price}?/???{quantity}? = {int(part_time_wage)}?"
 
         h = vlookup_h(gmv, LUT_ZHENBIE)
 
-        # 用别地执行+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # ?????+???(????+20?????)?n?20????????????
         if brush:
             part_time_wage = (unit_price + 20) * quantity
-            wage_note = (f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元")
+            wage_note = (f"({unit_price}+20???)/???{quantity} = {int(part_time_wage)}?")
 
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-    elif biz == "电訪地执行+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("电訪地执行+外呼", [])
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
+    elif biz == "?????+??":
+        outer_tiers = TALENT_PRICE_TABLE.get("?????+??", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
-        wage_note = f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"({unit_price}+20???)/??{quantity} = {int(part_time_wage)}?"
         h = vlookup_h(gmv, LUT_DIANFANG)
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
 
-    elif biz == "电訪地执行":
+    elif biz == "?????":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 电訪地执行（无外呼）：纯样本单价×数量，无呼出费
+        # ????????????????????????
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/个×{quantity}个 = {int(part_time_wage)}元"
+        wage_note = f"{unit_price}?/??{quantity}? = {int(part_time_wage)}?"
 
         h = vlookup_h(gmv, LUT_DIANFANG)
 
-        # 电訪地执行+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # ?????+???(????+20?????)?n?20????????????
         if brush:
             part_time_wage = (unit_price + 20) * quantity
-            wage_note = (f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元")
+            wage_note = (f"({unit_price}+20???)/??{quantity} = {int(part_time_wage)}?")
 
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-    elif biz == "街访执行":
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
+    elif biz == "????":
 
 
 
@@ -1144,7 +1135,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访2：只拦截不访谈，按GMV比例
+            # ??2?????????GMV??
 
 
 
@@ -1159,7 +1150,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
+            wage_note = f"120?/???+ GMV({gmv}?)?{gmv_rate*100:.0f}%"
 
 
 
@@ -1169,7 +1160,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访2：固定档位
+            # ??2?????
 
 
 
@@ -1189,7 +1180,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ 固定{fixed}元"
+            wage_note = f"120?/???+ ??{fixed}?"
 
 
 
@@ -1199,7 +1190,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访1：拦截+访谈，按样本数×单价
+            # ??1???+??????????
 
 
 
@@ -1219,7 +1210,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
+            wage_note = f"120?/???+ {price}?/?? {quantity}?"
 
 
 
@@ -1234,7 +1225,7 @@ def calc_quote(demand_data):
 
 
 
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
 
 
 
@@ -1244,7 +1235,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "测试执行":
+    elif biz == "????":
 
 
 
@@ -1259,7 +1250,7 @@ def calc_quote(demand_data):
 
 
 
-        wage_note = f"{unit_price}元/场× {quantity}场"
+        wage_note = f"{unit_price}?/?? {quantity}?"
 
 
 
@@ -1274,7 +1265,7 @@ def calc_quote(demand_data):
 
 
 
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
 
 
 
@@ -1284,7 +1275,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "实验室执行":
+    elif biz == "?????":
 
         unit_price = tier_data.get("price", 0)
         parttimer_count = demand_data.get("parttimer_count", 1)
@@ -1308,18 +1299,18 @@ def calc_quote(demand_data):
         meal_fee = 30 * meals_per_day * days
         transport_fee = 50 * days
         part_time_wage = parttimer_count * (base_wage + meal_fee + transport_fee)
-        wage_note = f"{parttimer_count}人×({sessions}场×{unit_price}元+30×{meals_per_day}餐×{days}天+50×{days}天) = {int(part_time_wage)}元"
+        wage_note = f"{parttimer_count}??({sessions}??{unit_price}?+30?{meals_per_day}??{days}?+50?{days}?) = {int(part_time_wage)}?"
 
         human_cost = 0
-        human_note = "无人力成本"
+        human_note = "?????"
 
-    elif biz == "邀约拉群":
+    elif biz == "????":
         unit_price = 3
         part_time_wage = unit_price * quantity
-        wage_note = f"3元/人×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"3?/??{quantity} = {int(part_time_wage)}?"
         h = vlookup_h(gmv, LUT_ZHENBIE)
         human_cost = h * 1200
-        human_note = f"标本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"???{gmv}?????{h}?1200 = {int(human_cost)}?"
 
     else:
 
@@ -1346,12 +1337,12 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = (f"({unit_price}+15元/样本)×{quantity}={part_time_wage}元，"
+            wage_note = (f"({unit_price}+15?/??)?{quantity}={part_time_wage}??"
 
 
 
 
-                         f"呼出费用根据拨打难度有所不同，以实际产生结算")
+                         f"??????????????????????")
 
 
 
@@ -1366,7 +1357,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"{unit_price}元/个× {quantity}个"
+            wage_note = f"{unit_price}?/?? {quantity}?"
 
 
 
@@ -1431,7 +1422,7 @@ def calc_quote(demand_data):
 
 
 
-# 人才字段映射
+# ??????
 
 
 
@@ -1446,242 +1437,242 @@ COLUMN_MAP = {
 
 
 
-    "name": "姓名", "gender": "性别", "birth_date": "出生年月",
+    "name": "??", "gender": "??", "birth_date": "????",
 
 
 
 
-    "identity_tag": "身份标签", "city": "常住城市", "city_level": "城市级别",
+    "identity_tag": "????", "city": "????", "city_level": "????",
 
 
 
 
-    "school": "学校", "major": "专业", "education": "在读学历",
+    "school": "??", "major": "??", "education": "????",
 
 
 
 
-    "graduate_year": "预计毕业年份", "phone": "手机号", "wechat": "微信号",
+    "graduate_year": "??????", "phone": "???", "wechat": "???",
 
 
 
 
-    "project_count": "业务次数", "avg_rating": "历史平均星级",
+    "project_count": "????", "avg_rating": "??????",
 
 
 
 
-    "month_rating": "当月星级", "overall_summary": "整体评价摘要",
+    "month_rating": "????", "overall_summary": "??????",
 
 
 
 
-    "detailed_review": "详细业务评价", "exam_score": "兼职考试得分",
+    "detailed_review": "??????", "exam_score": "??????",
 
 
 
 
-    "basic_test": "日常跑测/基础测评",
+    "basic_test": "????/????",
 
 
 
 
-    "desktop_research": "桌面研究（竞品舆情/资料整理）",
+    "desktop_research": "?????????/?????",
 
 
 
 
-    "issue_list": "问题清单执行", "insight_proposal": "洞察提案能力",
+    "issue_list": "??????", "insight_proposal": "??????",
 
 
 
 
-    "skills_debug": "Skills生成/调试（AI工具）",
+    "skills_debug": "Skills??/???AI???",
 
 
 
 
-    "agent_debug": "Agent生成/调试", "knowledge_base": "AI知识库建设",
+    "agent_debug": "Agent??/??", "knowledge_base": "AI?????",
 
 
 
 
-    "interview_selection": "访谈执行-玩家用别地执行",
+    "interview_selection": "????-???????",
 
 
 
 
-    "online_interview": "访谈执行-线上访谈",
+    "online_interview": "????-????",
 
 
 
 
-    "field_interview": "访谈执行-田野调查/外访",
+    "field_interview": "????-????/??",
 
 
 
 
-    "questionnaire_design": "访谈提纲/问卷设计",
+    "questionnaire_design": "????/????",
 
 
 
 
-    "questionnaire_analysis": "问卷调研（录入整理/分析）",
+    "questionnaire_analysis": "?????????/???",
 
 
 
 
-    "lab_assist": "实验室测试协助执行", "lab_leader": "实验室测试主负责/主持",
+    "lab_assist": "?????????", "lab_leader": "????????/??",
 
 
 
 
-    "data_warehouse": "数仓工作（日常报表）",
+    "data_warehouse": "??????????",
 
 
 
 
-    "data_query": "数据查询/报表开发", "web_crawl": "爬虫/数据收集",
+    "data_query": "????/????", "web_crawl": "??/????",
 
 
 
 
-    "deep_assessment": "深度测评能力",
+    "deep_assessment": "??????",
 
 
 
 
-    "commercial_research": "商业化研究与分析",
+    "commercial_research": "????????",
 
 
 
 
-    "excel_level": "Excel技能等级", "spss_level": "SPSS技能等级",
+    "excel_level": "Excel????", "spss_level": "SPSS????",
 
 
 
 
-    "language_ability": "语言能力",
+    "language_ability": "????",
 
 
 
 
-    "category_moba": "品类-MOBA类（英雄联盟、王者荣耀等）",
+    "category_moba": "??-MOBA?????????????",
 
 
 
 
-    "category_mmorgp": "品类-MMORPG（逆水寒、梦幻西游等）",
+    "category_mmorgp": "??-MMORPG???????????",
 
 
 
 
-    "category_openworld_rpg": "品类-开放世界RPG（塞尔达，原神等）",
+    "category_openworld_rpg": "??-????RPG?????????",
 
 
 
 
-    "category_card_rpg": "品类-卡牌RPG类（阴阳师、崩坏：星穹铁道等）",
+    "category_card_rpg": "??-??RPG???????????????",
 
 
 
 
-    "category_tactical": "品类-战术竞技类（PUBG、和平精英等）",
+    "category_tactical": "??-??????PUBG???????",
 
 
 
 
-    "category_shooter": "品类-射击类（穿越火线、CODM等）",
+    "category_shooter": "??-?????????CODM??",
 
 
 
 
-    "category_strategy_slg": "品类-策略/SLG类（文明、率土之滨等）",
+    "category_strategy_slg": "??-??/SLG???????????",
 
 
 
 
-    "category_action_fight": "品类-动作/格斗类（只狼、崩坏等）",
+    "category_action_fight": "??-??/???????????",
 
 
 
 
-    "category_sandbox_survival": "品类-沙盒/生存类（我的世界、明日之后等）",
+    "category_sandbox_survival": "??-??/???????????????",
 
 
 
 
-    "category_autochess": "品类-自走棋类（金铲铲、多多自走棋等）",
+    "category_autochess": "??-????????????????",
 
 
 
 
-    "category_casual_puzzle": "品类-休闲益智类（羊了个羊、消消乐等）",
+    "category_casual_puzzle": "??-????????????????",
 
 
 
 
-    "category_party": "品类-休闲竞技/派对类（蛋仔派对、鹅鸭杀等）",
+    "category_party": "??-????/??????????????",
 
 
 
 
-    "category_etc": "品类-其他（自填）",
+    "category_etc": "??-??????",
 
 
 
 
-    "key_game_1": "重点游戏-逆水寒", "key_game_2": "重点游戏-燕云十六声",
+    "key_game_1": "????-???", "key_game_2": "????-?????",
 
 
 
 
-    "key_game_3": "重点游戏-一梦江湖", "key_game_4": "重点游戏-阴阳师",
+    "key_game_3": "????-????", "key_game_4": "????-???",
 
 
 
 
-    "key_game_5": "重点游戏-金铲铲之战", "key_game_6": "重点游戏-蛋仔派对",
+    "key_game_5": "????-?????", "key_game_6": "????-????",
 
 
 
 
-    "key_game_7": "重点游戏-无尽冬日", "key_game_8": "重点游戏-率土之滨",
+    "key_game_7": "????-????", "key_game_8": "????-????",
 
 
 
 
-    "key_game_9": "重点游戏-王者荣耀", "key_game_10": "重点游戏-英雄联盟",
+    "key_game_9": "????-????", "key_game_10": "????-????",
 
 
 
 
-    "key_game_11": "重点游戏-明日之后", "key_game_12": "重点游戏-萤火突击",
+    "key_game_11": "????-????", "key_game_12": "????-????",
 
 
 
 
-    "key_game_13": "重点游戏-三角洲行动",
+    "key_game_13": "????-?????",
 
 
 
 
-    "deep_game_1": "深度游戏1", "deep_game_2": "深度游戏2", "deep_game_3": "深度游戏3",
+    "deep_game_1": "????1", "deep_game_2": "????2", "deep_game_3": "????3",
 
 
 
 
-    "proficient_products": "精通产品（1000h+）",
+    "proficient_products": "?????1000h+?",
 
 
 
 
-    "familiar_products": "熟悉产品（500h+）",
+    "familiar_products": "?????500h+?",
 
 
 
 
-    "other_game_experience": "其他游戏经历补充",
+    "other_game_experience": "????????",
 
 
 
@@ -1711,7 +1702,7 @@ TALENT_FIELDS = list(COLUMN_MAP.keys())
 
 
 
-# 数据库初始化
+# ??????
 
 
 
@@ -1746,7 +1737,7 @@ def init_db():
 
 
 
-        # PostgreSQL 模式
+        # PostgreSQL ??
 
 
 
@@ -2576,7 +2567,7 @@ def init_db():
 
 
 
-        # SQLite 本地开发模式
+        # SQLite ??????
 
 
 
@@ -3131,7 +3122,7 @@ except Exception as e:
 
 
 
-    print(f"[WARN] 数据库初始化失败（稍后可访问 /api/init 重试）: {e}")
+    print(f"[WARN] ?????????????? /api/init ???: {e}")
 
 
 
@@ -3156,7 +3147,7 @@ except Exception as e:
 
 
 
-# 调试用：手动初始化数据库（部署后调用一次即可）
+# ???????????????????????
 
 
 
@@ -3201,7 +3192,7 @@ def manual_init():
 
 
 
-        return jsonify({'message': '数据库初始化完成'})
+        return jsonify({'message': '????????'})
 
 
 
@@ -3226,7 +3217,7 @@ def manual_init():
 
 
 
-        # 找最后一个有价值的行
+        # ??????????
 
 
 
@@ -3261,7 +3252,7 @@ def manual_init():
 
 
 
-# 路由和 API
+# ??? API
 
 
 
@@ -3306,7 +3297,7 @@ def apply_page():
 
 
 
-    """报名页面入口，企微等外部浏览器直接打开此路径"""
+    """??????????????????????"""
 
 
 
@@ -3476,7 +3467,7 @@ def reset_admin():
 
 
 
-    return jsonify({'message': 'admin/admin123 已重置'})
+    return jsonify({'message': 'admin/admin123 ???'})
 
 
 
@@ -3536,7 +3527,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '系统已有多个账号'}), 403
+        return jsonify({'error': '????????'}), 403
 
 
 
@@ -3551,7 +3542,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '请创建1~5个账号'}), 400
+        return jsonify({'error': '???1~5???'}), 400
 
 
 
@@ -3571,7 +3562,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '用户名不能重复'}), 400
+        return jsonify({'error': '???????'}), 400
 
 
 
@@ -3636,7 +3627,7 @@ def system_setup():
 
 
 
-    return jsonify({'message': f'成功创建 {len(users_to_create)} 个账号'})
+    return jsonify({'message': f'???? {len(users_to_create)} ???'})
 
 
 
@@ -3751,7 +3742,7 @@ def create_user():
 
 
 
-        return jsonify({'error': '用户名和密码不能为空'}), 400
+        return jsonify({'error': '??????????'}), 400
 
 
 
@@ -3781,7 +3772,7 @@ def create_user():
 
 
 
-        return jsonify({'error': '最多只能创建200个账号'}), 400
+        return jsonify({'error': '??????200???'}), 400
 
 
 
@@ -3841,7 +3832,7 @@ def create_user():
 
 
 
-        return jsonify({'id': user_id, 'message': '账号创建成功'})
+        return jsonify({'id': user_id, 'message': '??????'})
 
 
 
@@ -3866,7 +3857,7 @@ def create_user():
 
 
 
-            return jsonify({'error': '用户名已存在'}), 400
+            return jsonify({'error': '??????'}), 400
 
 
 
@@ -3896,7 +3887,7 @@ def import_users():
 
 
 
-    """批量导入账号（Excel 文件）"""
+    """???????Excel ???"""
 
 
 
@@ -3921,7 +3912,7 @@ def import_users():
 
 
 
-        return jsonify({'error': '请上传 Excel 文件'}), 400
+        return jsonify({'error': '??? Excel ??'}), 400
 
 
 
@@ -3936,7 +3927,7 @@ def import_users():
 
 
 
-        # 验证必需列
+        # ?????
 
 
 
@@ -3956,7 +3947,7 @@ def import_users():
 
 
 
-            return jsonify({'error': f'Excel 缺少必需列: {", ".join(missing)}，可选列: role'}), 400
+            return jsonify({'error': f'Excel ?????: {", ".join(missing)}????: role'}), 400
 
 
 
@@ -4031,7 +4022,7 @@ def import_users():
 
 
 
-            # 限制总数不超过 200 个
+            # ??????? 200 ?
 
 
 
@@ -4051,7 +4042,7 @@ def import_users():
 
 
 
-                errors.append(f"第{idx+2}行: 已达到账号上限（200个）")
+                errors.append(f"?{idx+2}?: ????????200??")
 
 
 
@@ -4136,7 +4127,7 @@ def import_users():
 
 
 
-                    errors.append(f"第{idx+2}行「{username}」: 用户名已存在")
+                    errors.append(f"?{idx+2}??{username}?: ??????")
 
 
 
@@ -4146,7 +4137,7 @@ def import_users():
 
 
 
-                    errors.append(f"第{idx+2}行「{username}」: {err_msg}")
+                    errors.append(f"?{idx+2}??{username}?: {err_msg}")
 
 
 
@@ -4161,7 +4152,7 @@ def import_users():
 
 
 
-        msg = f'成功导入 {imported} 个账号'
+        msg = f'???? {imported} ???'
 
 
 
@@ -4171,7 +4162,7 @@ def import_users():
 
 
 
-            msg += f'，跳过 {skipped} 行'
+            msg += f'??? {skipped} ?'
 
 
 
@@ -4246,7 +4237,7 @@ def delete_user(user_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '????'})
 
 
 
@@ -4448,34 +4439,34 @@ def gongzhang_yiti_email(demand_id):
                 biz = demand.get('biz_type') or demand.get('business_type') or ""
                 parent_oid = demand.get('parent_order') or ""
                 base_url = "http://talent-management-web.onrender.com"
-                subj = dt + " 兼职需求已完结，请评价"
+                subj = dt + " ???????????"
                 # Plain text email
-                po_line = ("【父单单号】" + parent_oid + " " if parent_oid else "")
+                po_line = ("??????" + parent_oid + " " if parent_oid else "")
                 lines = [
-                    "哈喽" + demander_name + "：",
-                    "您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价",
+                    "??" + demander_name + "?",
+                    "??" + po_line + "???????????????????????",
                     "",
                 ]
                 if biz:
-                    lines.append("【业务类型】" + biz)
+                    lines.append("??????" + biz)
                 lines.append("")
                 for t in (selected_list or []):
-                    name = t.get('name') or "未知"
-                    lines.append(name + "：1-5分（评分）+评语（填空，非必答）")
+                    name = t.get('name') or "??"
+                    lines.append(name + "?1-5?????+??????????")
                     lines.append("")
                 tb = "\n".join(lines)
-                tb += "\n评价链接：" + base_url + "/evaluate?demand_id=" + str(demand_id) + " 点此评价"
+                tb += "\n?????" + base_url + "/evaluate?demand_id=" + str(demand_id) + " ????"
                 hl = ["<html><body>",
-                      "<p>哈喽" + demander_name + "：</p>",
-                      "<p>您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价</p>"]
+                      "<p>??" + demander_name + "?</p>",
+                      "<p>??" + po_line + "???????????????????????</p>"]
                 if biz:
-                    hl.append("<p>【业务类型】" + biz + "</p>")
+                    hl.append("<p>??????" + biz + "</p>")
                 hl.append("<ul>")
                 for t in (selected_list or []):
-                    name = t.get('name') or "未知"
-                    hl.append("<li>" + name + "：1-5分（评分）+评语（填空，非必答）</li>")
+                    name = t.get('name') or "??"
+                    hl.append("<li>" + name + "?1-5?????+??????????</li>")
                 hl.append("</ul>")
-                hl.append("<p><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "'>点此评价</a></p>")
+                hl.append("<p><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "'>????</a></p>")
                 hl.append("</body></html>")
                 hb = "".join(hl)
                 ok, r = send_email(de, subj, hb, tb)
@@ -4493,7 +4484,7 @@ def gongzhang_yiti_email(demand_id):
 
 @app.route('/api/debug/demand/<int:demand_id>/email-info', methods=['GET'])
 def debug_email_info(demand_id):
-    """诊断公账已提邮件为什么没发"""
+    """?????????????"""
     try:
         conn = get_db()
         cursor = conn.cursor()
@@ -4548,7 +4539,7 @@ def debug_email_info(demand_id):
         return jsonify({'error': str(e), 'trace': traceback.format_exc()[-500:]}), 500
 
 
-# ---- 人才管理 API ----
+# ---- ???? API ----
 
 
 
@@ -5098,12 +5089,12 @@ def create_talent():
 
 
 
-        return jsonify({'id': None, 'message': '创建成功（无字段）'})
+        return jsonify({'id': None, 'message': '?????????'})
 
 
 
 
-    return jsonify({'id': talent_id, 'message': '创建成功'})
+    return jsonify({'id': talent_id, 'message': '????'})
 
 
 
@@ -5228,7 +5219,7 @@ def update_talent(talent_id):
 
 
 
-    return jsonify({'message': '更新成功'})
+    return jsonify({'message': '????'})
 
 
 
@@ -5288,7 +5279,7 @@ def delete_talent(talent_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '????'})
 
 
 
@@ -5513,7 +5504,7 @@ def import_talents():
 
 
 
-                    errors.append(f"第{idx+2}行: {str(e)}")
+                    errors.append(f"?{idx+2}?: {str(e)}")
 
 
 
@@ -5523,7 +5514,7 @@ def import_talents():
 
 
 
-        msg = f'成功导入 {imported} 条记录'
+        msg = f'???? {imported} ???'
 
 
 
@@ -5533,7 +5524,7 @@ def import_talents():
 
 
 
-            msg += f'，{len(errors)} 行失败'
+            msg += f'?{len(errors)} ???'
 
 
 
@@ -5653,7 +5644,7 @@ def export_talents():
 
 
 
-        df.to_excel(writer, index=False, sheet_name='人才库')
+        df.to_excel(writer, index=False, sheet_name='???')
 
 
 
@@ -5678,7 +5669,7 @@ def export_talents():
 
 
 
-                     download_name=f'人才库_{datetime.now().strftime("%Y%m%d")}.xlsx')
+                     download_name=f'???_{datetime.now().strftime("%Y%m%d")}.xlsx')
 
 
 
@@ -5813,7 +5804,7 @@ def get_stats():
 
 
 
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '??'")
 
 
 
@@ -5823,7 +5814,7 @@ def get_stats():
 
 
 
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '??'")
 
 
 
@@ -5858,7 +5849,7 @@ def get_stats():
 
 
 
-# 需求接单模块 API
+# ?????? API
 
 
 
@@ -6298,7 +6289,7 @@ def get_demands():
 
 
 
-        return jsonify({'error': 'get_demands失败: ' + str(e)[:200], 'trace': traceback.format_exc()[-500:]}), 500
+        return jsonify({'error': 'get_demands??: ' + str(e)[:200], 'trace': traceback.format_exc()[-500:]}), 500
 
 
 
@@ -6663,7 +6654,7 @@ def create_demand():
 
 
 
-    return jsonify({'id': demand_id, 'message': '需求创建成功'})
+    return jsonify({'id': demand_id, 'message': '??????'})
 
 
 
@@ -6753,7 +6744,7 @@ def update_demand(demand_id):
 
 
 
-    return jsonify({'message': '更新成功'})
+    return jsonify({'message': '????'})
 
 
 
@@ -6813,7 +6804,7 @@ def delete_demand(demand_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '????'})
 
 
 
@@ -6828,7 +6819,7 @@ def delete_demand(demand_id):
 
 
 
-# ---- 报价 API ----
+# ---- ?? API ----
 
 
 
@@ -6893,7 +6884,7 @@ def calc_demand_quote(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '?????'}), 404
 
 
 
@@ -7203,7 +7194,7 @@ def save_quote(demand_id):
 
 
 
-    return jsonify({'id': quote_id, 'message': '报价已保存'})
+    return jsonify({'id': quote_id, 'message': '?????'})
 
 
 
@@ -7408,7 +7399,7 @@ def confirm_quote(demand_id):
 
 
 
-    return jsonify({'message': '报价已确认，进入招募阶段'})
+    return jsonify({'message': '????????????'})
 
 
 
@@ -7423,7 +7414,7 @@ def confirm_quote(demand_id):
 
 
 
-# ---- 报名 API ----
+# ---- ?? API ----
 
 
 
@@ -7443,7 +7434,7 @@ def apply_demand(demand_id):
 
 
 
-    """报名接口：接收{name, phone}，根据手机号查找或创建人才记录然后创建报名。"""
+    """???????{name, phone}??????????????????????"""
 
 
 
@@ -7468,7 +7459,7 @@ def apply_demand(demand_id):
 
 
 
-        return jsonify({'error': '手机号不能为空'}), 400
+        return jsonify({'error': '???????'}), 400
 
 
 
@@ -7558,7 +7549,7 @@ def apply_demand(demand_id):
 
 
 
-                (name or '未知', phone, wechat)
+                (name or '??', phone, wechat)
 
 
 
@@ -7583,7 +7574,7 @@ def apply_demand(demand_id):
 
 
 
-                (name or '未知', phone, wechat)
+                (name or '??', phone, wechat)
 
 
 
@@ -7648,7 +7639,7 @@ def apply_demand(demand_id):
 
 
 
-        return jsonify({'error': '已经报过名了'}), 400
+        return jsonify({'error': '??????'}), 400
 
 
 
@@ -7723,7 +7714,7 @@ def apply_demand(demand_id):
 
 
 
-    return jsonify({'id': app_id, 'message': '报名成功', 'talent_id': talent_id})
+    return jsonify({'id': app_id, 'message': '????', 'talent_id': talent_id})
 
 
 
@@ -7738,7 +7729,7 @@ def get_demand_public(demand_id):
 
 
 
-    """公开接口：获取需求基本信息（用于报名页面）"""
+    """?????????????????????"""
 
 
 
@@ -7848,7 +7839,7 @@ def get_demand_public(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '?????'}), 404
 
 
 
@@ -7878,7 +7869,7 @@ def get_apply_status(demand_id):
 
 
 
-    """公开接口：根据手机号查询当前需求的报名状态"""
+    """?????????????????????"""
 
 
 
@@ -7893,7 +7884,7 @@ def get_apply_status(demand_id):
 
 
 
-        return jsonify({'error': '手机号不能为空'}), 400
+        return jsonify({'error': '???????'}), 400
 
 
 
@@ -8023,7 +8014,7 @@ def get_apply_status(demand_id):
 
 
 
-        return jsonify({'applied': False, 'message': '未找到报名记录'})
+        return jsonify({'applied': False, 'message': '???????'})
 
 
 
@@ -8213,7 +8204,7 @@ def select_talent(app_id):
 
 
 
-    # 获取当前 application 信息（demand_id + talent_id）
+    # ???? application ???demand_id + talent_id?
 
 
 
@@ -8253,7 +8244,7 @@ def select_talent(app_id):
 
 
 
-        return jsonify({'error': '未找到报名记录'}), 404
+        return jsonify({'error': '???????'}), 404
 
 
 
@@ -8273,7 +8264,7 @@ def select_talent(app_id):
 
 
 
-    # 更新状态为已入选
+    # ????????
 
 
 
@@ -8303,7 +8294,7 @@ def select_talent(app_id):
 
 
 
-    # 获取需求标题
+    # ??????
 
 
 
@@ -8333,7 +8324,7 @@ def select_talent(app_id):
 
 
 
-    demand_title = demand_row['title']; tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', ''); tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', '') if demand_row else '未知需求'
+    demand_title = demand_row['title']; tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', ''); tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', '') if demand_row else '????'
 
 
 
@@ -8343,7 +8334,7 @@ def select_talent(app_id):
 
 
 
-    # 获取所有已入选的兼职信息
+    # ????????????
 
 
 
@@ -8433,7 +8424,7 @@ def select_talent(app_id):
 
 
 
-    # 发送企微执行群通知
+    # ?????????
 
 
 
@@ -8448,7 +8439,7 @@ def select_talent(app_id):
 
 
 
-    return jsonify({'message': '已选中该人才', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
+    return jsonify({'message': '??????', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
 
 
 
@@ -8508,7 +8499,7 @@ def reject_talent(app_id):
 
 
 
-    return jsonify({'message': '已拒绝'})
+    return jsonify({'message': '???'})
 
 
 
@@ -8533,7 +8524,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    """手动触发入选通知到企微执行群"""
+    """??????????????"""
 
 
 
@@ -8553,7 +8544,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    # 获取需求标题
+    # ??????
 
 
 
@@ -8593,7 +8584,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '?????'}), 404
 
 
 
@@ -8608,7 +8599,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    # 获取所有已入选的兼职
+    # ??????????
 
 
 
@@ -8703,7 +8694,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-        return jsonify({'error': '暂无已入选的兼职'}), 400
+        return jsonify({'error': '????????'}), 400
 
 
 
@@ -8728,7 +8719,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    return jsonify({'message': '已发送企微执行群', 'count': len(selected_list)})
+    return jsonify({'message': '????????', 'count': len(selected_list)})
 
 
 
@@ -8783,7 +8774,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    return jsonify({'message': '已拒绝'})
+    return jsonify({'message': '???'})
 
 
 
@@ -8798,7 +8789,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-# ---- 评价 API ----
+# ---- ?? API ----
 
 
 
@@ -9030,7 +9021,7 @@ def create_evaluation(demand_id):
 
     eval_id = cursor.lastrowid
 
-    # 计算并更新人才的month_rating和avg_rating
+    # ????????month_rating?avg_rating
     try:
         from datetime import datetime
         if DATABASE_URL:
@@ -9087,10 +9078,10 @@ def create_evaluation(demand_id):
 
     close_conn(conn)
 
-    return jsonify({'id': eval_id, 'message': '评价已保存', 'month_rating': month_rating_val if 'month_rating_val' in dir() else None, 'avg_rating': avg_rating_val if 'avg_rating_val' in dir() else None})
+    return jsonify({'id': eval_id, 'message': '?????', 'month_rating': month_rating_val if 'month_rating_val' in dir() else None, 'avg_rating': avg_rating_val if 'avg_rating_val' in dir() else None})
 
 
-# ---- 企微 Webhook ----# ---- 企微 Webhook ----
+# ---- ?? Webhook ----# ---- ?? Webhook ----
 
 
 
@@ -9195,7 +9186,7 @@ def send_wecom_message(content):
 
 
 
-            return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
+            return {'error': '?? Webhook URL ?????????????'}
 
 
 
@@ -9275,7 +9266,7 @@ def send_wecom_message(content):
 
 
 
-            return {'error': result.get('errmsg', '发送失败')}
+            return {'error': result.get('errmsg', '????')}
 
 
 
@@ -9305,12 +9296,12 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    """入选后发送企微群通知（通过群机器人）
+    """??????????????????
 
 
 
 
-    selected_list: [{'name': '张三', 'phone': '138xxx', 'wechat': 'zhangsan'}]
+    selected_list: [{'name': '??', 'phone': '138xxx', 'wechat': 'zhangsan'}]
 
 
 
@@ -9320,7 +9311,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    # 优先用 wecom_group_webhook_url，没有则复用 wecom_webhook_url（群机器人与个人机器人共享同一key）
+    # ??? wecom_group_webhook_url?????? wecom_webhook_url???????????????key?
 
 
 
@@ -9335,7 +9326,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写 wecom_webhook_url'}
+        return {'error': '?? Webhook URL ????????????? wecom_webhook_url'}
 
 
 
@@ -9345,22 +9336,22 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    msg = f"### ✅ 入选通知\n"
+    msg = f"### ? ????\n"
 
 
 
 
-    msg += f"**产品代号：** {product_code or title}\n"
+    msg += f"**?????** {product_code or title}\n"
 
 
 
 
-    msg += f"**提单人：** {tidanren}\n" + f"**入选人数：** {len(selected_list)} 人\n\n"
+    msg += f"**????** {tidanren}\n" + f"**?????** {len(selected_list)} ?\n\n"
 
 
 
 
-    msg += "**入选名单：**\n"
+    msg += "**?????**\n"
 
 
 
@@ -9370,7 +9361,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-        wechat_info = f"（微信号：{t['wechat']}）" if t.get('wechat') else "（暂无微信号）"
+        wechat_info = f"?????{t['wechat']}?" if t.get('wechat') else "???????"
 
 
 
@@ -9380,7 +9371,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    msg += f"\n请相关执行负责人尽快拉群并通知以上人员。"
+    msg += f"\n????????????????????"
 
 
 
@@ -9455,7 +9446,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-            return {'error': result.get('errmsg', '发送失败')}
+            return {'error': result.get('errmsg', '????')}
 
 
 
@@ -9505,7 +9496,7 @@ def publish_to_wecom(demand_id):
 
 
 
-            return jsonify({'error': '企微 Webhook URL 未配置'}), 400
+            return jsonify({'error': '?? Webhook URL ???'}), 400
 
 
 
@@ -9611,7 +9602,7 @@ def publish_to_wecom(demand_id):
 
 
 
-            return jsonify({'error': '需求不存在'}), 404
+            return jsonify({'error': '?????'}), 404
 
 
 
@@ -9669,34 +9660,34 @@ def publish_to_wecom(demand_id):
 
 
 
-        brush_str = "（刷名单）" if demand['brush_list'] else ""
+        brush_str = "?????" if demand['brush_list'] else ""
 
-        # 根据 business_type 和 tier 获取样本单价
+        # ?? business_type ? tier ??????
         def get_sample_price(biz_type, tier):
             sample_prices = {
-                "电訪地执行": {
-                    "30mins以内/个": 30,
-                    "30~60mins/个": 45,
-                    "60~90mins/个（仅限5星兼职）": 80,
-                    "90~120mins/个": 100,
+                "?????": {
+                    "30mins??/?": 30,
+                    "30~60mins/?": 45,
+                    "60~90mins/????5????": 80,
+                    "90~120mins/?": 100,
                 },
-                "用别地执行": {
-                    "5~10mins/个": 8,
-                    "10~20mins/个": 12,
-                    "20~30mins/个": 16,
-                    ">30mins/个": 26,
+                "?????": {
+                    "5~10mins/?": 8,
+                    "10~20mins/?": 12,
+                    "20~30mins/?": 16,
+                    ">30mins/?": 26,
                 },
-                "电訪地执行+外呼": {
-                    "30mins以内/个": 30,
-                    "30~60mins/个": 45,
-                    "60~90mins/个（仅限5星兼职）": 80,
-                    "90~120mins/个": 100,
+                "?????+??": {
+                    "30mins??/?": 30,
+                    "30~60mins/?": 45,
+                    "60~90mins/????5????": 80,
+                    "90~120mins/?": 100,
                 },
-                "用别地执行+外呼": {
-                    "5~10mins/个": 10,
-                    "10~20mins/个": 10,
-                    "20~30mins/个": 16,
-                    ">30mins/个": 20,
+                "?????+??": {
+                    "5~10mins/?": 10,
+                    "10~20mins/?": 10,
+                    "20~30mins/?": 16,
+                    ">30mins/?": 20,
                 },
             }
             if biz_type in sample_prices:
@@ -9770,15 +9761,15 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg = "### New 需求发布\n"
+        msg = "### New ????\n"
 
 
 
-        msg += "**业务类型：** %s\n" % msg_biz
+        msg += "**?????** %s\n" % msg_biz
 
 
 
-        msg += "**数量：** %s\n" % msg_qty
+        msg += "**???** %s\n" % msg_qty
 
 
 
@@ -9790,29 +9781,29 @@ def publish_to_wecom(demand_id):
 
 
 
-            # Always show 单价 only in 企微 push
+            # Always show ?? only in ?? push
             biz = demand.get("business_type","")
             unit_price = get_sample_price(biz, demand.get("tier",""))
-            if biz and "外呼" in biz:
-                if "电訪地执行" in biz:
-                    msg += "**单价：** (0.5/呼出+%s/个)\n" % unit_price
+            if biz and "??" in biz:
+                if "?????" in biz:
+                    msg += "**???** (0.5/??+%s/?)\n" % unit_price
                 else:
-                    msg += "**单价：** (0.5/呼出+%s/样本)\n" % unit_price
+                    msg += "**???** (0.5/??+%s/??)\n" % unit_price
             else:
-                if "电訪地执行" in biz:
-                    msg += "**单价：** %s/个\n" % unit_price
-                elif "用别地执行" in biz:
-                    msg += "**单价：** %s/样本\n" % unit_price
+                if "?????" in biz:
+                    msg += "**???** %s/?\n" % unit_price
+                elif "?????" in biz:
+                    msg += "**???** %s/??\n" % unit_price
 
-        msg += "\n**执行时间：** %s\n" % execution_time
-
-
-
-        msg += "\n**截止日期：** %s\n" % msg_deadline
+        msg += "\n**?????** %s\n" % execution_time
 
 
 
-        msg += "**需求描述：** %s\n" % msg_desc
+        msg += "\n**?????** %s\n" % msg_deadline
+
+
+
+        msg += "**?????** %s\n" % msg_desc
 
 
 
@@ -9820,11 +9811,11 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
+        msg += "> ?????[????](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
 
 
 
-        msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
+        msg += "\n\n> ?? **????**????????????????????????????????"
 
 
 
@@ -9849,7 +9840,7 @@ def publish_to_wecom(demand_id):
 
 
 
-        return jsonify({'message': '已发送到企微群', 'result': result})
+        return jsonify({'message': '???????', 'result': result})
 
 
 
@@ -9866,7 +9857,7 @@ def publish_to_wecom(demand_id):
 
 
 
-    # ---- 人才端：我的报名 & 我的评价 ----
+    # ---- ???????? & ???? ----
 
 
 
@@ -10176,7 +10167,7 @@ def my_evaluations(talent_id):
 
 
 
-# ---- 系统设置 API ----
+# ---- ???? API ----
 
 
 
@@ -10301,7 +10292,7 @@ def set_setting_api(key):
 
 
 
-    return jsonify({'message': '设置已保存', 'key': key, 'value': value})
+    return jsonify({'message': '?????', 'key': key, 'value': value})
 
 
 
@@ -10321,7 +10312,7 @@ def init_wecom_settings():
 
 
 
-    """启动时自动保存企微应用凭证（已配置则跳过）"""
+    """?????????????????????"""
 
 
 
