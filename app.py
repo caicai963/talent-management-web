@@ -3,17 +3,17 @@
 
 
 
-人才标签管理系统 - Flask 后端
+浜烘�����绛剧�＄��绯荤�� - Flask ���绔�
 
 
 
 
-包含：人才管理 + 需求接单流程
+������锛�浜烘��绠＄�� + ���姹���ュ��娴�绋�
 
 
 
 
-支持：SQLite（本地） / PostgreSQL（Supabase 云数据库）
+������锛�SQLite锛������帮�� / PostgreSQL锛�Supabase 浜���版��搴�锛�
 
 
 
@@ -88,7 +88,7 @@ CORS(app)
 
 
 
-# 配置 Jinja2 使用 <% %> 替代 {{ }}，避免与 Vue 冲突
+# ���缃� Jinja2 浣跨�� <% %> ��夸唬 {{ }}锛���垮��涓� Vue ��茬��
 
 
 
@@ -108,7 +108,7 @@ app.jinja_env.variable_end_string = '%>'
 
 
 
-# 数据库配置：优先使用 DATABASE_URL（Supabase PostgreSQL），否则用本地 SQLite
+# ��版��搴����缃�锛�浼����浣跨�� DATABASE_URL锛�Supabase PostgreSQL锛�锛���������ㄦ����� SQLite
 
 
 
@@ -128,7 +128,7 @@ def get_db():
 
 
 
-    """返回数据库连接（自动在行结束时关闭）"""
+    """杩������版��搴�杩���ワ�������ㄥ�ㄨ��缁������跺�抽��锛�"""
 
 
 
@@ -313,7 +313,7 @@ def close_conn(conn):
 
 
 
-    """关闭连接（psycopg2 需要 commit+close，sqlite3 只管 close）"""
+    """��抽��杩���ワ��psycopg2 ���瑕� commit+close锛�sqlite3 ���绠� close锛�"""
 
 
 
@@ -373,7 +373,7 @@ def shutdown_session(exception=None):
 
 
 
-    # Flask 请求结束后自动清理连接（通过 request context）
+    # Flask 璇锋��缁������������ㄦ�����杩���ワ�����杩� request context锛�
 
 
 
@@ -393,7 +393,7 @@ def shutdown_session(exception=None):
 
 
 
-# 人才工资单价表（单位：元）
+# 浜烘��宸ヨ�����浠疯〃锛����浣�锛����锛�
 
 
 
@@ -408,57 +408,27 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "甄别": [
+    "������": [
 
 
 
 
-        {"label": "5~10mins/个", "price": 8},
+        {"label": "5~10mins/涓�", "price": 8},
 
 
 
 
-        {"label": "10~20mins/个", "price": 12},
+        {"label": "10~20mins/涓�", "price": 12},
 
 
 
 
-        {"label": "20~30mins/个", "price": 16},
+        {"label": "20~30mins/涓�", "price": 16},
 
 
 
 
-        {"label": ">30mins/个", "price": 26},
-
-
-
-
-    ],
-
-
-
-
-    "电访": [
-
-
-
-
-        {"label": "30mins以内/个", "price": 30},
-
-
-
-
-        {"label": "30~60mins/个", "price": 45},
-
-
-
-
-        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
-
-
-
-
-        {"label": "90~120mins/个", "price": 100},
+        {"label": ">30mins/涓�", "price": 26},
 
 
 
@@ -468,50 +438,80 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "实验室执行": [
+    "��佃��": [
 
 
 
 
-        {"label": "2H以内/场", "price": 150},
+        {"label": "30mins浠ュ��/涓�", "price": 30},
 
 
 
 
-        {"label": "2~4小时/场", "price": 200},
+        {"label": "30~60mins/涓�", "price": 45},
 
 
 
 
-        {"label": "4~6小时/场", "price": 250},
+        {"label": "60~90mins/涓�锛�浠����5�����艰��锛�", "price": 80},
+
+
+
+
+        {"label": "90~120mins/涓�", "price": 100},
 
 
 
 
     ],
 
-    "甄别+外呼": [
-        {"label": "5~10mins/个", "price": 10},
-        {"label": "10~20mins/个", "price": 10},
-        {"label": "20~30mins/个", "price": 16},
-        {"label": ">30mins/个", "price": 20},
+
+
+
+    "瀹�楠�瀹ゆ�ц��": [
+
+
+
+
+        {"label": "2H浠ュ��/���", "price": 150},
+
+
+
+
+        {"label": "2~4灏����/���", "price": 200},
+
+
+
+
+        {"label": "4~6灏����/���", "price": 250},
+
+
+
+
     ],
 
-    "电访+外呼": [
-        {"label": "30mins以内/个", "price": 30},
-        {"label": "30~60mins/个", "price": 45},
-        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
-        {"label": "90~120mins/个", "price": 100},
+    "������+澶����": [
+        {"label": "5~10mins/涓�", "price": 10},
+        {"label": "10~20mins/涓�", "price": 10},
+        {"label": "20~30mins/涓�", "price": 16},
+        {"label": ">30mins/涓�", "price": 20},
+    ],
+
+    "��佃��+澶����": [
+        {"label": "30mins浠ュ��/涓�", "price": 30},
+        {"label": "30~60mins/涓�", "price": 45},
+        {"label": "60~90mins/涓�锛�浠����5�����艰��锛�", "price": 80},
+        {"label": "90~120mins/涓�", "price": 100},
     ],
 
 
 
-    "邀约拉群": [
+    "���绾����缇�": [
 
 
 
 
-        {"label": "条", "price": 3},
+        {"label": "���", "price": 3},
 
 
 
@@ -551,7 +551,7 @@ TRANSPORT_SUBSIDY = 50
 
 
 
-LAB_TIER_HOURS = {"2H以内/场": 2, "2~4小时/场": 4, "4~6小时/场": 6}
+LAB_TIER_HOURS = {"2H浠ュ��/���": 2, "2~4灏����/���": 4, "4~6灏����/���": 6}
 
 
 
@@ -616,7 +616,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-        note_parts.append(f"超时{int(overtime_hours)}小时×50={overtime_fee}元")
+        note_parts.append(f"瓒����{int(overtime_hours)}灏���睹�50={overtime_fee}���")
 
 
 
@@ -626,7 +626,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-        note_parts.append(f"餐补{cross_meal_count}顿×30={meal_fee}元")
+        note_parts.append(f"椁�琛�{cross_meal_count}椤棵�30={meal_fee}���")
 
 
 
@@ -656,7 +656,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-                note_parts.append(f"交通补贴50元")
+                note_parts.append(f"浜ら��琛ヨ创50���")
 
 
 
@@ -676,7 +676,7 @@ def calc_human_cost_lab(tier_label, end_time_str, cross_meal_count, scheduled_ho
 
 
 
-    note = "，".join(note_parts) if note_parts else "无额外补贴"
+    note = "锛�".join(note_parts) if note_parts else "���棰�澶�琛ヨ创"
 
 
 
@@ -891,7 +891,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz in ("甄别", "甄别+外呼", "电访", "电访+外呼", "街访执行", "测试执行") and not gmv:
+    if biz in ("������", "������+澶����", "��佃��", "��佃��+澶����", "琛�璁挎�ц��", "娴�璇���ц��") and not gmv:
 
 
 
@@ -926,7 +926,7 @@ def calc_quote(demand_data):
 
 
 
-        return {"error": f"未知业务类型: {biz}"}
+        return {"error": f"�����ヤ����＄被���: {biz}"}
 
 
 
@@ -946,7 +946,7 @@ def calc_quote(demand_data):
 
 
 
-        return {"error": f"未知档位: {tier}"}
+        return {"error": f"�����ユ。浣�: {tier}"}
 
 
 
@@ -981,7 +981,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz == "街访1":
+    if biz == "琛�璁�1":
 
 
 
@@ -1001,7 +1001,7 @@ def calc_quote(demand_data):
 
 
 
-        wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
+        wage_note = f"120���/澶╁�����+ {price}���/涓��� {quantity}涓�"
 
 
 
@@ -1011,7 +1011,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "街访2":
+    elif biz == "琛�璁�2":
 
 
 
@@ -1046,7 +1046,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
+            wage_note = f"120���/澶╁�����+ GMV({gmv}���)��{gmv_rate*100:.0f}%"
 
 
 
@@ -1061,7 +1061,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ 固定{fixed}元"
+            wage_note = f"120���/澶╁�����+ ��哄��{fixed}���"
 
 
 
@@ -1071,65 +1071,65 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "甄别+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("甄别+外呼", [])
+    elif biz == "������+澶����":
+        outer_tiers = TALENT_PRICE_TABLE.get("������+澶����", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
-        wage_note = f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"({unit_price}+20�����煎��)/��锋����{quantity} = {int(part_time_wage)}���"
         h = vlookup_h(gmv, LUT_ZHENBIE)
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
 
-    elif biz == "甄别":
+    elif biz == "������":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 甄别（无外呼）：纯样本单价×数量，无呼出费
+        # ������锛����澶���硷��锛�绾���锋�����浠访���伴��锛������煎�鸿垂
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/样本×{quantity}个 = {int(part_time_wage)}元"
+        wage_note = f"{unit_price}���/��锋����{quantity}涓� = {int(part_time_wage)}���"
 
         h = vlookup_h(gmv, LUT_ZHENBIE)
 
-        # 甄别+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # ������+澶���硷��(��锋�����浠�+20�����煎�洪��浼�)��n锛�20���姣�涓���锋�������煎�鸿垂��ㄩ��浼�
         if brush:
             part_time_wage = (unit_price + 20) * quantity
-            wage_note = (f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元")
+            wage_note = (f"({unit_price}+20�����煎��)/��锋����{quantity} = {int(part_time_wage)}���")
 
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-    elif biz == "电访+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("电访+外呼", [])
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
+    elif biz == "��佃��+澶����":
+        outer_tiers = TALENT_PRICE_TABLE.get("��佃��+澶����", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
-        wage_note = f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"({unit_price}+20�����煎��)/涓���{quantity} = {int(part_time_wage)}���"
         h = vlookup_h(gmv, LUT_DIANFANG)
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
 
-    elif biz == "电访":
+    elif biz == "��佃��":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 电访（无外呼）：纯样本单价×数量，无呼出费
+        # ��佃�匡�����澶���硷��锛�绾���锋�����浠访���伴��锛������煎�鸿垂
         part_time_wage = unit_price * quantity
-        wage_note = f"{unit_price}元/个×{quantity}个 = {int(part_time_wage)}元"
+        wage_note = f"{unit_price}���/涓���{quantity}涓� = {int(part_time_wage)}���"
 
         h = vlookup_h(gmv, LUT_DIANFANG)
 
-        # 电访+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # ��佃��+澶���硷��(��锋�����浠�+20�����煎�洪��浼�)��n锛�20���姣�涓���锋�������煎�鸿垂��ㄩ��浼�
         if brush:
             part_time_wage = (unit_price + 20) * quantity
-            wage_note = (f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元")
+            wage_note = (f"({unit_price}+20�����煎��)/涓���{quantity} = {int(part_time_wage)}���")
 
         human_cost = h * 1200
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-    elif biz == "街访执行":
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
+    elif biz == "琛�璁挎�ц��":
 
 
 
@@ -1144,7 +1144,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访2：只拦截不访谈，按GMV比例
+            # 琛�璁�2锛����������涓�璁胯��锛����GMV姣�渚�
 
 
 
@@ -1159,7 +1159,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ GMV({gmv}元)×{gmv_rate*100:.0f}%"
+            wage_note = f"120���/澶╁�����+ GMV({gmv}���)��{gmv_rate*100:.0f}%"
 
 
 
@@ -1169,7 +1169,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访2：固定档位
+            # 琛�璁�2锛���哄��妗ｄ��
 
 
 
@@ -1189,7 +1189,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ 固定{fixed}元"
+            wage_note = f"120���/澶╁�����+ ��哄��{fixed}���"
 
 
 
@@ -1199,7 +1199,7 @@ def calc_quote(demand_data):
 
 
 
-            # 街访1：拦截+访谈，按样本数×单价
+            # 琛�璁�1锛�������+璁胯��锛������锋����懊����浠�
 
 
 
@@ -1219,7 +1219,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"120元/天底薪+ {price}元/个× {quantity}个"
+            wage_note = f"120���/澶╁�����+ {price}���/涓��� {quantity}涓�"
 
 
 
@@ -1234,7 +1234,7 @@ def calc_quote(demand_data):
 
 
 
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
 
 
 
@@ -1244,7 +1244,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "测试执行":
+    elif biz == "娴�璇���ц��":
 
 
 
@@ -1259,7 +1259,7 @@ def calc_quote(demand_data):
 
 
 
-        wage_note = f"{unit_price}元/场× {quantity}场"
+        wage_note = f"{unit_price}���/��好� {quantity}���"
 
 
 
@@ -1274,7 +1274,7 @@ def calc_quote(demand_data):
 
 
 
-        human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"��锋�����{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
 
 
 
@@ -1284,7 +1284,7 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "实验室执行":
+    elif biz == "瀹�楠�瀹ゆ�ц��":
 
         unit_price = tier_data.get("price", 0)
         parttimer_count = demand_data.get("parttimer_count", 1)
@@ -1308,18 +1308,18 @@ def calc_quote(demand_data):
         meal_fee = 30 * meals_per_day * days
         transport_fee = 50 * days
         part_time_wage = parttimer_count * (base_wage + meal_fee + transport_fee)
-        wage_note = f"{parttimer_count}人×({sessions}场×{unit_price}元+30×{meals_per_day}餐×{days}天+50×{days}天) = {int(part_time_wage)}元"
+        wage_note = f"{parttimer_count}浜好�({sessions}��好�{unit_price}���+30��{meals_per_day}椁���{days}澶�+50��{days}澶�) = {int(part_time_wage)}���"
 
         human_cost = 0
-        human_note = "无人力成本"
+        human_note = "���浜哄��������"
 
-    elif biz == "邀约拉群":
+    elif biz == "���绾����缇�":
         unit_price = 3
         part_time_wage = unit_price * quantity
-        wage_note = f"3元/人×{quantity} = {int(part_time_wage)}元"
+        wage_note = f"3���/浜好�{quantity} = {int(part_time_wage)}���"
         h = vlookup_h(gmv, LUT_ZHENBIE)
         human_cost = h * 1200
-        human_note = f"标本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
+        human_note = f"���������{gmv}���浜哄��������{h}��1200 = {int(human_cost)}���"
 
     else:
 
@@ -1346,12 +1346,12 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = (f"({unit_price}+15元/样本)×{quantity}={part_time_wage}元，"
+            wage_note = (f"({unit_price}+15���/��锋��)��{quantity}={part_time_wage}���锛�"
 
 
 
 
-                         f"呼出费用根据拨打难度有所不同，以实际产生结算")
+                         f"��煎�鸿垂��ㄦ�规����ㄦ����惧害������涓����锛�浠ュ�����浜х��缁�绠�")
 
 
 
@@ -1366,7 +1366,7 @@ def calc_quote(demand_data):
 
 
 
-            wage_note = f"{unit_price}元/个× {quantity}个"
+            wage_note = f"{unit_price}���/涓��� {quantity}涓�"
 
 
 
@@ -1431,7 +1431,7 @@ def calc_quote(demand_data):
 
 
 
-# 人才字段映射
+# 浜烘��瀛�娈垫��灏�
 
 
 
@@ -1446,242 +1446,242 @@ COLUMN_MAP = {
 
 
 
-    "name": "姓名", "gender": "性别", "birth_date": "出生年月",
+    "name": "濮����", "gender": "��у��", "birth_date": "��虹��骞存��",
 
 
 
 
-    "identity_tag": "身份标签", "city": "常住城市", "city_level": "城市级别",
+    "identity_tag": "韬�浠芥��绛�", "city": "甯镐�����甯�", "city_level": "���甯�绾у��",
 
 
 
 
-    "school": "学校", "major": "专业", "education": "在读学历",
+    "school": "瀛����", "major": "涓�涓�", "education": "��ㄨ�诲�����",
 
 
 
 
-    "graduate_year": "预计毕业年份", "phone": "手机号", "wechat": "微信号",
+    "graduate_year": "棰�璁℃��涓�骞翠唤", "phone": "�����哄��", "wechat": "寰�淇″��",
 
 
 
 
-    "project_count": "业务次数", "avg_rating": "历史平均星级",
+    "project_count": "涓���℃�℃��", "avg_rating": "�����插钩������绾�",
 
 
 
 
-    "month_rating": "当月星级", "overall_summary": "整体评价摘要",
+    "month_rating": "褰�������绾�", "overall_summary": "��翠��璇�浠锋��瑕�",
 
 
 
 
-    "detailed_review": "详细业务评价", "exam_score": "兼职考试得分",
+    "detailed_review": "璇�缁�涓���¤��浠�", "exam_score": "��艰�����璇�寰����",
 
 
 
 
-    "basic_test": "日常跑测/基础测评",
+    "basic_test": "��ュ父璺�娴�/��虹��娴�璇�",
 
 
 
 
-    "desktop_research": "桌面研究（竞品舆情/资料整理）",
+    "desktop_research": "妗���㈢��绌讹��绔����������/璧������寸��锛�",
 
 
 
 
-    "issue_list": "问题清单执行", "insight_proposal": "洞察提案能力",
+    "issue_list": "���棰�娓������ц��", "insight_proposal": "娲�瀵����妗���藉��",
 
 
 
 
-    "skills_debug": "Skills生成/调试（AI工具）",
+    "skills_debug": "Skills������/璋�璇�锛�AI宸ュ�凤��",
 
 
 
 
-    "agent_debug": "Agent生成/调试", "knowledge_base": "AI知识库建设",
+    "agent_debug": "Agent������/璋�璇�", "knowledge_base": "AI��ヨ��搴�寤鸿��",
 
 
 
 
-    "interview_selection": "访谈执行-玩家甄别",
+    "interview_selection": "璁胯����ц��-��╁�剁�����",
 
 
 
 
-    "online_interview": "访谈执行-线上访谈",
+    "online_interview": "璁胯����ц��-绾夸��璁胯��",
 
 
 
 
-    "field_interview": "访谈执行-田野调查/外访",
+    "field_interview": "璁胯����ц��-��伴��璋����/澶�璁�",
 
 
 
 
-    "questionnaire_design": "访谈提纲/问卷设计",
+    "questionnaire_design": "璁胯�����绾�/�����疯�捐��",
 
 
 
 
-    "questionnaire_analysis": "问卷调研（录入整理/分析）",
+    "questionnaire_analysis": "�����疯�����锛�褰���ユ�寸��/������锛�",
 
 
 
 
-    "lab_assist": "实验室测试协助执行", "lab_leader": "实验室测试主负责/主持",
+    "lab_assist": "瀹�楠�瀹ゆ��璇������╂�ц��", "lab_leader": "瀹�楠�瀹ゆ��璇�涓昏��璐�/涓绘��",
 
 
 
 
-    "data_warehouse": "数仓工作（日常报表）",
+    "data_warehouse": "��颁��宸ヤ��锛���ュ父��ヨ〃锛�",
 
 
 
 
-    "data_query": "数据查询/报表开发", "web_crawl": "爬虫/数据收集",
+    "data_query": "��版����ヨ��/��ヨ〃寮����", "web_crawl": "������/��版����堕��",
 
 
 
 
-    "deep_assessment": "深度测评能力",
+    "deep_assessment": "娣卞害娴�璇���藉��",
 
 
 
 
-    "commercial_research": "商业化研究与分析",
+    "commercial_research": "���涓�������绌朵��������",
 
 
 
 
-    "excel_level": "Excel技能等级", "spss_level": "SPSS技能等级",
+    "excel_level": "Excel�����界��绾�", "spss_level": "SPSS�����界��绾�",
 
 
 
 
-    "language_ability": "语言能力",
+    "language_ability": "璇�瑷���藉��",
 
 
 
 
-    "category_moba": "品类-MOBA类（英雄联盟、王者荣耀等）",
+    "category_moba": "���绫�-MOBA绫伙����遍�������������������ｈ��绛�锛�",
 
 
 
 
-    "category_mmorgp": "品类-MMORPG（逆水寒、梦幻西游等）",
+    "category_mmorgp": "���绫�-MMORPG锛����姘村�����姊�骞昏タ娓哥��锛�",
 
 
 
 
-    "category_openworld_rpg": "品类-开放世界RPG（塞尔达，原神等）",
+    "category_openworld_rpg": "���绫�-寮���句�����RPG锛�濉�灏�杈撅�����绁�绛�锛�",
 
 
 
 
-    "category_card_rpg": "品类-卡牌RPG类（阴阳师、崩坏：星穹铁道等）",
+    "category_card_rpg": "���绫�-��＄��RPG绫伙����撮�冲�����宕╁��锛����绌归�����绛�锛�",
 
 
 
 
-    "category_tactical": "品类-战术竞技类（PUBG、和平精英等）",
+    "category_tactical": "���绫�-������绔����绫伙��PUBG������骞崇簿��辩��锛�",
 
 
 
 
-    "category_shooter": "品类-射击类（穿越火线、CODM等）",
+    "category_shooter": "���绫�-灏���荤被锛�绌胯�����绾裤��CODM绛�锛�",
 
 
 
 
-    "category_strategy_slg": "品类-策略/SLG类（文明、率土之滨等）",
+    "category_strategy_slg": "���绫�-绛����/SLG绫伙�����������������涔�婊ㄧ��锛�",
 
 
 
 
-    "category_action_fight": "品类-动作/格斗类（只狼、崩坏等）",
+    "category_action_fight": "���绫�-��ㄤ��/��兼��绫伙�������笺��宕╁��绛�锛�",
 
 
 
 
-    "category_sandbox_survival": "品类-沙盒/生存类（我的世界、明日之后等）",
+    "category_sandbox_survival": "���绫�-娌����/���瀛�绫伙��������涓������������ヤ�����绛�锛�",
 
 
 
 
-    "category_autochess": "品类-自走棋类（金铲铲、多多自走棋等）",
+    "category_autochess": "���绫�-���璧版��绫伙�������查�层��澶�澶����璧版��绛�锛�",
 
 
 
 
-    "category_casual_puzzle": "品类-休闲益智类（羊了个羊、消消乐等）",
+    "category_casual_puzzle": "���绫�-浼���茬����虹被锛�缇�浜�涓�缇����娑�娑�涔�绛�锛�",
 
 
 
 
-    "category_party": "品类-休闲竞技/派对类（蛋仔派对、鹅鸭杀等）",
+    "category_party": "���绫�-浼���茬�����/娲惧�圭被锛����浠�娲惧�广��楣�楦����绛�锛�",
 
 
 
 
-    "category_etc": "品类-其他（自填）",
+    "category_etc": "���绫�-��朵��锛����濉�锛�",
 
 
 
 
-    "key_game_1": "重点游戏-逆水寒", "key_game_2": "重点游戏-燕云十六声",
+    "key_game_1": "�����规父���-���姘村��", "key_game_2": "�����规父���-���浜�������澹�",
 
 
 
 
-    "key_game_3": "重点游戏-一梦江湖", "key_game_4": "重点游戏-阴阳师",
+    "key_game_3": "�����规父���-涓�姊�姹�婀�", "key_game_4": "�����规父���-��撮�冲��",
 
 
 
 
-    "key_game_5": "重点游戏-金铲铲之战", "key_game_6": "重点游戏-蛋仔派对",
+    "key_game_5": "�����规父���-�����查�蹭�����", "key_game_6": "�����规父���-���浠�娲惧��",
 
 
 
 
-    "key_game_7": "重点游戏-无尽冬日", "key_game_8": "重点游戏-率土之滨",
+    "key_game_7": "�����规父���-���灏藉�����", "key_game_8": "�����规父���-������涔�婊�",
 
 
 
 
-    "key_game_9": "重点游戏-王者荣耀", "key_game_10": "重点游戏-英雄联盟",
+    "key_game_9": "�����规父���-��������ｈ��", "key_game_10": "�����规父���-��遍��������",
 
 
 
 
-    "key_game_11": "重点游戏-明日之后", "key_game_12": "重点游戏-萤火突击",
+    "key_game_11": "�����规父���-�����ヤ�����", "key_game_12": "�����规父���-��ょ��绐����",
 
 
 
 
-    "key_game_13": "重点游戏-三角洲行动",
+    "key_game_13": "�����规父���-涓�瑙�娲茶�����",
 
 
 
 
-    "deep_game_1": "深度游戏1", "deep_game_2": "深度游戏2", "deep_game_3": "深度游戏3",
+    "deep_game_1": "娣卞害娓告��1", "deep_game_2": "娣卞害娓告��2", "deep_game_3": "娣卞害娓告��3",
 
 
 
 
-    "proficient_products": "精通产品（1000h+）",
+    "proficient_products": "绮鹃��浜у��锛�1000h+锛�",
 
 
 
 
-    "familiar_products": "熟悉产品（500h+）",
+    "familiar_products": "������浜у��锛�500h+锛�",
 
 
 
 
-    "other_game_experience": "其他游戏经历补充",
+    "other_game_experience": "��朵��娓告��缁����琛ュ��",
 
 
 
@@ -1711,7 +1711,7 @@ TALENT_FIELDS = list(COLUMN_MAP.keys())
 
 
 
-# 数据库初始化
+# ��版��搴����濮����
 
 
 
@@ -1746,7 +1746,7 @@ def init_db():
 
 
 
-        # PostgreSQL 模式
+        # PostgreSQL 妯″��
 
 
 
@@ -2576,7 +2576,7 @@ def init_db():
 
 
 
-        # SQLite 本地开发模式
+        # SQLite �����板�����妯″��
 
 
 
@@ -3131,7 +3131,7 @@ except Exception as e:
 
 
 
-    print(f"[WARN] 数据库初始化失败（稍后可访问 /api/init 重试）: {e}")
+    print(f"[WARN] ��版��搴����濮����澶辫触锛�绋�������璁块�� /api/init ���璇�锛�: {e}")
 
 
 
@@ -3156,7 +3156,7 @@ except Exception as e:
 
 
 
-# 调试用：手动初始化数据库（部署后调用一次即可）
+# 璋�璇����锛������ㄥ��濮������版��搴�锛���ㄧ讲���璋���ㄤ��娆″�冲��锛�
 
 
 
@@ -3201,7 +3201,7 @@ def manual_init():
 
 
 
-        return jsonify({'message': '数据库初始化完成'})
+        return jsonify({'message': '��版��搴����濮����瀹����'})
 
 
 
@@ -3226,7 +3226,7 @@ def manual_init():
 
 
 
-        # 找最后一个有价值的行
+        # ��炬�����涓�涓����浠峰�肩��琛�
 
 
 
@@ -3261,7 +3261,7 @@ def manual_init():
 
 
 
-# 路由和 API
+# 璺���卞�� API
 
 
 
@@ -3306,7 +3306,7 @@ def apply_page():
 
 
 
-    """报名页面入口，企微等外部浏览器直接打开此路径"""
+    """��ュ��椤甸�㈠�ュ�ｏ��浼�寰�绛�澶���ㄦ��瑙���ㄧ�存�ユ��寮�姝よ矾寰�"""
 
 
 
@@ -3476,7 +3476,7 @@ def reset_admin():
 
 
 
-    return jsonify({'message': 'admin/admin123 已重置'})
+    return jsonify({'message': 'admin/admin123 宸查��缃�'})
 
 
 
@@ -3536,7 +3536,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '系统已有多个账号'}), 403
+        return jsonify({'error': '绯荤��宸叉��澶�涓�璐����'}), 403
 
 
 
@@ -3551,7 +3551,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '请创建1~5个账号'}), 400
+        return jsonify({'error': '璇峰��寤�1~5涓�璐����'}), 400
 
 
 
@@ -3571,7 +3571,7 @@ def system_setup():
 
 
 
-        return jsonify({'error': '用户名不能重复'}), 400
+        return jsonify({'error': '��ㄦ�峰��涓���介��澶�'}), 400
 
 
 
@@ -3636,7 +3636,7 @@ def system_setup():
 
 
 
-    return jsonify({'message': f'成功创建 {len(users_to_create)} 个账号'})
+    return jsonify({'message': f'���������寤� {len(users_to_create)} 涓�璐����'})
 
 
 
@@ -3751,7 +3751,7 @@ def create_user():
 
 
 
-        return jsonify({'error': '用户名和密码不能为空'}), 400
+        return jsonify({'error': '��ㄦ�峰�����瀵����涓���戒负绌�'}), 400
 
 
 
@@ -3781,7 +3781,7 @@ def create_user():
 
 
 
-        return jsonify({'error': '最多只能创建200个账号'}), 400
+        return jsonify({'error': '���澶������藉��寤�200涓�璐����'}), 400
 
 
 
@@ -3841,7 +3841,7 @@ def create_user():
 
 
 
-        return jsonify({'id': user_id, 'message': '账号创建成功'})
+        return jsonify({'id': user_id, 'message': '璐���峰��寤烘�����'})
 
 
 
@@ -3866,7 +3866,7 @@ def create_user():
 
 
 
-            return jsonify({'error': '用户名已存在'}), 400
+            return jsonify({'error': '��ㄦ�峰��宸插�����'}), 400
 
 
 
@@ -3896,7 +3896,7 @@ def import_users():
 
 
 
-    """批量导入账号（Excel 文件）"""
+    """��归��瀵煎�ヨ处��凤��Excel ���浠讹��"""
 
 
 
@@ -3921,7 +3921,7 @@ def import_users():
 
 
 
-        return jsonify({'error': '请上传 Excel 文件'}), 400
+        return jsonify({'error': '璇蜂��浼� Excel ���浠�'}), 400
 
 
 
@@ -3936,7 +3936,7 @@ def import_users():
 
 
 
-        # 验证必需列
+        # 楠�璇�蹇�������
 
 
 
@@ -3956,7 +3956,7 @@ def import_users():
 
 
 
-            return jsonify({'error': f'Excel 缺少必需列: {", ".join(missing)}，可选列: role'}), 400
+            return jsonify({'error': f'Excel 缂哄��蹇�������: {", ".join(missing)}锛����������: role'}), 400
 
 
 
@@ -4031,7 +4031,7 @@ def import_users():
 
 
 
-            # 限制总数不超过 200 个
+            # �����舵�绘�颁��瓒�杩� 200 涓�
 
 
 
@@ -4051,7 +4051,7 @@ def import_users():
 
 
 
-                errors.append(f"第{idx+2}行: 已达到账号上限（200个）")
+                errors.append(f"绗�{idx+2}琛�: 宸茶揪��拌处��蜂�����锛�200涓�锛�")
 
 
 
@@ -4136,7 +4136,7 @@ def import_users():
 
 
 
-                    errors.append(f"第{idx+2}行「{username}」: 用户名已存在")
+                    errors.append(f"绗�{idx+2}琛����{username}���: ��ㄦ�峰��宸插�����")
 
 
 
@@ -4146,7 +4146,7 @@ def import_users():
 
 
 
-                    errors.append(f"第{idx+2}行「{username}」: {err_msg}")
+                    errors.append(f"绗�{idx+2}琛����{username}���: {err_msg}")
 
 
 
@@ -4161,7 +4161,7 @@ def import_users():
 
 
 
-        msg = f'成功导入 {imported} 个账号'
+        msg = f'������瀵煎�� {imported} 涓�璐����'
 
 
 
@@ -4171,7 +4171,7 @@ def import_users():
 
 
 
-            msg += f'，跳过 {skipped} 行'
+            msg += f'锛�璺宠�� {skipped} 琛�'
 
 
 
@@ -4246,7 +4246,7 @@ def delete_user(user_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '�����ゆ�����'})
 
 
 
@@ -4448,34 +4448,34 @@ def gongzhang_yiti_email(demand_id):
                 biz = demand.get('biz_type') or demand.get('business_type') or ""
                 parent_oid = demand.get('parent_order') or ""
                 base_url = "http://talent-management-web.onrender.com"
-                subj = dt + " 兼职需求已完结，请评价"
+                subj = dt + " ��艰�����姹�宸插��缁�锛�璇疯��浠�"
                 # Plain text email
-                po_line = ("【父单单号】" + parent_oid + " " if parent_oid else "")
+                po_line = ("�����跺�������枫��" + parent_oid + " " if parent_oid else "")
                 lines = [
-                    "哈喽" + demander_name + "：",
-                    "您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价",
+                    "������" + demander_name + "锛�",
+                    "��ㄧ��" + po_line + "��艰�����姹�宸插��缁�锛�璇峰�逛�������艰�����宸ヤ��璐ㄩ��杩�琛�璇�浠�",
                     "",
                 ]
                 if biz:
-                    lines.append("【业务类型】" + biz)
+                    lines.append("���涓���＄被������" + biz)
                 lines.append("")
                 for t in (selected_list or []):
-                    name = t.get('name') or "未知"
-                    lines.append(name + "：1-5分（评分）+评语（填空，非必答）")
+                    name = t.get('name') or "������"
+                    lines.append(name + "锛�1-5���锛�璇����锛�+璇�璇�锛�濉�绌猴�����蹇�绛�锛�")
                     lines.append("")
                 tb = "\n".join(lines)
-                tb += "\n评价链接：" + base_url + "/evaluate?demand_id=" + str(demand_id) + " 点此评价"
+                tb += "\n璇�浠烽�炬�ワ��" + base_url + "/evaluate?demand_id=" + str(demand_id) + " ��规�よ��浠�"
                 hl = ["<html><body>",
-                      "<p>哈喽" + demander_name + "：</p>",
-                      "<p>您的" + po_line + "兼职需求已完结，请对下列兼职的工作质量进行评价</p>"]
+                      "<p>������" + demander_name + "锛�</p>",
+                      "<p>��ㄧ��" + po_line + "��艰�����姹�宸插��缁�锛�璇峰�逛�������艰�����宸ヤ��璐ㄩ��杩�琛�璇�浠�</p>"]
                 if biz:
-                    hl.append("<p>【业务类型】" + biz + "</p>")
+                    hl.append("<p>���涓���＄被������" + biz + "</p>")
                 hl.append("<ul>")
                 for t in (selected_list or []):
-                    name = t.get('name') or "未知"
-                    hl.append("<li>" + name + "：1-5分（评分）+评语（填空，非必答）</li>")
+                    name = t.get('name') or "������"
+                    hl.append("<li>" + name + "锛�1-5���锛�璇����锛�+璇�璇�锛�濉�绌猴�����蹇�绛�锛�</li>")
                 hl.append("</ul>")
-                hl.append("<p><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "'>点此评价</a></p>")
+                hl.append("<p><a href='" + base_url + "/evaluate?demand_id=" + str(demand_id) + "'>��规�よ��浠�</a></p>")
                 hl.append("</body></html>")
                 hb = "".join(hl)
                 ok, r = send_email(de, subj, hb, tb)
@@ -4493,7 +4493,7 @@ def gongzhang_yiti_email(demand_id):
 
 @app.route('/api/debug/demand/<int:demand_id>/email-info', methods=['GET'])
 def debug_email_info(demand_id):
-    """诊断公账已提邮件为什么没发"""
+    """璇�������璐�宸叉�����浠朵负浠�涔�娌″��"""
     try:
         conn = get_db()
         cursor = conn.cursor()
@@ -4548,7 +4548,7 @@ def debug_email_info(demand_id):
         return jsonify({'error': str(e), 'trace': traceback.format_exc()[-500:]}), 500
 
 
-# ---- 人才管理 API ----
+# ---- 浜烘��绠＄�� API ----
 
 
 
@@ -5098,12 +5098,12 @@ def create_talent():
 
 
 
-        return jsonify({'id': None, 'message': '创建成功（无字段）'})
+        return jsonify({'id': None, 'message': '���寤烘�����锛����瀛�娈碉��'})
 
 
 
 
-    return jsonify({'id': talent_id, 'message': '创建成功'})
+    return jsonify({'id': talent_id, 'message': '���寤烘�����'})
 
 
 
@@ -5228,7 +5228,7 @@ def update_talent(talent_id):
 
 
 
-    return jsonify({'message': '更新成功'})
+    return jsonify({'message': '��存�版�����'})
 
 
 
@@ -5288,7 +5288,7 @@ def delete_talent(talent_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '�����ゆ�����'})
 
 
 
@@ -5513,7 +5513,7 @@ def import_talents():
 
 
 
-                    errors.append(f"第{idx+2}行: {str(e)}")
+                    errors.append(f"绗�{idx+2}琛�: {str(e)}")
 
 
 
@@ -5523,7 +5523,7 @@ def import_talents():
 
 
 
-        msg = f'成功导入 {imported} 条记录'
+        msg = f'������瀵煎�� {imported} ��¤�板��'
 
 
 
@@ -5533,7 +5533,7 @@ def import_talents():
 
 
 
-            msg += f'，{len(errors)} 行失败'
+            msg += f'锛�{len(errors)} 琛�澶辫触'
 
 
 
@@ -5653,7 +5653,7 @@ def export_talents():
 
 
 
-        df.to_excel(writer, index=False, sheet_name='人才库')
+        df.to_excel(writer, index=False, sheet_name='浜烘��搴�')
 
 
 
@@ -5678,7 +5678,7 @@ def export_talents():
 
 
 
-                     download_name=f'人才库_{datetime.now().strftime("%Y%m%d")}.xlsx')
+                     download_name=f'浜烘��搴�_{datetime.now().strftime("%Y%m%d")}.xlsx')
 
 
 
@@ -5813,7 +5813,7 @@ def get_stats():
 
 
 
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '绮鹃��'")
 
 
 
@@ -5823,7 +5823,7 @@ def get_stats():
 
 
 
-            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '精通'")
+            cursor.execute(f"SELECT COUNT(*) FROM talents WHERE {field} = '绮鹃��'")
 
 
 
@@ -5858,7 +5858,7 @@ def get_stats():
 
 
 
-# 需求接单模块 API
+# ���姹���ュ��妯″�� API
 
 
 
@@ -6298,7 +6298,7 @@ def get_demands():
 
 
 
-        return jsonify({'error': 'get_demands失败: ' + str(e)[:200], 'trace': traceback.format_exc()[-500:]}), 500
+        return jsonify({'error': 'get_demands澶辫触: ' + str(e)[:200], 'trace': traceback.format_exc()[-500:]}), 500
 
 
 
@@ -6647,7 +6647,7 @@ def create_demand():
 
 
 
-    return jsonify({'id': demand_id, 'message': '需求创建成功'})
+    return jsonify({'id': demand_id, 'message': '���姹����寤烘�����'})
 
 
 
@@ -6737,7 +6737,7 @@ def update_demand(demand_id):
 
 
 
-    return jsonify({'message': '更新成功'})
+    return jsonify({'message': '��存�版�����'})
 
 
 
@@ -6797,7 +6797,7 @@ def delete_demand(demand_id):
 
 
 
-    return jsonify({'message': '删除成功'})
+    return jsonify({'message': '�����ゆ�����'})
 
 
 
@@ -6812,7 +6812,7 @@ def delete_demand(demand_id):
 
 
 
-# ---- 报价 API ----
+# ---- ��ヤ环 API ----
 
 
 
@@ -6877,7 +6877,7 @@ def calc_demand_quote(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '���姹�涓�瀛����'}), 404
 
 
 
@@ -7187,7 +7187,7 @@ def save_quote(demand_id):
 
 
 
-    return jsonify({'id': quote_id, 'message': '报价已保存'})
+    return jsonify({'id': quote_id, 'message': '��ヤ环宸蹭��瀛�'})
 
 
 
@@ -7392,7 +7392,7 @@ def confirm_quote(demand_id):
 
 
 
-    return jsonify({'message': '报价已确认，进入招募阶段'})
+    return jsonify({'message': '��ヤ环宸茬‘璁わ��杩���ユ�������舵��'})
 
 
 
@@ -7407,7 +7407,7 @@ def confirm_quote(demand_id):
 
 
 
-# ---- 报名 API ----
+# ---- ��ュ�� API ----
 
 
 
@@ -7427,7 +7427,7 @@ def apply_demand(demand_id):
 
 
 
-    """报名接口：接收{name, phone}，根据手机号查找或创建人才记录然后创建报名。"""
+    """��ュ����ュ�ｏ����ユ��{name, phone}锛���规�������哄�锋�ユ�炬�����寤轰汉���璁板����跺�����寤烘�ュ�����"""
 
 
 
@@ -7452,7 +7452,7 @@ def apply_demand(demand_id):
 
 
 
-        return jsonify({'error': '手机号不能为空'}), 400
+        return jsonify({'error': '�����哄�蜂����戒负绌�'}), 400
 
 
 
@@ -7542,7 +7542,7 @@ def apply_demand(demand_id):
 
 
 
-                (name or '未知', phone, wechat)
+                (name or '������', phone, wechat)
 
 
 
@@ -7567,7 +7567,7 @@ def apply_demand(demand_id):
 
 
 
-                (name or '未知', phone, wechat)
+                (name or '������', phone, wechat)
 
 
 
@@ -7632,7 +7632,7 @@ def apply_demand(demand_id):
 
 
 
-        return jsonify({'error': '已经报过名了'}), 400
+        return jsonify({'error': '宸茬����ヨ�����浜�'}), 400
 
 
 
@@ -7707,7 +7707,7 @@ def apply_demand(demand_id):
 
 
 
-    return jsonify({'id': app_id, 'message': '报名成功', 'talent_id': talent_id})
+    return jsonify({'id': app_id, 'message': '��ュ��������', 'talent_id': talent_id})
 
 
 
@@ -7722,7 +7722,7 @@ def get_demand_public(demand_id):
 
 
 
-    """公开接口：获取需求基本信息（用于报名页面）"""
+    """���寮���ュ�ｏ����峰�����姹���烘��淇℃��锛���ㄤ����ュ��椤甸��锛�"""
 
 
 
@@ -7832,7 +7832,7 @@ def get_demand_public(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '���姹�涓�瀛����'}), 404
 
 
 
@@ -7862,7 +7862,7 @@ def get_apply_status(demand_id):
 
 
 
-    """公开接口：根据手机号查询当前需求的报名状态"""
+    """���寮���ュ�ｏ����规�������哄�锋�ヨ�㈠��������姹������ュ����舵��"""
 
 
 
@@ -7877,7 +7877,7 @@ def get_apply_status(demand_id):
 
 
 
-        return jsonify({'error': '手机号不能为空'}), 400
+        return jsonify({'error': '�����哄�蜂����戒负绌�'}), 400
 
 
 
@@ -8007,7 +8007,7 @@ def get_apply_status(demand_id):
 
 
 
-        return jsonify({'applied': False, 'message': '未找到报名记录'})
+        return jsonify({'applied': False, 'message': '�����惧�版�ュ��璁板��'})
 
 
 
@@ -8197,7 +8197,7 @@ def select_talent(app_id):
 
 
 
-    # 获取当前 application 信息（demand_id + talent_id）
+    # ��峰��褰���� application 淇℃��锛�demand_id + talent_id锛�
 
 
 
@@ -8237,7 +8237,7 @@ def select_talent(app_id):
 
 
 
-        return jsonify({'error': '未找到报名记录'}), 404
+        return jsonify({'error': '�����惧�版�ュ��璁板��'}), 404
 
 
 
@@ -8257,7 +8257,7 @@ def select_talent(app_id):
 
 
 
-    # 更新状态为已入选
+    # ��存�扮�舵��涓哄凡��ラ��
 
 
 
@@ -8287,7 +8287,7 @@ def select_talent(app_id):
 
 
 
-    # 获取需求标题
+    # ��峰�����姹����棰�
 
 
 
@@ -8317,7 +8317,7 @@ def select_talent(app_id):
 
 
 
-    demand_title = demand_row['title']; tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', ''); tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', '') if demand_row else '未知需求'
+    demand_title = demand_row['title']; tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', ''); tidanren = demand_row.get('tidanren', ''); product_code = demand_row.get('product_code', '') if demand_row else '�����ラ��姹�'
 
 
 
@@ -8327,7 +8327,7 @@ def select_talent(app_id):
 
 
 
-    # 获取所有已入选的兼职信息
+    # ��峰��������宸插�ラ�������艰��淇℃��
 
 
 
@@ -8417,7 +8417,7 @@ def select_talent(app_id):
 
 
 
-    # 发送企微执行群通知
+    # ������浼�寰���ц��缇ら�����
 
 
 
@@ -8432,7 +8432,7 @@ def select_talent(app_id):
 
 
 
-    return jsonify({'message': '已选中该人才', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
+    return jsonify({'message': '宸查��涓�璇ヤ汉���', 'notified': 'error' not in notify_result, 'notify_result': notify_result})
 
 
 
@@ -8492,7 +8492,7 @@ def reject_talent(app_id):
 
 
 
-    return jsonify({'message': '已拒绝'})
+    return jsonify({'message': '宸叉��缁�'})
 
 
 
@@ -8517,7 +8517,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    """手动触发入选通知到企微执行群"""
+    """�����ㄨЕ�����ラ�������ュ�颁��寰���ц��缇�"""
 
 
 
@@ -8537,7 +8537,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    # 获取需求标题
+    # ��峰�����姹����棰�
 
 
 
@@ -8577,7 +8577,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-        return jsonify({'error': '需求不存在'}), 404
+        return jsonify({'error': '���姹�涓�瀛����'}), 404
 
 
 
@@ -8592,7 +8592,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    # 获取所有已入选的兼职
+    # ��峰��������宸插�ラ�������艰��
 
 
 
@@ -8687,7 +8687,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-        return jsonify({'error': '暂无已入选的兼职'}), 400
+        return jsonify({'error': '������宸插�ラ�������艰��'}), 400
 
 
 
@@ -8712,7 +8712,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    return jsonify({'message': '已发送企微执行群', 'count': len(selected_list)})
+    return jsonify({'message': '宸插�����浼�寰���ц��缇�', 'count': len(selected_list)})
 
 
 
@@ -8767,7 +8767,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-    return jsonify({'message': '已拒绝'})
+    return jsonify({'message': '宸叉��缁�'})
 
 
 
@@ -8782,7 +8782,7 @@ def notify_group_for_demand(demand_id):
 
 
 
-# ---- 评价 API ----
+# ---- 璇�浠� API ----
 
 
 
@@ -9014,7 +9014,7 @@ def create_evaluation(demand_id):
 
     eval_id = cursor.lastrowid
 
-    # 计算并更新人才的month_rating和avg_rating
+    # 璁＄��骞舵�存�颁汉������month_rating���avg_rating
     try:
         from datetime import datetime
         if DATABASE_URL:
@@ -9071,10 +9071,10 @@ def create_evaluation(demand_id):
 
     close_conn(conn)
 
-    return jsonify({'id': eval_id, 'message': '评价已保存', 'month_rating': month_rating_val if 'month_rating_val' in dir() else None, 'avg_rating': avg_rating_val if 'avg_rating_val' in dir() else None})
+    return jsonify({'id': eval_id, 'message': '璇�浠峰凡淇�瀛�', 'month_rating': month_rating_val if 'month_rating_val' in dir() else None, 'avg_rating': avg_rating_val if 'avg_rating_val' in dir() else None})
 
 
-# ---- 企微 Webhook ----# ---- 企微 Webhook ----
+# ---- 浼�寰� Webhook ----# ---- 浼�寰� Webhook ----
 
 
 
@@ -9179,7 +9179,7 @@ def send_wecom_message(content):
 
 
 
-            return {'error': '企微 Webhook URL 未配置，请在系统设置中填写'}
+            return {'error': '浼�寰� Webhook URL ������缃�锛�璇峰�ㄧ郴缁�璁剧疆涓�濉����'}
 
 
 
@@ -9259,7 +9259,7 @@ def send_wecom_message(content):
 
 
 
-            return {'error': result.get('errmsg', '发送失败')}
+            return {'error': result.get('errmsg', '������澶辫触')}
 
 
 
@@ -9289,12 +9289,12 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    """入选后发送企微群通知（通过群机器人）
+    """��ラ�����������浼�寰�缇ら����ワ�����杩�缇ゆ�哄�ㄤ汉锛�
 
 
 
 
-    selected_list: [{'name': '张三', 'phone': '138xxx', 'wechat': 'zhangsan'}]
+    selected_list: [{'name': '寮�涓�', 'phone': '138xxx', 'wechat': 'zhangsan'}]
 
 
 
@@ -9304,7 +9304,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    # 优先用 wecom_group_webhook_url，没有则复用 wecom_webhook_url（群机器人与个人机器人共享同一key）
+    # 浼������� wecom_group_webhook_url锛�娌℃�����澶���� wecom_webhook_url锛�缇ゆ�哄�ㄤ汉涓�涓�浜烘�哄�ㄤ汉��变韩���涓�key锛�
 
 
 
@@ -9319,7 +9319,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-        return {'error': '企微 Webhook URL 未配置，请在系统设置中填写 wecom_webhook_url'}
+        return {'error': '浼�寰� Webhook URL ������缃�锛�璇峰�ㄧ郴缁�璁剧疆涓�濉���� wecom_webhook_url'}
 
 
 
@@ -9329,22 +9329,22 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    msg = f"### ✅ 入选通知\n"
+    msg = f"### ��� ��ラ��������\n"
 
 
 
 
-    msg += f"**产品代号：** {product_code or title}\n"
+    msg += f"**浜у��浠ｅ�凤��** {product_code or title}\n"
 
 
 
 
-    msg += f"**提单人：** {tidanren}\n" + f"**入选人数：** {len(selected_list)} 人\n\n"
+    msg += f"**������浜猴��** {tidanren}\n" + f"**��ラ��浜烘�帮��** {len(selected_list)} 浜�\n\n"
 
 
 
 
-    msg += "**入选名单：**\n"
+    msg += "**��ラ��������锛�**\n"
 
 
 
@@ -9354,7 +9354,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-        wechat_info = f"（微信号：{t['wechat']}）" if t.get('wechat') else "（暂无微信号）"
+        wechat_info = f"锛�寰�淇″�凤��{t['wechat']}锛�" if t.get('wechat') else "锛�������寰�淇″�凤��"
 
 
 
@@ -9364,7 +9364,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-    msg += f"\n请相关执行负责人尽快拉群并通知以上人员。"
+    msg += f"\n璇风�稿�虫�ц��璐�璐ｄ汉灏藉揩���缇ゅ苟�����ヤ互涓�浜哄�����"
 
 
 
@@ -9439,7 +9439,7 @@ def send_wecom_group_notification(title, demand_title, tidanren, product_code, s
 
 
 
-            return {'error': result.get('errmsg', '发送失败')}
+            return {'error': result.get('errmsg', '������澶辫触')}
 
 
 
@@ -9489,7 +9489,7 @@ def publish_to_wecom(demand_id):
 
 
 
-            return jsonify({'error': '企微 Webhook URL 未配置'}), 400
+            return jsonify({'error': '浼�寰� Webhook URL ������缃�'}), 400
 
 
 
@@ -9595,7 +9595,7 @@ def publish_to_wecom(demand_id):
 
 
 
-            return jsonify({'error': '需求不存在'}), 404
+            return jsonify({'error': '���姹�涓�瀛����'}), 404
 
 
 
@@ -9653,34 +9653,34 @@ def publish_to_wecom(demand_id):
 
 
 
-        brush_str = "（刷名单）" if demand['brush_list'] else ""
+        brush_str = "锛���峰�����锛�" if demand['brush_list'] else ""
 
-        # 根据 business_type 和 tier 获取样本单价
+        # ��规�� business_type ��� tier ��峰����锋�����浠�
         def get_sample_price(biz_type, tier):
             sample_prices = {
-                "电访": {
-                    "30mins以内/个": 30,
-                    "30~60mins/个": 45,
-                    "60~90mins/个（仅限5星兼职）": 80,
-                    "90~120mins/个": 100,
+                "��佃��": {
+                    "30mins浠ュ��/涓�": 30,
+                    "30~60mins/涓�": 45,
+                    "60~90mins/涓�锛�浠����5�����艰��锛�": 80,
+                    "90~120mins/涓�": 100,
                 },
-                "甄别": {
-                    "5~10mins/个": 8,
-                    "10~20mins/个": 12,
-                    "20~30mins/个": 16,
-                    ">30mins/个": 26,
+                "������": {
+                    "5~10mins/涓�": 8,
+                    "10~20mins/涓�": 12,
+                    "20~30mins/涓�": 16,
+                    ">30mins/涓�": 26,
                 },
-                "电访+外呼": {
-                    "30mins以内/个": 30,
-                    "30~60mins/个": 45,
-                    "60~90mins/个（仅限5星兼职）": 80,
-                    "90~120mins/个": 100,
+                "��佃��+澶����": {
+                    "30mins浠ュ��/涓�": 30,
+                    "30~60mins/涓�": 45,
+                    "60~90mins/涓�锛�浠����5�����艰��锛�": 80,
+                    "90~120mins/涓�": 100,
                 },
-                "甄别+外呼": {
-                    "5~10mins/个": 10,
-                    "10~20mins/个": 10,
-                    "20~30mins/个": 16,
-                    ">30mins/个": 20,
+                "������+澶����": {
+                    "5~10mins/涓�": 10,
+                    "10~20mins/涓�": 10,
+                    "20~30mins/涓�": 16,
+                    ">30mins/涓�": 20,
                 },
             }
             if biz_type in sample_prices:
@@ -9754,15 +9754,15 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg = "### New 需求发布\n"
+        msg = "### New ���姹����甯�\n"
 
 
 
-        msg += "**业务类型：** %s\n" % msg_biz
+        msg += "**涓���＄被���锛�** %s\n" % msg_biz
 
 
 
-        msg += "**数量：** %s\n" % msg_qty
+        msg += "**��伴��锛�** %s\n" % msg_qty
 
 
 
@@ -9774,29 +9774,30 @@ def publish_to_wecom(demand_id):
 
 
 
-            # Always show 单价 only in 企微 push
+            # Always show ���浠� only in 浼�寰� push
             biz = demand.get("business_type","")
             unit_price = get_sample_price(biz, demand.get("tier",""))
-            if biz and "外呼" in biz:
-                if "电访" in biz:
-                    msg += "**单价：** (0.5/呼出+%s/个)\n" % unit_price
+            if biz and "澶����" in biz:
+                if "��佃��" in biz:
+                    msg += "**���浠凤��** (0.5/��煎��+%s/涓�)\n" % unit_price
                 else:
-                    msg += "**单价：** (0.5/呼出+%s/样本)\n" % unit_price
+                    msg += "**���浠凤��** (0.5/��煎��+%s/��锋��)\n" % unit_price
             else:
-                if "电访" in biz:
-                    msg += "**单价：** %s/个\n" % unit_price
-                elif "甄别" in biz:
-                    msg += "**单价：** %s/样本\n" % unit_price
+                if "��佃��" in biz:
+                    msg += "**���浠凤��** %s/涓�\n" % unit_price
+                elif "������" in biz:
+                    msg += "**���浠凤��** %s/��锋��\n" % unit_price
 
-        msg += "\n**执行时间：** %s\n" % execution_time
-
-
-
-        msg += "\n**截止日期：** %s\n" % msg_deadline
+        msg += "**产品代号**：%s\n" % product_code
+        msg += "\n**��ц����堕�达��** %s\n" % execution_time
 
 
 
-        msg += "**需求描述：** %s\n" % msg_desc
+        msg += "\n**���姝㈡�ユ��锛�** %s\n" % msg_deadline
+
+
+
+        msg += "**���姹����杩帮��** %s\n" % msg_desc
 
 
 
@@ -9804,11 +9805,11 @@ def publish_to_wecom(demand_id):
 
 
 
-        msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
+        msg += "> ��瑰�绘�ュ��锛�[绯荤����炬��](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
 
 
 
-        msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
+        msg += "\n\n> ���锔� **���瑕����绀�**锛���ュ�����璇峰�″�����娣诲��绠＄�����浼�寰�������������锛����������缁����娉������ュ�ラ��缁����"
 
 
 
@@ -9833,7 +9834,7 @@ def publish_to_wecom(demand_id):
 
 
 
-        return jsonify({'message': '已发送到企微群', 'result': result})
+        return jsonify({'message': '宸插�������颁��寰�缇�', 'result': result})
 
 
 
@@ -9850,7 +9851,7 @@ def publish_to_wecom(demand_id):
 
 
 
-    # ---- 人才端：我的报名 & 我的评价 ----
+    # ---- 浜烘��绔�锛���������ュ�� & ������璇�浠� ----
 
 
 
@@ -10160,7 +10161,7 @@ def my_evaluations(talent_id):
 
 
 
-# ---- 系统设置 API ----
+# ---- 绯荤��璁剧疆 API ----
 
 
 
@@ -10285,7 +10286,7 @@ def set_setting_api(key):
 
 
 
-    return jsonify({'message': '设置已保存', 'key': key, 'value': value})
+    return jsonify({'message': '璁剧疆宸蹭��瀛�', 'key': key, 'value': value})
 
 
 
@@ -10305,7 +10306,7 @@ def init_wecom_settings():
 
 
 
-    """启动时自动保存企微应用凭证（已配置则跳过）"""
+    """�����ㄦ�惰����ㄤ��瀛�浼�寰�搴���ㄥ��璇�锛�宸查��缃����璺宠��锛�"""
 
 
 

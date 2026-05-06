@@ -2814,7 +2814,9 @@
 
 
 
-                                        <button v-if="d.status === 'recruiting' && isAdmin" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">发企微群</button>
+                                        <button v-if="d.status === 'recruiting' && isAdmin && !d.gongzhang_yiti" class="btn-danger" @click="publishToWecom(d.id)" style="padding:4px 8px;font-size:12px;">发企微群</button>
+                                        <span v-if="d.status === 'recruiting' && d.gongzhang_yiti" style="color:#999;font-size:12px;margin-left:8px;">公账已提</span>
+
 
 
 
