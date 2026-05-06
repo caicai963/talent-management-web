@@ -9776,17 +9776,17 @@ def publish_to_wecom(demand_id):
 
             # Always show ���浠� only in 浼�寰� push
             biz = demand.get("business_type","")
-            unit_price = get_sample_price(biz, demand.get("tier",""))
+            pw = get_sample_price(biz, demand.get("tier",""))
             if biz and "澶����" in biz:
                 if "��佃��" in biz:
-                    msg += "**���浠凤��** (0.5/��煎��+%s/涓�)\n" % unit_price
+                    msg += "**���浠凤��** (0.5/��煎��+%s/涓�)\n" % pw
                 else:
-                    msg += "**���浠凤��** (0.5/��煎��+%s/��锋��)\n" % unit_price
+                    msg += "**���浠凤��** (0.5/��煎��+%s/��锋��)\n" % pw
             else:
                 if "��佃��" in biz:
-                    msg += "**���浠凤��** %s/涓�\n" % unit_price
+                    msg += "**���浠凤��** %s/涓�\n" % pw
                 elif "������" in biz:
-                    msg += "**���浠凤��** %s/��锋��\n" % unit_price
+                    msg += "**���浠凤��** %s/��锋��\n" % pw
 
         msg += "**产品代号**：%s\n" % product_code
         msg += "\n**��ц����堕�达��** %s\n" % execution_time
