@@ -408,7 +408,7 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "甄别": [
+    "用别地执行": [
 
 
 
@@ -438,7 +438,7 @@ TALENT_PRICE_TABLE = {
 
 
 
-    "电访": [
+    "电訪地执行": [
 
 
 
@@ -490,14 +490,14 @@ TALENT_PRICE_TABLE = {
 
     ],
 
-    "甄别+外呼": [
+    "用别地执行+外呼": [
         {"label": "5~10mins/个", "price": 10},
         {"label": "10~20mins/个", "price": 10},
         {"label": "20~30mins/个", "price": 16},
         {"label": ">30mins/个", "price": 20},
     ],
 
-    "电访+外呼": [
+    "电訪地执行+外呼": [
         {"label": "30mins以内/个", "price": 30},
         {"label": "30~60mins/个", "price": 45},
         {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
@@ -891,7 +891,7 @@ def calc_quote(demand_data):
 
 
 
-    if biz in ("甄别", "甄别+外呼", "电访", "电访+外呼", "街访执行", "测试执行") and not gmv:
+    if biz in ("用别地执行", "用别地执行+外呼", "电訪地执行", "电訪地执行+外呼", "街访执行", "测试执行") and not gmv:
 
 
 
@@ -1071,8 +1071,8 @@ def calc_quote(demand_data):
 
 
 
-    elif biz == "甄别+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("甄别+外呼", [])
+    elif biz == "用别地执行+外呼":
+        outer_tiers = TALENT_PRICE_TABLE.get("用别地执行+外呼", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
@@ -1081,27 +1081,27 @@ def calc_quote(demand_data):
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "甄别":
+    elif biz == "用别地执行":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 甄别（无外呼）：纯样本单价×数量，无呼出费
+        # 用别地执行（无外呼）：纯样本单价×数量，无呼出费
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/样本×{quantity}个 = {int(part_time_wage)}元"
 
         h = vlookup_h(gmv, LUT_ZHENBIE)
 
-        # 甄别+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # 用别地执行+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
         if brush:
             part_time_wage = (unit_price + 20) * quantity
             wage_note = (f"({unit_price}+20元呼出)/样本×{quantity} = {int(part_time_wage)}元")
 
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
-    elif biz == "电访+外呼":
-        outer_tiers = TALENT_PRICE_TABLE.get("电访+外呼", [])
+    elif biz == "电訪地执行+外呼":
+        outer_tiers = TALENT_PRICE_TABLE.get("电訪地执行+外呼", [])
         outer_tier_data = next((t for t in outer_tiers if t["label"] == tier), None)
         unit_price = outer_tier_data.get("price", 0) if outer_tier_data else 0
         part_time_wage = (unit_price + 20) * quantity
@@ -1110,19 +1110,19 @@ def calc_quote(demand_data):
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
-    elif biz == "电访":
+    elif biz == "电訪地执行":
 
 
         unit_price = tier_data.get("price", 0)
 
 
-        # 电访（无外呼）：纯样本单价×数量，无呼出费
+        # 电訪地执行（无外呼）：纯样本单价×数量，无呼出费
         part_time_wage = unit_price * quantity
         wage_note = f"{unit_price}元/个×{quantity}个 = {int(part_time_wage)}元"
 
         h = vlookup_h(gmv, LUT_DIANFANG)
 
-        # 电访+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
+        # 电訪地执行+外呼：(样本单价+20元呼出预估)×n，20是每个样本的呼出费用预估
         if brush:
             part_time_wage = (unit_price + 20) * quantity
             wage_note = (f"({unit_price}+20元呼出)/个×{quantity} = {int(part_time_wage)}元")
@@ -1506,7 +1506,7 @@ COLUMN_MAP = {
 
 
 
-    "interview_selection": "访谈执行-玩家甄别",
+    "interview_selection": "访谈执行-玩家用别地执行",
 
 
 
@@ -9674,25 +9674,25 @@ def publish_to_wecom(demand_id):
         # 根据 business_type 和 tier 获取样本单价
         def get_sample_price(biz_type, tier):
             sample_prices = {
-                "电访": {
+                "电訪地执行": {
                     "30mins以内/个": 30,
                     "30~60mins/个": 45,
                     "60~90mins/个（仅限5星兼职）": 80,
                     "90~120mins/个": 100,
                 },
-                "甄别": {
+                "用别地执行": {
                     "5~10mins/个": 8,
                     "10~20mins/个": 12,
                     "20~30mins/个": 16,
                     ">30mins/个": 26,
                 },
-                "电访+外呼": {
+                "电訪地执行+外呼": {
                     "30mins以内/个": 30,
                     "30~60mins/个": 45,
                     "60~90mins/个（仅限5星兼职）": 80,
                     "90~120mins/个": 100,
                 },
-                "甄别+外呼": {
+                "用别地执行+外呼": {
                     "5~10mins/个": 10,
                     "10~20mins/个": 10,
                     "20~30mins/个": 16,
@@ -9794,14 +9794,14 @@ def publish_to_wecom(demand_id):
             biz = demand.get("business_type","")
             unit_price = get_sample_price(biz, demand.get("tier",""))
             if biz and "外呼" in biz:
-                if "电访" in biz:
+                if "电訪地执行" in biz:
                     msg += "**单价：** (0.5/呼出+%s/个)\n" % unit_price
                 else:
                     msg += "**单价：** (0.5/呼出+%s/样本)\n" % unit_price
             else:
-                if "电访" in biz:
+                if "电訪地执行" in biz:
                     msg += "**单价：** %s/个\n" % unit_price
-                elif "甄别" in biz:
+                elif "用别地执行" in biz:
                     msg += "**单价：** %s/样本\n" % unit_price
 
         msg += "\n**执行时间：** %s\n" % execution_time
