@@ -754,12 +754,7 @@
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">兼职人数</label>
                             <input v-model.number="demandForm.parttimer_count" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
-                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访'" style="grid-column:1/-1;">
-                            <label style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-                                <input type="checkbox" v-model="demandForm.brush_list" />
-                                <span style="font-size:13px;color:#666;">需要刷名单（+15元/样本呼出费）</span>
-                            </label>
-                        </div>
+                        
                         <template v-if="demandForm.business_type === '实验室执行'">
                             <div>
                                 <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">排期时长（小时）</label>
