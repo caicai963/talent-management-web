@@ -87,10 +87,10 @@ TALENT_PRICE_TABLE =  {
         {"label": ">30mins/个", "price": 26},
     ],
     "甄别+外呼": [
-        {"label": "30mins以内/个", "price": 30},
-        {"label": "30~60mins/个", "price": 45},
-        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
-        {"label": "90~120mins/个", "price": 100},
+        {"label": "5~10mins/个", "price": 28},
+        {"label": "10~20mins/个", "price": 32},
+        {"label": "20~30mins/个", "price": 36},
+        {"label": ">30mins/个", "price": 46},
     ],
     "电访": [
         {"label": "30mins以内/个", "price": 30},
