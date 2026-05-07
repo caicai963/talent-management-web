@@ -233,7 +233,7 @@
 
                 <div class="header-right">
 
-                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : '普通用户' }})</span>
+                    <span class="user-info">{{ currentUser.username }} ({{ currentUser.role === 'admin' ? '管理员' : currentUser.role === 'demander' ? '需求方' : '兼职' }})</span>
 
                     <button class="logout-btn" @click="handleLogout">退出</button>
 
@@ -243,7 +243,7 @@
 
             <!-- 管理员视图 -->
 
-            <div v-if="currentUser.role === 'admin'">
+            <div v-if="currentUser.role === 'admin' || currentUser.role === 'demander'">
 
                 <div class="tabs">
 
@@ -325,7 +325,7 @@
 
 <!-- 人才列表 -->
 
-            <div v-if="activeTab === 'list' && currentUser.role === 'admin'">
+            <div v-if="activeTab === 'list' && (currentUser.role === 'admin' || currentUser.role === 'demander')">
 
                 <div class="toolbar">
 
@@ -481,7 +481,7 @@
 
             <!-- 统计页面 -->
 
-            <div v-if="activeTab === 'stats' && currentUser.role === 'admin'">
+            <div v-if="activeTab === 'stats' && (currentUser.role === 'admin' || currentUser.role === 'demander')">
 
                 <div class="stats-grid">
 
@@ -2226,7 +2226,7 @@
                 const currentTierOptions = ref([]);
                 const currentQuote = ref(null);
                 const statusLabels = ref({ pending:'待报价', quoting:'报价中', confirmed:'已确认', recruiting:'招募中', selecting:'选择人才', done:'已完成', cancelled:'已取消' });
-                const isAdmin = computed(() => currentUser.value && currentUser.value.role === 'admin');
+                const isAdmin = computed(() => currentUser.value && (currentUser.value.role === 'admin' || currentUser.value.role === 'demander'));
                 const closeModal = () => { currentModal.value = null; };
 
 
@@ -2280,7 +2280,7 @@
                 };
                 const saveDemand = async () => {
                     try {
-                        await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id });
+                        await axios.post('/api/demands', { ...demandForm.value, demander_id: currentUser.value?.id, tidanren: currentUser.value?.username });
                         closeModal();
                         loadDemands();
                         showToast('需求保存成功');
