@@ -707,8 +707,10 @@
             </div>
 
             <!-- 发布需求弹窗 -->
+            
+            <!-- 发布需求弹窗 -->
             <div v-if="currentModal === 'demand-create'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
-                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:650px;max-height:90vh;overflow-y:auto;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
                     <h3 style="margin:0;">发布需求</h3>
                     <button @click="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0 8px;">&times;</button>
@@ -719,14 +721,22 @@
                             <input v-model="demandForm.tidanren" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="请填写提单人姓名" />
                         </div>
                         <div style="grid-column:2;">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">需求标题 *</label>
-                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：H73产品 甄别需求" />
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">产品代号 *</label>
+                            <input v-model="demandForm.title" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：H73产品代号" />
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">执行时间</label>
+                            <input v-model="demandForm.execution_time" type="text" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="如：2026-05-10 ~ 2026-05-15" />
                         </div>
                         <div>
                             <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">业务类型 *</label>
                             <select v-model="demandForm.business_type" @change="onBizTypeChange" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
                                 <option value="">请选择</option>
-                                <option v-for="(tiers, biz) in demandMeta" :key="biz" :value="biz">{{ biz }}</option>
+                                <option value="甄别">甄别</option>
+                                <option value="甄别+外呼">甄别+外呼</option>
+                                <option value="电访">电访</option>
+                                <option value="电访+外呼">电访+外呼</option>
+                                <option value="实验室执行">实验室执行</option>
                             </select>
                         </div>
                         <div>
@@ -737,18 +747,17 @@
                             </select>
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">数量/场次 *</label>
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">样本数量/场次 *</label>
                             <input v-model.number="demandForm.quantity" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
                         <div>
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">截止日期</label>
-                            <input v-model="demandForm.deadline" type="date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">兼职人数</label>
+                            <input v-model.number="demandForm.parttimer_count" type="number" min="1" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
                         </div>
-                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访'">
-                            <label style="display:block;margin-bottom:4px;font-size:13px;color:#666;">刷名单</label>
-                            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                        <div v-if="demandForm.business_type === '甄别' || demandForm.business_type === '电访'" style="grid-column:1/-1;">
+                            <label style="display:flex;align-items:center;gap:8px;margin-top:4px;">
                                 <input type="checkbox" v-model="demandForm.brush_list" />
-                                <span style="font-size:13px;">需要刷名单（+15元/样本呼出费）</span>
+                                <span style="font-size:13px;color:#666;">需要刷名单（+15元/样本呼出费）</span>
                             </label>
                         </div>
                         <template v-if="demandForm.business_type === '实验室执行'">
@@ -785,7 +794,7 @@
                 </div>
             </div>
 
-            <!-- 详情弹窗 -->
+<!-- 详情弹窗 -->
             <div v-if="currentModal === 'demand-detail'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
                 <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:90vh;overflow-y:auto;">
                     <h3 style="margin-bottom:16px;">需求详情</h3>
@@ -2204,7 +2213,7 @@
                 const demands = ref([]);
                 const demandStatusFilter = ref('');
                 const currentModal = ref(null);  // null | 'demand-create' | 'demand-detail' | 'quote' | 'applications' | 'talent' | 'evaluate'
-                const demandForm = ref({ title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'' });
+                const demandForm = ref({ tidanren:'', title:'', execution_time:'', business_type:'', tier:'', quantity:1, parttimer_count:1, description:'', requirements:'', brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0 });
                 const currentDemand = ref(null);
                 const quoteForm = ref({ part_time_wage:0, human_cost:0, note:'' });
                 const currentDemandId = ref(null);

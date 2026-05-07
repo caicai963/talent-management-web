@@ -79,14 +79,26 @@ def shutdown_session(exception=None):
 # ============================================================
 # 人才工资单价表（单位：元）
 # ============================================================
-TALENT_PRICE_TABLE = {
+TALENT_PRICE_TABLE =  {
     "甄别": [
         {"label": "5~10mins/个", "price": 8},
         {"label": "10~20mins/个", "price": 12},
         {"label": "20~30mins/个", "price": 16},
         {"label": ">30mins/个", "price": 26},
     ],
+    "甄别+外呼": [
+        {"label": "30mins以内/个", "price": 30},
+        {"label": "30~60mins/个", "price": 45},
+        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
+        {"label": "90~120mins/个", "price": 100},
+    ],
     "电访": [
+        {"label": "30mins以内/个", "price": 30},
+        {"label": "30~60mins/个", "price": 45},
+        {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
+        {"label": "90~120mins/个", "price": 100},
+    ],
+    "电访+外呼": [
         {"label": "30mins以内/个", "price": 30},
         {"label": "30~60mins/个", "price": 45},
         {"label": "60~90mins/个（仅限5星兼职）", "price": 80},
@@ -96,45 +108,6 @@ TALENT_PRICE_TABLE = {
         {"label": "2H以内/场", "price": 150},
         {"label": "2~4小时/场", "price": 200},
         {"label": "4~6小时/场", "price": 250},
-    ],
-    "测试执行": [
-        {"label": "2H以内/场", "price": 150},
-        {"label": "2~4小时/场", "price": 200},
-        {"label": "4~6小时/场", "price": 250},
-    ],
-    "街访执行": [
-        # 街访1（拦截+访谈）
-        {"label": "10分钟以内", "price": 30, "base": 120},
-        {"label": "30分钟以内", "price": 65, "base": 120},
-        {"label": "30~60分钟", "price": 104, "base": 120},
-        # 街访2（只拦截不访谈）
-        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
-        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
-        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
-        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
-    ],
-    "街访1": [
-        {"label": "10分钟以内", "price": 30, "base": 120},
-        {"label": "30分钟以内", "price": 65, "base": 120},
-        {"label": "30~60分钟", "price": 104, "base": 120},
-    ],
-    "街访2": [
-        {"label": "千万级", "gmv_rate": 0.05, "gmv_rate_display": "GMV×5%", "base": 120, "fixed": 3000},
-        {"label": "百万级", "gmv_rate": 0.10, "gmv_rate_display": "GMV×10%", "base": 120, "fixed": 1500},
-        {"label": "十万级", "gmv_rate": 0.20, "gmv_rate_display": "GMV×20%", "base": 120, "fixed": 800},
-        {"label": "千级及以下", "gmv_rate": None, "gmv_rate_display": "固定200元", "base": 120, "fixed": 200},
-    ],
-    "舆情打标": [
-        {"label": "条", "price": 0.3},
-    ],
-    "洞察收集/桌面研究": [
-        {"label": "<0.5H/人", "price": 10},
-        {"label": "<1H/人", "price": 30},
-        {"label": "1~3H/人", "price": 100},
-        {"label": "3~6H/人", "price": 150},
-    ],
-    "邀约拉新": [
-        {"label": "条", "price": 3},
     ],
 }
 
