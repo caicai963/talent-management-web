@@ -437,7 +437,7 @@
 
                                 <td>{{ talent.graduate_year || '-' }}</td>
 
-                                <td>{{ talent.phone || '-' }}</td>
+                                <td v-if="currentUser.role !== 'demander'">{{ talent.phone || '-' }}</td>
 
                                 <td>{{ talent.month_rating || '-' }}</td>
 
@@ -1429,8 +1429,8 @@
                             <div class="form-group"><label>专业</label><div>{{ detailTalent.major || '-' }}</div></div>
                             <div class="form-group"><label>在读学历</label><div>{{ detailTalent.education || '-' }}</div></div>
                             <div class="form-group"><label>预计毕业年份</label><div>{{ detailTalent.graduate_year || '-' }}</div></div>
-                            <div class="form-group"><label>手机号</label><div>{{ detailTalent.phone || '-' }}</div></div>
-                            <div class="form-group"><label>微信号</label><div>{{ detailTalent.wechat || '-' }}</div></div>
+                            <div class="form-group" v-if="currentUser.role !== 'demander'"><label>手机号</label><div>{{ detailTalent.phone || '-' }}</div></div>
+                            <div class="form-group" v-if="currentUser.role !== 'demander'"><label>微信号</label><div>{{ detailTalent.wechat || '-' }}</div></div>
                         </div>
                     </div>
                     <div class="form-section">
