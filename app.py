@@ -1892,7 +1892,6 @@ def publish_to_wecom(demand_id):
     msg += "**执行时间：** %s\n" % msg_exec_time
     msg += "**具体要求：** %s\n" % msg_req
     msg += "---\n"
-    msg += "---\n"
     msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
     msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
 
