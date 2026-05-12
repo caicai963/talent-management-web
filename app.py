@@ -456,7 +456,18 @@ def init_db():
         except Exception:
             pass
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
+  
+        # Migration: add execution_time and parttimer_count to demands
+        try:
+            if DATABASE_URL:
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1")
+            else:
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1")
+        except Exception:
+            pass
+          CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
@@ -479,11 +490,13 @@ def init_db():
                 business_type TEXT NOT NULL,
                 tier TEXT NOT NULL,
                 quantity INTEGER DEFAULT 1,
+                parttimer_count INTEGER DEFAULT 1,
                 brush_list INTEGER DEFAULT 0,
                 gmv REAL DEFAULT 0,
                 scheduled_hours REAL DEFAULT 0,
                 end_time TEXT,
                 cross_meal_count INTEGER DEFAULT 0,
+                execution_time TEXT,
                 human_cost REAL DEFAULT 0,
                 budget_min REAL,
                 budget_max REAL,
@@ -562,11 +575,13 @@ def init_db():
                 business_type TEXT NOT NULL,
                 tier TEXT NOT NULL,
                 quantity INTEGER DEFAULT 1,
+                parttimer_count INTEGER DEFAULT 1,
                 brush_list INTEGER DEFAULT 0,
                 gmv REAL DEFAULT 0,
                 scheduled_hours REAL DEFAULT 0,
                 end_time TEXT,
                 cross_meal_count INTEGER DEFAULT 0,
+                execution_time TEXT,
                 human_cost REAL DEFAULT 0,
                 budget_min REAL,
                 budget_max REAL,
