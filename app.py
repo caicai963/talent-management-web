@@ -1916,16 +1916,14 @@ def publish_to_wecom(demand_id):
         qty = demand.get('quantity', 1) or 1
         pw = quote['part_time_wage'] or 0
         if '+外呼' in biz:
-            # Get base tier price from TPT
+            # Get tier price from TPT for display
             tier_price = 0
             if biz in TALENT_PRICE_TABLE:
                 for t in TALENT_PRICE_TABLE[biz]:
                     if t['label'] == tier:
                         tier_price = t.get('price', 0)
                         break
-            if tier_price == 0:
-                tier_price = int(pw) // int(qty) if qty else 0
-            unit_price = tier_price + 0.5
+            quote_str = "0.5元/呼出 + %s元/样本" % tier_price
         else:
             unit_price = int(pw) // int(qty) if qty else 0
         quote_str = "%s元/样本" % unit_price
