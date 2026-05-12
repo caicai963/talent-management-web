@@ -1928,7 +1928,7 @@ def publish_to_wecom(demand_id):
             quote_str = "0.5元/呼出 + %s元/样本" % tier_price
         else:
             unit_price = int(pw) // int(qty) if qty else 0
-        quote_str = "%s元/样本" % unit_price
+            quote_str = "%s元/样本" % unit_price
     else:
         quote_str = "待确认"
 
