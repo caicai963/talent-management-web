@@ -1276,8 +1276,9 @@ def create_demand():
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
-                deadline, demander_id, tidanren, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                deadline, demander_id, tidanren, status,
+                execution_time, parttimer_count
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s)
         """, (
             data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
@@ -1287,7 +1288,7 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1), data.get('execution_time', ''), data.get('parttimer_count', 1),
         ))
         demand_id = cursor.lastrowid
     else:
@@ -1297,8 +1298,9 @@ def create_demand():
                 quantity, brush_list, gmv,
                 scheduled_hours, end_time, cross_meal_count,
                 human_cost, budget_min, budget_max,
-                deadline, demander_id, tidanren, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                deadline, demander_id, tidanren, status,
+                execution_time, parttimer_count
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
         """, (
             data.get('title', ''), data.get('description', ''), data.get('requirements', ''),
             data.get('business_type', ''), data.get('tier', ''),
@@ -1308,7 +1310,7 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1), data.get('execution_time', ''), data.get('parttimer_count', 1),
         ))
         demand_id = cursor.lastrowid
     close_conn(conn)

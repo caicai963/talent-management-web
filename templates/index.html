@@ -827,6 +827,8 @@
                         <div><strong>档位：</strong>{{ currentDemand.tier }}</div>
                         <div><strong>数量：</strong>{{ currentDemand.quantity }}{{ currentDemand.brush_list ? "（刷名单）" : "" }}</div>
                         <div><strong>截止日期：</strong>{{ currentDemand.deadline || "-" }}</div>
+                        <div><strong>兼职人数：</strong>{{ currentDemand.parttimer_count || 1 }}人</div>
+                        <div><strong>执行时间：</strong>{{ currentDemand.execution_time || "未填写" }}</div>
                         <div><strong>状态：</strong>{{ statusLabels[currentDemand.status] || currentDemand.status }}</div>
                         <div style="grid-column:1/-1;"><strong>描述：</strong>{{ currentDemand.description || "无" }}</div>
                         <div style="grid-column:1/-1;"><strong>要求：</strong>{{ currentDemand.requirements || "无" }}</div>
@@ -2291,9 +2293,9 @@
                 };
                 const openDemandModal = (d) => {
                     if (d) {
-                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'' };
+                        demandForm.value = { id:d.id, title:d.title, description:d.description||'', requirements:d.requirements||'', business_type:d.business_type||'', tier:d.tier||'', quantity:d.quantity||1, brush_list:!!d.brush_list, gmv:d.gmv||0, scheduled_hours:d.scheduled_hours||0, end_time:d.end_time||'', cross_meal_count:d.cross_meal_count||0, deadline:d.deadline||'', tidanren:d.tidanren||'', execution_time:d.execution_time||'', parttimer_count:d.parttimer_count||1 };
                     } else {
-                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'' };
+                        demandForm.value = { title:'', description:'', requirements:'', business_type:'', tier:'', quantity:1, brush_list:false, gmv:0, scheduled_hours:0, end_time:'', cross_meal_count:0, deadline:'', tidanren:'', execution_time:'', parttimer_count:1 };
                     }
                     currentModal.value = 'demand-create';
                 };
