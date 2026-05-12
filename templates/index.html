@@ -684,7 +684,7 @@
                                 <td>{{ d.deadline || "-" }}</td>
                                 <td>
                                     <div class="actions">
-                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button>
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button><button class="btn-warning" @click="openEvalForDemand(d.id)" style="padding:4px 8px;font-size:12px;">完结</button>
                                         <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
                                         <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
                                         <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
@@ -785,6 +785,34 @@
                     <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
                         <button class="btn-secondary" @click="closeModal()">取消</button>
                         <button class="btn-primary" @click="saveDemand">保存需求</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 兼职评价弹窗 -->
+            <div v-if="currentModal === 'eval'" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;" @click.self="closeModal()">
+                <div style="margin:auto;background:white;border-radius:8px;padding:24px;width:600px;max-height:80vh;overflow-y:auto;">
+                    <h3 style="margin-bottom:16px;">兼职评价</h3>
+                    <div v-if="evalDemandId" style="margin-bottom:16px;font-size:13px;color:#666;">
+                        已选 <strong>{{ selectedForEval.length }}</strong> 名兼职
+                    </div>
+                    <div v-for="app in selectedForEval" :key="app.id" style="border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:12px;">
+                        <div style="font-weight:bold;margin-bottom:12px;">{{ app.name }} <span style="color:#888;font-size:12px;">{{ app.phone }}</span></div>
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:13px;color:#555;margin-bottom:4px;">评分（1-5星）：</div>
+                            <div style="display:flex;gap:4px;">
+                                <span v-for="s in [1,2,3,4,5]" :key="s" @click="setAppRating(app.id, s)"
+                                    :style="{cursor:'pointer',fontSize:'28px',color: getAppRating(app.id) >= s ? '#ff9800' : '#ddd',margin:'0 3px',display:'inline-block'}">★</span>
+                            </div>
+                        </div>
+                        <div>
+                            <textarea :id="'comment-'+app.id" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;font-size:13px;" placeholder="评语（可选）"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
+                        <button class="btn-secondary" @click="closeModal()">取消</button>
+                        <button class="btn-primary" @click="submitDemandEvaluations">提交评价</button>
                     </div>
                 </div>
             </div>
@@ -2215,6 +2243,10 @@
                 const currentApplications = ref([]);
                 const talentDetail = ref(null);
                 const evalForm = ref({ rating:5, comment:'' });
+                const evalDemandId = ref(null);
+                const attitudeRatings = ref({});
+                const qualityRatings = ref({});
+                const selectedForEval = ref([]);
                 const selectedAppForEval = ref(null);
                 const demandQuotes = ref({});
                 const demandMeta = ref({});
@@ -2350,6 +2382,39 @@
                         const res = await axios.post('/api/demands/' + currentDemandId.value + '/notify-group');
                         showToast(res.data.message || '已发送企微群');
                     } catch(e) { showToast(e.response?.data?.error || '发送失败'); }
+                };
+                const openEvalForDemand = async (demandId) => {
+                    evalDemandId.value = demandId;
+                    attitudeRatings.value = {};
+                    qualityRatings.value = {};
+                    try {
+                        const res = await axios.get(`/api/demands/${demandId}/applications`);
+                        selectedForEval.value = (res.data || []).filter(a => a.status === 'selected');
+                        currentModal.value = 'eval';
+                    } catch(e) { showToast('加载失败'); }
+                };
+                const setAppRating = (appId, rating) => { attitudeRatings.value[appId] = rating; };
+                const getAppRating = (appId) => { return attitudeRatings.value[appId] || 0; };
+                const submitDemandEvaluations = async () => {
+                    if (!selectedForEval.value.length) { showToast('没有选中的兼职'); return; }
+                    for (const app of selectedForEval.value) {
+                        if (!attitudeRatings.value[app.id]) { showToast('请为所有兼职打分'); return; }
+                    }
+                    try {
+                        for (const app of selectedForEval.value) {
+                            const comment = document.getElementById('comment-' + app.id)?.value || '';
+                            await axios.post('/api/demands/' + evalDemandId.value + '/evaluate', {
+                                talent_id: app.talent_id,
+                                rating: attitudeRatings.value[app.id],
+                                comment: comment,
+                                evaluated_by: currentUser.value?.id
+                            });
+                        }
+                        await axios.put('/api/demands/' + evalDemandId.value, { status: 'done' });
+                        closeModal();
+                        loadDemands();
+                        showToast('评价提交成功');
+                    } catch(e) { showToast('提交失败'); }
                 };
                 const openEvaluateModal = async (d) => {
                     currentDemandId.value = d.id;
