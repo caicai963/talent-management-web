@@ -1925,7 +1925,8 @@ def publish_to_wecom(demand_id):
                     if t['label'] == tier:
                         tier_price = t.get('price', 0)
                         break
-            quote_str = "0.5元/呼出 + %s元/样本" % tier_price
+            sample_price = tier_price - 20 if "甄别" in biz else tier_price
+            quote_str = "0.5元/呼出 + %s元/样本" % sample_price
         else:
             unit_price = int(pw) // int(qty) if qty else 0
             quote_str = "%s元/样本" % unit_price
