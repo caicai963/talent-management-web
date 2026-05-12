@@ -266,6 +266,14 @@ def calc_quote(demand_data):
         human_cost = h * 1200
         human_note = f"样本数{gmv}→人力投入{h}×1200 = {int(human_cost)}元"
 
+    elif biz == "电访+外呼":
+        unit_price = tier_data.get("price", 0)
+        part_time_wage = unit_price * quantity + 20 * quantity  # 样本单价 + 20元呼出费
+        wage_note = f"({unit_price}+20元/样本呼出费)×{quantity}个"
+        h = vlookup_h(quantity, LUT_DIANFANG)
+        human_cost = h * 1200
+        human_note = f"样本数{quantity}→人力投入{h}×1200 = {int(human_cost)}元"
+
     elif biz == "实验室执行":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity
@@ -274,7 +282,7 @@ def calc_quote(demand_data):
         human_cost = lab_extra["subtotal"]
         human_note = lab_extra["note"]
 
-    elif biz == "甄别+呼出":
+    elif biz == "甄别+外呼":
         unit_price = tier_data.get("price", 0)
         part_time_wage = unit_price * quantity + 20 * quantity  # 样本单价 + 20元呼出费
         wage_note = f"({unit_price}+20元/样本呼出费)×{quantity}个"
@@ -1903,9 +1911,23 @@ def publish_to_wecom(demand_id):
     msg_req = demand.get('requirements', '') or "无"
 
     if quote:
-        pw = quote['part_time_wage'] or 0
+        biz = demand.get('business_type', '')
+        tier = demand.get('tier', '')
         qty = demand.get('quantity', 1) or 1
-        unit_price = int(pw) // int(qty) if qty else 0
+        pw = quote['part_time_wage'] or 0
+        if '+外呼' in biz:
+            # Get base tier price from TPT
+            tier_price = 0
+            if biz in TALENT_PRICE_TABLE:
+                for t in TALENT_PRICE_TABLE[biz]:
+                    if t['label'] == tier:
+                        tier_price = t.get('price', 0)
+                        break
+            if tier_price == 0:
+                tier_price = int(pw) // int(qty) if qty else 0
+            unit_price = tier_price + 0.5
+        else:
+            unit_price = int(pw) // int(qty) if qty else 0
         quote_str = "%s元/样本" % unit_price
     else:
         quote_str = "待确认"
