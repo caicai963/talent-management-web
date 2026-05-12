@@ -1875,13 +1875,15 @@ def publish_to_wecom(demand_id):
 
     msg_biz = demand['business_type'] or ""
     msg_tier = demand['tier'] or ""
-    msg_qty = demand['quantity'] or 0
-    msg_exec_time = demand.get('execution_time', '') or "待定"
+    msg_qty = demand.get('parttimer_count', 0) or 0
+    msg_exec_time = demand.get('execution_time', '') or "未填写"
     msg_req = demand.get('requirements', '') or "无"
 
     if quote:
         pw = quote['part_time_wage'] or 0
-        quote_str = "%s元/样本" % pw
+        qty = demand.get('quantity', 1) or 1
+        unit_price = int(pw) // int(qty) if qty else 0
+        quote_str = "%s元/样本" % unit_price
     else:
         quote_str = "待确认"
 
