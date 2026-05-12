@@ -274,6 +274,14 @@ def calc_quote(demand_data):
         human_cost = lab_extra["subtotal"]
         human_note = lab_extra["note"]
 
+    elif biz == "甄别+呼出":
+        unit_price = tier_data.get("price", 0)
+        part_time_wage = unit_price * quantity + 20 * quantity  # 样本单价 + 20元呼出费
+        wage_note = f"({unit_price}+20元/样本呼出费)×{quantity}个"
+        h = vlookup_h(quantity, LUT_ZHENBIE)
+        human_cost = h * 1200
+        human_note = f"样本数{quantity}→人力投入{h}×1200 = {int(human_cost)}元"
+
     else:
         unit_price = tier_data.get("price", 0)
         if brush:
