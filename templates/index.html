@@ -447,7 +447,7 @@
 
                                     <button class="btn-primary" @click="openEditModal(talent)" v-if="currentUser.role !== 'demander'">编辑</button>
 
-                                    <button class="btn-danger" @click="deleteTalent(talent.id)">删除</button>
+                                    <button class="btn-danger" @click="deleteTalent(talent.id)" v-if="currentUser.role !== 'demander'">删除</button>
 
                                 </td>
 
