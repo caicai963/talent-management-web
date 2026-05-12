@@ -1288,7 +1288,7 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1), data.get('execution_time', ''), data.get('parttimer_count', 1),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1),
         ))
         demand_id = cursor.lastrowid
     else:
@@ -1310,7 +1310,7 @@ def create_demand():
             data.get('scheduled_hours', 0), data.get('end_time', ''), data.get('cross_meal_count', 0),
             data.get('human_cost', 0),
             data.get('budget_min'), data.get('budget_max'),
-            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1), data.get('execution_time', ''), data.get('parttimer_count', 1),
+            data.get('deadline'), data.get('demander_id'), data.get('tidanren'), data.get('execution_time', ''), data.get('parttimer_count', 1),
         ))
         demand_id = cursor.lastrowid
     close_conn(conn)
