@@ -1873,31 +1873,25 @@ def publish_to_wecom(demand_id):
 
     quote = quote if quote else None
 
-    brush_str = "（刷名单）" if demand['brush_list'] else ""
-    msg_title = demand['title'] or ""
     msg_biz = demand['business_type'] or ""
     msg_tier = demand['tier'] or ""
     msg_qty = demand['quantity'] or 0
-    msg_deadline = demand['deadline'] or "待定"
-    msg_desc = demand['description'] or "无"
-    msg_demander_tidan = demand.get('tidanren', '') or demand.get('demander_name', '')
+    msg_exec_time = demand.get('execution_time', '') or "待定"
+    msg_req = demand.get('requirements', '') or "无"
 
     if quote:
         pw = quote['part_time_wage'] or 0
-        hc = quote['human_cost'] or 0
-        total = quote['total_quote'] or 0
-        quote_str = "%s元（兼职工资%s元 + 人力成本%s元）" % (total, pw, hc)
+        quote_str = "%s元/样本" % pw
     else:
         quote_str = "待确认"
 
     msg = "### New 需求发布\n"
-    msg += "**提单人：** %s\n" % msg_demander_tidan
-    msg += "**需求标题：** %s\n" % msg_title
-    msg += "**业务类型：** %s - %s %s\n" % (msg_biz, msg_tier, brush_str)
-    msg += "**数量：** %s\n" % msg_qty
-    msg += "**截止日期：** %s\n" % msg_deadline
-    msg += "**需求描述：** %s\n" % msg_desc
-    msg += "**报价：** %s\n" % quote_str
+    msg += "**需求类型：** %s - %s\n" % (msg_biz, msg_tier)
+    msg += "**兼职人数：** %s\n" % msg_qty
+    msg += "**单价：** %s\n" % quote_str
+    msg += "**执行时间：** %s\n" % msg_exec_time
+    msg += "**具体要求：** %s\n" % msg_req
+    msg += "---\n"
     msg += "---\n"
     msg += "> 点击报名：[系统链接](https://talent-management-web.onrender.com/apply?demand_id=%s)" % demand_id
     msg += "\n\n> ⚠️ **重要提示**：报名后请务必先添加管理员企微「菜菜」，否则后续无法通知入选结果"
