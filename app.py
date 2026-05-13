@@ -469,10 +469,26 @@ def init_db():
         try:
             if DATABASE_URL:
                 cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1")
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1
+        # Migration: add evaluation_type to demand_evaluations
+        try:
+            if DATABASE_URL:
+                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+            else:
+                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+        except Exception:
+            pass")
             else:
                 cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1")
+                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1
+        # Migration: add evaluation_type to demand_evaluations
+        try:
+            if DATABASE_URL:
+                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+            else:
+                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+        except Exception:
+            pass")
         except Exception:
             pass
           CREATE TABLE IF NOT EXISTS users (
@@ -547,6 +563,7 @@ def init_db():
                 talent_id INTEGER NOT NULL,
                 rating INTEGER,
                 comment TEXT,
+                evaluation_type TEXT DEFAULT 'quality',
                 evaluated_by INTEGER,
                 created_at TIMESTAMP DEFAULT NOW()
             )
@@ -1768,6 +1785,78 @@ def get_evaluations(demand_id):
     return jsonify(rows)
 
 
+@app.route('/api/demands/<int:demand_id>/final-ratings', methods=['GET'])
+def get_final_ratings(demand_id):
+    """Get final aggregated ratings for all talents in a demand"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get all evaluations for this demand
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT de.talent_id, de.evaluation_type, de.rating, de.comment, 
+                   t.name as talent_name, u.username as evaluator_name
+            FROM demand_evaluations de
+            JOIN talents t ON de.talent_id = t.id
+            LEFT JOIN users u ON de.evaluated_by = u.id
+            WHERE de.demand_id = %s
+        """, (demand_id,))
+    else:
+        cursor.execute("""
+            SELECT de.talent_id, de.evaluation_type, de.rating, de.comment,
+                   t.name as talent_name, u.username as evaluator_name
+            FROM demand_evaluations de
+            JOIN talents t ON de.talent_id = t.id
+            LEFT JOIN users u ON de.evaluated_by = u.id
+            WHERE de.demand_id = ?
+        """, (demand_id,))
+    
+    rows = fetchall_dicts(cursor)
+    close_conn(conn)
+    
+    # Group by talent
+    talent_evals = {}
+    for row in rows:
+        tid = row['talent_id']
+        if tid not in talent_evals:
+            talent_evals[tid] = {
+                'talent_id': tid,
+                'talent_name': row['talent_name'],
+                'quality_rating': 4,  # default
+                'quality_comment': '',
+                'attitude_rating': 4,  # default
+                'attitude_comment': '',
+                'quality_evaluator': None,
+                'attitude_evaluator': None
+            }
+        if row['evaluation_type'] == 'quality':
+            talent_evals[tid]['quality_rating'] = row['rating'] or 4
+            talent_evals[tid]['quality_comment'] = row['comment'] or ''
+            talent_evals[tid]['quality_evaluator'] = row['evaluator_name']
+        elif row['evaluation_type'] == 'attitude':
+            talent_evals[tid]['attitude_rating'] = row['rating'] or 4
+            talent_evals[tid]['attitude_comment'] = row['comment'] or ''
+            talent_evals[tid]['attitude_evaluator'] = row['evaluator_name']
+    
+    # Calculate weighted final rating
+    result = []
+    for tid, data in talent_evals.items():
+        final = data['quality_rating'] * 0.7 + data['attitude_rating'] * 0.3
+        result.append({
+            'talent_id': tid,
+            'talent_name': data['talent_name'],
+            'quality_rating': data['quality_rating'],
+            'attitude_rating': data['attitude_rating'],
+            'final_rating': round(final, 1),
+            'quality_comment': data['quality_comment'],
+            'attitude_comment': data['attitude_comment'],
+            'quality_evaluator': data['quality_evaluator'],
+            'attitude_evaluator': data['attitude_evaluator']
+        })
+    
+    return jsonify(result)
+
+
 @app.route('/api/demands/<int:demand_id>/evaluate', methods=['POST'])
 def create_evaluation(demand_id):
     data = request.json
@@ -1776,17 +1865,19 @@ def create_evaluation(demand_id):
     if DATABASE_URL:
         cursor.execute("""
             INSERT INTO demand_evaluations
-                (demand_id, talent_id, rating, comment, evaluated_by)
-            VALUES (%s, %s, %s, %s, %s)
+                (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (demand_id, data['talent_id'], data['rating'],
-             data.get('comment', ''), data.get('evaluated_by')))
+             data.get('comment', ''), data.get('evaluation_type', 'quality'),
+             data.get('evaluated_by')))
     else:
         cursor.execute("""
             INSERT INTO demand_evaluations
-                (demand_id, talent_id, rating, comment, evaluated_by)
-            VALUES (?, ?, ?, ?, ?)
+                (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (demand_id, data['talent_id'], data['rating'],
-             data.get('comment', ''), data.get('evaluated_by')))
+             data.get('comment', ''), data.get('evaluation_type', 'quality'),
+             data.get('evaluated_by')))
     eval_id = cursor.lastrowid
     close_conn(conn)
     return jsonify({'id': eval_id, 'message': '评价已保存'})
