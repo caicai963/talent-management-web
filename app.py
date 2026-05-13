@@ -1857,29 +1857,120 @@ def get_final_ratings(demand_id):
     return jsonify(result)
 
 
+@app.route('/api/demands/<int:demand_id>/evaluation-status', methods=['GET'])
+def get_demand_evaluation_status(demand_id):
+    """Get which talents have been evaluated (quality/attitude) for a demand"""
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT talent_id, evaluation_type, rating, comment
+            FROM demand_evaluations
+            WHERE demand_id = %s
+        """, (demand_id,))
+    else:
+        cursor.execute("""
+            SELECT talent_id, evaluation_type, rating, comment
+            FROM demand_evaluations
+            WHERE demand_id = ?
+        """, (demand_id,))
+    rows = fetchall_dicts(cursor)
+    close_conn(conn)
+    
+    status = {}
+    for row in rows:
+        tid = row['talent_id']
+        etype = row['evaluation_type']
+        if tid not in status:
+            status[tid] = {'talent_id': tid, 'quality_done': False, 'attitude_done': False,
+                          'quality_rating': None, 'attitude_rating': None,
+                          'quality_comment': '', 'attitude_comment': ''}
+        if etype == 'quality':
+            status[tid]['quality_done'] = True
+            status[tid]['quality_rating'] = row['rating']
+            status[tid]['quality_comment'] = row['comment'] or ''
+        elif etype == 'attitude':
+            status[tid]['attitude_done'] = True
+            status[tid]['attitude_rating'] = row['rating']
+            status[tid]['attitude_comment'] = row['comment'] or ''
+    
+    return jsonify(list(status.values()))
+
+
+    return jsonify(result)
+
+
 @app.route('/api/demands/<int:demand_id>/evaluate', methods=['POST'])
 def create_evaluation(demand_id):
     data = request.json
+    talent_id = data.get('talent_id')
+    rating = data.get('rating')
+    evaluated_by = data.get('evaluated_by')
+    
+    if not talent_id or not rating:
+        return jsonify({'error': '缺少必要参数'}), 400
+    
+    # Determine evaluation_type from user's role
+    # Get user role from database
+    conn_user = get_db()
+    cursor_user = conn_user.cursor()
+    user_role = None
+    if DATABASE_URL:
+        cursor_user.execute("SELECT role FROM users WHERE id = %s", (evaluated_by,))
+    else:
+        cursor_user.execute("SELECT role FROM users WHERE id = ?", (evaluated_by,))
+    user_row = fetchone_dict(cursor_user)
+    if user_row:
+        user_role = user_row.get('role')
+    close_conn(conn_user)
+    
+    # Role-based evaluation_type: admin=attitude, demander=quality
+    if user_role == 'admin':
+        evaluation_type = 'attitude'
+    else:
+        evaluation_type = 'quality'
+    
+    # Check for duplicate evaluation
     conn = get_db()
     cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT id FROM demand_evaluations
+            WHERE demand_id = %s AND talent_id = %s AND evaluation_type = %s
+        """, (demand_id, talent_id, evaluation_type))
+    else:
+        cursor.execute("""
+            SELECT id FROM demand_evaluations
+            WHERE demand_id = ? AND talent_id = ? AND evaluation_type = ?
+        """, (demand_id, talent_id, evaluation_type))
+    existing = fetchone_dict(cursor)
+    if existing:
+        close_conn(conn)
+        return jsonify({'error': '该兼职已被评价，请勿重复评价'}), 400
+    
+    # Insert evaluation
     if DATABASE_URL:
         cursor.execute("""
             INSERT INTO demand_evaluations
                 (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
             VALUES (%s, %s, %s, %s, %s, %s)
-        """, (demand_id, data['talent_id'], data['rating'],
-             data.get('comment', ''), data.get('evaluation_type', 'quality'),
-             data.get('evaluated_by')))
+        """, (demand_id, talent_id, rating,
+             data.get('comment', ''), evaluation_type,
+             evaluated_by))
     else:
         cursor.execute("""
             INSERT INTO demand_evaluations
                 (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (demand_id, data['talent_id'], data['rating'],
-             data.get('comment', ''), data.get('evaluation_type', 'quality'),
-             data.get('evaluated_by')))
+        """, (demand_id, talent_id, rating,
+             data.get('comment', ''), evaluation_type,
+             evaluated_by))
     eval_id = cursor.lastrowid
     close_conn(conn)
+    
+    # Update talent's ratings
+    update_talent_ratings(talent_id)
+    
     return jsonify({'id': eval_id, 'message': '评价已保存'})
 
 
