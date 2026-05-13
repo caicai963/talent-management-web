@@ -684,7 +684,7 @@
                                 <td>{{ d.deadline || "-" }}</td>
                                 <td>
                                     <div class="actions">
-                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button><button class="btn-warning" @click="openEvalForDemand(d.id)" style="padding:4px 8px;font-size:12px;">完结</button>
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button><button class="btn-warning" @click="wanjie(d.id)" style="padding:4px 8px;font-size:12px;">完结</button>
                                         <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
                                         <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
                                         <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
@@ -1651,7 +1651,16 @@
 
     <script>
 
-        const { createApp, ref, computed, onMounted, watch } = Vue;
+        
+                const wanjie = async (demandId) => {
+                    if (!confirm('确认要求已完端')) return;
+                    try {
+                        await axios.put('/api/demands/' + demandId, { status: 'done' });
+                        loadDemands();
+                        showToast('已完端');
+                    } catch(e) { showToast('操作失败'); }
+                };
+const { createApp, ref, computed, onMounted, watch } = Vue;
 
 
 
@@ -2412,7 +2421,6 @@
                                 evaluated_by: currentUser.value?.id
                             });
                         }
-                        await axios.put('/api/demands/' + evalDemandId.value, { status: 'done' });
                         closeModal();
                         loadDemands();
                         showToast('评价提交成功');
