@@ -2498,7 +2498,15 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 
 
-                return {
+                
+                const wanjie = async (demandId) => {
+                    if (!confirm('确认要求已完端')) return;
+                    try {
+                        await axios.put('/api/demands/' + demandId, { status: 'done' });
+                        loadDemands();
+                        showToast('已完端');
+                    } catch(e) { showToast('操作失败'); }
+        return {
 
                     isLoggedIn, currentUser, loginForm, loginError,
                     demands, demandStatusFilter, currentModal, demandForm, currentDemand,
@@ -2537,7 +2545,8 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
                     statusPhone, statusResult, statusChecked,
                     submitRegistration, checkMyStatus,
 
-                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie
+                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm,         };
+saveUser, wanjie, showToast
 
                 };
 
