@@ -1974,6 +1974,39 @@ def create_evaluation(demand_id):
     return jsonify({'id': eval_id, 'message': '评价已保存'})
 
 
+
+def update_talent_ratings(talent_id):
+    """Update talent's avg_rating and month_rating based on all evaluations"""
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating,
+                   COUNT(*) as eval_count
+            FROM demand_evaluations
+            WHERE talent_id = %s
+        """, (talent_id,))
+    else:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating,
+                   COUNT(*) as eval_count
+            FROM demand_evaluations
+            WHERE talent_id = ?
+        """, (talent_id,))
+    row = fetchone_dict(cursor)
+    if row and row['avg_rating']:
+        avg = round(float(row['avg_rating']), 1)
+        count = row['eval_count'] or 0
+        if DATABASE_URL:
+            cursor.execute(
+                "UPDATE talents SET avg_rating = %s, month_rating = %s, project_count = %s WHERE id = %s",
+                (avg, avg, count, talent_id))
+        else:
+            cursor.execute(
+                "UPDATE talents SET avg_rating = ?, month_rating = ?, project_count = ? WHERE id = ?",
+                (avg, avg, count, talent_id))
+    close_conn(conn)
+
 # ---- 企微 Webhook ----
 
 def get_setting(key, default=''):
