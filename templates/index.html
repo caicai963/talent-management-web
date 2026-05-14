@@ -684,7 +684,7 @@
                                 <td>{{ d.deadline || "-" }}</td>
                                 <td>
                                     <div class="actions">
-                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button><button class="btn-warning" @click="wanjie(d.id)" style="padding:4px 8px;font-size:12px;">完结</button>
+                                        <button class="btn-secondary" @click="viewDemand(d)" style="padding:4px 8px;font-size:12px;">详情</button><button class="btn-warning" <button class="btn-info" @click="openEvalForDemand(d.id)" v-if="d.status === 'done'" style="padding:4px 8px;font-size:12px;">兼职评仧</button>@click="wanjie(d.id)" style="padding:4px 8px;font-size:12px;">完结</button>
                                         <button v-if="d.status === 'pending'" class="btn-primary" @click="calcAndSaveQuote(d)" style="padding:4px 8px;font-size:12px;">计算报价</button>
                                         <button v-if="d.status === 'quoting' && isAdmin" class="btn-warning" @click="openQuoteModal(d)" style="padding:4px 8px;font-size:12px;">填写报价</button>
                                         <button v-if="d.status === 'quoting' && !isAdmin" class="btn-success" @click="confirmQuote(d.id)" style="padding:4px 8px;font-size:12px;">确认报价</button>
