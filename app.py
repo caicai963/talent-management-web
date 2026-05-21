@@ -465,7 +465,18 @@ def init_db():
             pass
         cursor.execute("""
   
-        # Migration: add execution_time and parttimer_count to demands
+        # Migration: add quality_rating and attitude_rating to talents
+    try:
+        if DATABASE_URL:
+            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
+            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
+        else:
+            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
+            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
+    except Exception:
+        pass
+
+# Migration: add execution_time and parttimer_count to demands
         try:
             if DATABASE_URL:
                 cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
@@ -1988,37 +1999,136 @@ def create_evaluation(demand_id):
 
 
 def update_talent_ratings(talent_id):
-    """Update talent's avg_rating and month_rating based on all evaluations"""
+    """Update talent's quality_rating and attitude_rating based on evaluations"""
+    conn = get_db()
+    cursor = conn.cursor()
+    # Get quality ratings average
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating, COUNT(*) as cnt
+            FROM demand_evaluations
+            WHERE talent_id = %s AND evaluation_type = 'quality'
+        """, (talent_id,))
+    else:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating, COUNT(*) as cnt
+            FROM demand_evaluations
+            WHERE talent_id = ? AND evaluation_type = 'quality'
+        """, (talent_id,))
+    q_row = fetchone_dict(cursor)
+    quality_avg = round(float(q_row['avg_rating']), 1) if q_row and q_row['avg_rating'] else 0
+
+    # Get attitude ratings average
+    if DATABASE_URL:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating
+            FROM demand_evaluations
+            WHERE talent_id = %s AND evaluation_type = 'attitude'
+        """, (talent_id,))
+    else:
+        cursor.execute("""
+            SELECT AVG(rating) as avg_rating
+            FROM demand_evaluations
+            WHERE talent_id = ? AND evaluation_type = 'attitude'
+        """, (talent_id,))
+    a_row = fetchone_dict(cursor)
+    attitude_avg = round(float(a_row['avg_rating']), 1) if a_row and a_row['avg_rating'] else 0
+
+    # Count total evaluations
+    if DATABASE_URL:
+        cursor.execute("SELECT COUNT(*) as cnt FROM demand_evaluations WHERE talent_id = %s", (talent_id,))
+    else:
+        cursor.execute("SELECT COUNT(*) as cnt FROM demand_evaluations WHERE talent_id = ?", (talent_id,))
+    count_row = fetchone_dict(cursor)
+    total_count = count_row['cnt'] or 0
+
+    # Combined avg_rating for backward compatibility
+    if quality_avg > 0 and attitude_avg > 0:
+        combined_avg = round(quality_avg * 0.7 + attitude_avg * 0.3, 1)
+    elif quality_avg > 0:
+        combined_avg = quality_avg
+    elif attitude_avg > 0:
+        combined_avg = attitude_avg
+    else:
+        combined_avg = 0
+
+    if DATABASE_URL:
+        cursor.execute(
+            "UPDATE talents SET quality_rating = %s, attitude_rating = %s, avg_rating = %s, month_rating = %s, project_count = %s WHERE id = %s",
+            (quality_avg, attitude_avg, combined_avg, combined_avg, total_count, talent_id))
+    else:
+        cursor.execute(
+            "UPDATE talents SET quality_rating = ?, attitude_rating = ?, avg_rating = ?, month_rating = ?, project_count = ? WHERE id = ?",
+            (quality_avg, attitude_avg, combined_avg, combined_avg, total_count, talent_id))
+    close_conn(conn)
+
+
+
+@app.route('/api/evaluations/auto-default', methods=['POST'])
+def auto_default_missing_evaluations():
     conn = get_db()
     cursor = conn.cursor()
     if DATABASE_URL:
         cursor.execute("""
-            SELECT AVG(rating) as avg_rating,
-                   COUNT(*) as eval_count
-            FROM demand_evaluations
-            WHERE talent_id = %s
-        """, (talent_id,))
+            SELECT id FROM demands
+            WHERE status = 'done'
+            AND updated_at < NOW() - INTERVAL '24 hours'
+        """)
     else:
         cursor.execute("""
-            SELECT AVG(rating) as avg_rating,
-                   COUNT(*) as eval_count
-            FROM demand_evaluations
-            WHERE talent_id = ?
-        """, (talent_id,))
-    row = fetchone_dict(cursor)
-    if row and row['avg_rating']:
-        avg = round(float(row['avg_rating']), 1)
-        count = row['eval_count'] or 0
+            SELECT id FROM demands
+            WHERE status = 'done'
+            AND updated_at < datetime('now', '-24 hours')
+        """)
+    done_demands = fetchall_dicts(cursor)
+    defaulted = []
+    for demand_row in done_demands:
+        demand_id = demand_row['id']
         if DATABASE_URL:
-            cursor.execute(
-                "UPDATE talents SET avg_rating = %s, month_rating = %s, project_count = %s WHERE id = %s",
-                (avg, avg, count, talent_id))
+            cursor.execute("SELECT DISTINCT talent_id FROM demand_evaluations WHERE demand_id = %s", (demand_id,))
         else:
-            cursor.execute(
-                "UPDATE talents SET avg_rating = ?, month_rating = ?, project_count = ? WHERE id = ?",
-                (avg, avg, count, talent_id))
+            cursor.execute("SELECT DISTINCT talent_id FROM demand_evaluations WHERE demand_id = ?", (demand_id,))
+        talents = fetchall_dicts(cursor)
+        for t in talents:
+            talent_id = t['talent_id']
+            if DATABASE_URL:
+                cursor.execute("SELECT id FROM demand_evaluations WHERE demand_id = %s AND talent_id = %s AND evaluation_type = 'quality'", (demand_id, talent_id))
+            else:
+                cursor.execute("SELECT id FROM demand_evaluations WHERE demand_id = ? AND talent_id = ? AND evaluation_type = 'quality'", (demand_id, talent_id))
+            has_quality = cursor.fetchone() is not None
+            if DATABASE_URL:
+                cursor.execute("SELECT id FROM demand_evaluations WHERE demand_id = %s AND talent_id = %s AND evaluation_type = 'attitude'", (demand_id, talent_id))
+            else:
+                cursor.execute("SELECT id FROM demand_evaluations WHERE demand_id = ? AND talent_id = ? AND evaluation_type = 'attitude'", (demand_id, talent_id))
+            has_attitude = cursor.fetchone() is not None
+            if has_quality and not has_attitude:
+                if DATABASE_URL:
+                    cursor.execute("""
+                        INSERT INTO demand_evaluations (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+                        VALUES (%s, %s, 4, 'auto_default', 'attitude', NULL)
+                    """, (demand_id, talent_id))
+                else:
+                    cursor.execute("""
+                        INSERT INTO demand_evaluations (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+                        VALUES (?, ?, 4, 'auto_default', 'attitude', NULL)
+                    """, (demand_id, talent_id))
+                defaulted.append({'demand_id': demand_id, 'talent_id': talent_id, 'type': 'attitude'})
+                update_talent_ratings(talent_id)
+            elif has_attitude and not has_quality:
+                if DATABASE_URL:
+                    cursor.execute("""
+                        INSERT INTO demand_evaluations (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+                        VALUES (%s, %s, 4, 'auto_default', 'quality', NULL)
+                    """, (demand_id, talent_id))
+                else:
+                    cursor.execute("""
+                        INSERT INTO demand_evaluations (demand_id, talent_id, rating, comment, evaluation_type, evaluated_by)
+                        VALUES (?, ?, 4, 'auto_default', 'quality', NULL)
+                    """, (demand_id, talent_id))
+                defaulted.append({'demand_id': demand_id, 'talent_id': talent_id, 'type': 'quality'})
+                update_talent_ratings(talent_id)
     close_conn(conn)
-
+    return jsonify({'message': 'auto_default_done', 'count': len(defaulted), 'details': defaulted})
 # ---- 企微 Webhook ----
 
 def get_setting(key, default=''):
