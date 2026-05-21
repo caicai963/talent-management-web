@@ -1931,6 +1931,18 @@ def create_evaluation(demand_id):
         evaluation_type = 'quality'
     
     # Check for duplicate evaluation
+    # Ensure evaluation_type column exists (migration for existing tables)
+    try:
+        conn_mig = get_db()
+        cursor_mig = conn_mig.cursor()
+        if DATABASE_URL:
+            cursor_mig.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+        else:
+            cursor_mig.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+        close_conn(conn_mig)
+    except Exception:
+        pass
+
     conn = get_db()
     cursor = conn.cursor()
     if DATABASE_URL:
