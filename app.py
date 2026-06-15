@@ -463,53 +463,19 @@ def init_db():
                 cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS wechat TEXT")
         except Exception:
             pass
-        cursor.execute("""
-  
-        # Migration: add quality_rating and attitude_rating to talents
-    try:
-        if DATABASE_URL:
-            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
-            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
-        else:
-            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
-            cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
-    except Exception:
-        pass
-
-# Migration: add execution_time and parttimer_count to demands
+        # Migrations: add quality_rating, attitude_rating, and ensure talent_registration_tokens exists
         try:
             if DATABASE_URL:
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1
-        # Migration: add evaluation_type to demand_evaluations
-        try:
-            if DATABASE_URL:
-                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
+                cursor.execute("CREATE TABLE IF NOT EXISTS talent_registration_tokens (id SERIAL PRIMARY KEY, token TEXT UNIQUE NOT NULL, label TEXT, created_by INTEGER, status TEXT DEFAULT 'active', use_count INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())")
             else:
-                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
-        except Exception:
-            pass")
-            else:
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS execution_time TEXT")
-                cursor.execute("ALTER TABLE demands ADD COLUMN IF NOT EXISTS parttimer_count INTEGER DEFAULT 1
-        # Migration: add evaluation_type to demand_evaluations
-        try:
-            if DATABASE_URL:
-                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
-            else:
-                cursor.execute("ALTER TABLE demand_evaluations ADD COLUMN IF NOT EXISTS evaluation_type TEXT DEFAULT 'quality'")
-        except Exception:
-            pass")
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS quality_rating REAL DEFAULT 0")
+                cursor.execute("ALTER TABLE talents ADD COLUMN IF NOT EXISTS attitude_rating REAL DEFAULT 0")
+                cursor.execute("CREATE TABLE IF NOT EXISTS talent_registration_tokens (id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT UNIQUE NOT NULL, label TEXT, created_by INTEGER, status TEXT DEFAULT 'active', use_count INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
         except Exception:
             pass
-          CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                role TEXT DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS system_settings (
                 key TEXT PRIMARY KEY,
