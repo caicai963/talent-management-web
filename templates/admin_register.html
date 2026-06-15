@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兼职登记链接管理</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f7; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { color: #333; margin-bottom: 20px; }
+        .form-row { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { padding: 10px 20px; background: #667eea; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #5568d3; }
+        button.danger { background: #e53e3e; }
+        button.danger:hover { background: #c53030; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .link-cell { max-width: 350px; word-break: break-all; color: #667eea; }
+        .status-active { color: #38a169; font-weight: 600; }
+        .status-revoked { color: #e53e3e; font-weight: 600; }
+        .new-link-box { background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 16px; }
+        .new-link-box code { background: #fff; padding: 8px; display: block; margin-top: 8px; border-radius: 4px; word-break: break-all; }
+        .copy-btn { margin-top: 8px; background: #38a169; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 兼职登记链接管理</h1>
+        <p style="color:#888;margin-bottom:20px;font-size:13px;">生成长期有效的登记链接，发送给兼职填写，提交后自动创建账号</p>
+
+        <div class="form-row">
+            <label>链接备注（可选）</label>
+            <input id="labelInput" placeholder="如：2025年6月新批次兼职" maxlength="100">
+        </div>
+        <button onclick="createToken()">生成新链接</button>
+
+        <div id="newLinkBox" class="new-link-box" style="display:none;">
+            <strong>✅ 新链接已生成：</strong>
+            <code id="newLinkUrl"></code>
+            <button class="copy-btn" onclick="copyLink()">复制链接</button>
+        </div>
+
+        <h2 style="margin-top:30px;font-size:18px;">已有链接</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>备注</th>
+                    <th>链接</th>
+                    <th>使用次数</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="tokenTable">
+                <tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">加载中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadTokens() {
+            const r = await fetch('/api/talents/registration-tokens');
+            const data = await r.json();
+            const tbody = document.getElementById('tokenTable');
+            if (!data.tokens || data.tokens.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">暂无链接</td></tr>';
+                return;
+            }
+            const baseUrl = window.location.origin;
+            tbody.innerHTML = data.tokens.map(t => {
+                const link = `${baseUrl}/register/${t.token}`;
+                const status = t.status === 'active' ? '<span class="status-active">有效</span>' : '<span class="status-revoked">已撤销</span>';
+                const created = new Date(t.created_at).toLocaleString('zh-CN');
+                const revokeBtn = t.status === 'active' ? `<button class="danger" onclick="revoke(${t.id})">撤销</button>` : '-';
+                return `<tr>
+                    <td>${t.id}</td>
+                    <td>${t.label || '-'}</td>
+                    <td class="link-cell">${link}</td>
+                    <td>${t.use_count}</td>
+                    <td>${status}</td>
+                    <td>${created}</td>
+                    <td>${revokeBtn}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function createToken() {
+            const label = document.getElementById('labelInput').value.trim();
+            const r = await fetch('/api/talents/registration-tokens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ label })
+            });
+            const data = await r.json();
+            if (data.link) {
+                document.getElementById('newLinkBox').style.display = 'block';
+                document.getElementById('newLinkUrl').textContent = data.link;
+                document.getElementById('labelInput').value = '';
+                loadTokens();
+            } else {
+                alert('生成失败');
+            }
+        }
+
+        async function revoke(id) {
+            if (!confirm('确定撤销此链接？撤销后将无法使用')) return;
+            await fetch(`/api/talents/registration-tokens/${id}`, { method: 'DELETE' });
+            loadTokens();
+        }
+
+        function copyLink() {
+            const text = document.getElementById('newLinkUrl').textContent;
+            navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
+        }
+
+        loadTokens();
+    </script>
+</body>
+</html>

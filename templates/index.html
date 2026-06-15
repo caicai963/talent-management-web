@@ -252,6 +252,7 @@
                     <button class="tab" :class="{ active: activeTab === 'stats' }" @click="activeTab = 'stats'; loadStats()">数据统计</button>
 
                     <button class="tab" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'; loadUsers()">账号管理</button>
+<button class="tab" v-if="isAdmin" :class="{ active: activeTab === 'register-links' }" @click="activeTab = 'register-links'; loadRegistrationTokens()">登记链接</button>
 
                     <button class="tab" :class="{ active: activeTab === 'demands' }" @click="activeTab = 'demands'; loadDemands()">需求管理</button>
 
@@ -653,7 +654,58 @@
 
             </div>
 
-            <div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
+            <div v-if="activeTab === 'register-links'" style="max-width: 1000px; margin: 0 auto;">
+    <h2 style="margin: 20px 0;">📋 兼职登记链接管理</h2>
+    <p style="color:#888;margin-bottom:20px;">生成长期有效的登记链接，发送给兼职填写，提交后自动创建账号</p>
+    <div style="background:#f8f9fa;padding:20px;border-radius:8px;margin-bottom:20px;">
+        <div style="margin-bottom:12px;">
+            <label style="display:block;margin-bottom:4px;color:#555;">链接备注（可选）</label>
+            <input v-model="newTokenLabel" placeholder="如：2025年6月新批次兼职" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+        </div>
+        <button @click="createRegistrationToken" style="padding:8px 20px;background:#667eea;color:#fff;border:none;border-radius:4px;cursor:pointer;">生成新链接</button>
+        <div v-if="newTokenLink" style="background:#e8f5e9;padding:16px;border-radius:8px;margin-top:16px;">
+            <strong>✅ 新链接已生成：</strong>
+            <code style="display:block;background:#fff;padding:8px;margin-top:8px;border-radius:4px;word-break:break-all;">{{ newTokenLink }}</code>
+            <button @click="copyTokenLink" style="margin-top:8px;padding:6px 16px;background:#38a169;color:#fff;border:none;border-radius:4px;cursor:pointer;">复制链接</button>
+        </div>
+    </div>
+    <h3>已有链接</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>备注</th>
+                <th>链接</th>
+                <th>使用次数</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="t in registrationTokens" :key="t.id">
+                <td>{{ t.id }}</td>
+                <td>{{ t.label || '-' }}</td>
+                <td style="max-width:350px;word-break:break-all;color:#667eea;">{{ window.location.origin }}/register/{{ t.token }}</td>
+                <td>{{ t.use_count }}</td>
+                <td>
+                    <span v-if="t.status === 'active'" style="color:#38a169;font-weight:600;">有效</span>
+                    <span v-else style="color:#e53e3e;font-weight:600;">已撤销</span>
+                </td>
+                <td>{{ formatTime(t.created_at) }}</td>
+                <td>
+                    <button v-if="t.status === 'active'" @click="revokeRegistrationToken(t.id)" style="padding:4px 12px;background:#e53e3e;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">撤销</button>
+                    <span v-else>-</span>
+                </td>
+            </tr>
+            <tr v-if="!registrationTokens || registrationTokens.length === 0">
+                <td colspan="7" style="text-align:center;padding:20px;color:#888;">暂无链接</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div v-if="activeTab === 'demands'" style="padding:0 0 20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <h2>需求管理</h2>
                     <button class="btn-primary" @click="openDemandModal()" style="padding:8px 16px;">+ 发布需求</button>
@@ -1660,6 +1712,41 @@
                         showToast('已完端');
                     } catch(e) { showToast('操作失败'); }
                 };
+
+                // ---- 兼职登记链接 ----
+                const registrationTokens = ref([]);
+                const newTokenLabel = ref('');
+                const newTokenLink = ref('');
+
+                const loadRegistrationTokens = async () => {
+                    try {
+                        const r = await axios.get('/api/talents/registration-tokens');
+                        registrationTokens.value = r.data.tokens || [];
+                    } catch(e) { showToast('加载失败'); }
+                };
+
+                const createRegistrationToken = async () => {
+                    try {
+                        const r = await axios.post('/api/talents/registration-tokens', { label: newTokenLabel.value });
+                        newTokenLink.value = r.data.link;
+                        newTokenLabel.value = '';
+                        loadRegistrationTokens();
+                    } catch(e) { showToast('生成失败'); }
+                };
+
+                const revokeRegistrationToken = async (id) => {
+                    if (!confirm('确定撤销此链接？')) return;
+                    try {
+                        await axios.delete('/api/talents/registration-tokens/' + id);
+                        loadRegistrationTokens();
+                    } catch(e) { showToast('撤销失败'); }
+                };
+
+                const copyTokenLink = () => {
+                    navigator.clipboard.writeText(newTokenLink.value).then(() => showToast('已复制到剪贴板'));
+                };
+
+                const formatTime = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
 const { createApp, ref, computed, onMounted, watch } = Vue;
 
 
@@ -2544,6 +2631,7 @@ return {
 
                     registerDemandId, registerForm, registerMessage,
                     statusPhone, statusResult, statusChecked,
+                    registrationTokens, newTokenLabel, newTokenLink, loadRegistrationTokens, createRegistrationToken, revokeRegistrationToken, copyTokenLink,                    statusPhone, statusResult, statusChecked,
                     submitRegistration, checkMyStatus,
 
                     openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie
@@ -2596,4 +2684,6 @@ return {
 </html>
 
 
-<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</button>
+<button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</buttonwanjie, formatTime
+                }saveUser, wanjie, formatTime
+                };>

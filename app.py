@@ -747,6 +747,13 @@ def register_page(token):
     return render_template('register.html')
 
 
+
+
+@app.route('/admin/register-links')
+def admin_register_links():
+    return render_template('admin_register.html')
+
+
 @app.route('/api/system/status', methods=['GET'])
 def system_status():
     conn = get_db()
