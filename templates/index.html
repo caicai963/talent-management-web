@@ -1704,49 +1704,6 @@
     <script>
 
         
-                const wanjie = async (demandId) => {
-                    if (!confirm('确认要求已完端')) return;
-                    try {
-                        await axios.put('/api/demands/' + demandId, { status: 'done' });
-                        loadDemands();
-                        showToast('已完端');
-                    } catch(e) { showToast('操作失败'); }
-                };
-
-                // ---- 兼职登记链接 ----
-                const registrationTokens = ref([]);
-                const newTokenLabel = ref('');
-                const newTokenLink = ref('');
-
-                const loadRegistrationTokens = async () => {
-                    try {
-                        const r = await axios.get('/api/talents/registration-tokens');
-                        registrationTokens.value = r.data.tokens || [];
-                    } catch(e) { showToast('加载失败'); }
-                };
-
-                const createRegistrationToken = async () => {
-                    try {
-                        const r = await axios.post('/api/talents/registration-tokens', { label: newTokenLabel.value });
-                        newTokenLink.value = r.data.link;
-                        newTokenLabel.value = '';
-                        loadRegistrationTokens();
-                    } catch(e) { showToast('生成失败'); }
-                };
-
-                const revokeRegistrationToken = async (id) => {
-                    if (!confirm('确定撤销此链接？')) return;
-                    try {
-                        await axios.delete('/api/talents/registration-tokens/' + id);
-                        loadRegistrationTokens();
-                    } catch(e) { showToast('撤销失败'); }
-                };
-
-                const copyTokenLink = () => {
-                    navigator.clipboard.writeText(newTokenLink.value).then(() => showToast('已复制到剪贴板'));
-                };
-
-                const formatTime = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
 const { createApp, ref, computed, onMounted, watch } = Vue;
 
 
@@ -2594,6 +2551,41 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
                         showToast('已完端');
                     } catch(e) { showToast('操作失败'); }
                 };
+
+                // ---- 兼职登记链接 ----
+                const registrationTokens = ref([]);
+                const newTokenLabel = ref('');
+                const newTokenLink = ref('');
+
+                const loadRegistrationTokens = async () => {
+                    try {
+                        const r = await axios.get('/api/talents/registration-tokens');
+                        registrationTokens.value = r.data.tokens || [];
+                    } catch(e) { showToast('加载失败'); }
+                };
+
+                const createRegistrationToken = async () => {
+                    try {
+                        const r = await axios.post('/api/talents/registration-tokens', { label: newTokenLabel.value });
+                        newTokenLink.value = r.data.link;
+                        newTokenLabel.value = '';
+                        loadRegistrationTokens();
+                    } catch(e) { showToast('生成失败'); }
+                };
+
+                const revokeRegistrationToken = async (id) => {
+                    if (!confirm('确定撤销此链接？')) return;
+                    try {
+                        await axios.delete('/api/talents/registration-tokens/' + id);
+                        loadRegistrationTokens();
+                    } catch(e) { showToast('撤销失败'); }
+                };
+
+                const copyTokenLink = () => {
+                    navigator.clipboard.writeText(newTokenLink.value).then(() => showToast('已复制到剪贴板'));
+                };
+
+                const formatTime = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
 return {
 
                     isLoggedIn, currentUser, loginForm, loginError,
@@ -2634,7 +2626,7 @@ return {
                     registrationTokens, newTokenLabel, newTokenLink, loadRegistrationTokens, createRegistrationToken, revokeRegistrationToken, copyTokenLink,                    statusPhone, statusResult, statusChecked,
                     submitRegistration, checkMyStatus,
 
-                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie
+                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie, formatTime
 
                 };
 
