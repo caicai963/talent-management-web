@@ -686,7 +686,7 @@
             <tr v-for="t in registrationTokens" :key="t.id">
                 <td>{{ t.id }}</td>
                 <td>{{ t.label || '-' }}</td>
-                <td style="max-width:350px;word-break:break-all;color:#667eea;">{{ window.location.origin }}/register/{{ t.token }}</td>
+                <td style="max-width:350px;word-break:break-all;color:#667eea;">{{ getTokenLink(t.token) }}</td>
                 <td>{{ t.use_count }}</td>
                 <td>
                     <span v-if="t.status === 'active'" style="color:#38a169;font-weight:600;">有效</span>
@@ -2586,6 +2586,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
                 };
 
                 const formatTime = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-';
+                const getTokenLink = (token) => `${window.location.origin}/register/${token}`;
 return {
 
                     isLoggedIn, currentUser, loginForm, loginError,
@@ -2626,7 +2627,7 @@ return {
                     registrationTokens, newTokenLabel, newTokenLink, loadRegistrationTokens, createRegistrationToken, revokeRegistrationToken, copyTokenLink,                    statusPhone, statusResult, statusChecked,
                     submitRegistration, checkMyStatus,
 
-                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie, formatTime
+                    openEvalForDemand, setAppRating, getAppRating, submitDemandEvaluations,evalDemandId, attitudeRatings, qualityRatings, selectedForEval,showUserModal, editingUser, userForm, saveUser, wanjie, formatTime, getTokenLink
 
                 };
 
@@ -2677,5 +2678,5 @@ return {
 
 
 <button id="emergencyCloseBtn" onclick="emergencyCloseAll()" style="position:fixed;bottom:20px;right:20px;z-index:99999;background:#f44336;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:28px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);display:none;" title="紧急关闭弹窗">&#215;</buttonwanjie, formatTime
-                }saveUser, wanjie, formatTime
+                }saveUser, wanjie, formatTime, getTokenLink
                 };>
