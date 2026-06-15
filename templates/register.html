@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兼职登记</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 30px; }
+        h1 { color: #333; margin-bottom: 8px; text-align: center; font-size: 24px; }
+        .subtitle { color: #888; text-align: center; margin-bottom: 24px; font-size: 13px; }
+        .section { margin-bottom: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .section-title { font-weight: 600; color: #444; margin-bottom: 12px; font-size: 15px; }
+        .form-row { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+        label .req { color: #e53e3e; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+        textarea { min-height: 60px; resize: vertical; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .game-item { display: flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 6px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; }
+        .game-item input { width: auto; margin: 0; }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error { color: #e53e3e; font-size: 13px; text-align: center; margin-top: 10px; }
+        .success { color: #38a169; font-size: 14px; text-align: center; padding: 30px; }
+        .success h2 { color: #38a169; margin-bottom: 12px; }
+        .tip { color: #888; font-size: 12px; margin-top: 4px; }
+        .invalid { text-align: center; padding: 40px; color: #e53e3e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 兼职信息登记</h1>
+        <p class="subtitle" id="subtitle">请如实填写以下信息，便于我们为您匹配合适的兼职机会</p>
+
+        <div id="invalidLink" class="invalid" style="display:none;">
+            <h2>❌ 链接无效</h2>
+            <p>该登记链接不存在或已失效，请联系管理员获取新链接</p>
+        </div>
+
+        <div id="successView" class="success" style="display:none;">
+            <h2>✅ 登记成功！</h2>
+            <p>请妥善保管您的账号信息：</p>
+            <p style="font-size: 18px; font-weight: 600; margin: 16px 0;" id="accountInfo"></p>
+            <p style="color: #888; font-size: 13px;">下次可使用手机号 + 密码登录网站</p>
+        </div>
+
+        <form id="regForm" style="display:none;">
+            <div class="section">
+                <div class="section-title">🔐 账号信息（必填）</div>
+                <div class="form-row">
+                    <label>姓名 <span class="req">*</span></label>
+                    <input name="name" required maxlength="50">
+                </div>
+                <div class="form-row">
+                    <label>手机号（用于登录） <span class="req">*</span></label>
+                    <input name="phone" required pattern="[0-9]{11}" maxlength="11" placeholder="11位手机号">
+                </div>
+                <div class="form-row">
+                    <label>密码（用于登录） <span class="req">*</span></label>
+                    <input name="password" required type="password" minlength="6" maxlength="32" placeholder="至少6位">
+                </div>
+                <div class="form-row">
+                    <label>确认密码 <span class="req">*</span></label>
+                    <input name="password2" required type="password" minlength="6" maxlength="32">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">👤 基础信息（选填）</div>
+                <div class="row-2">
+                    <div class="form-row">
+                        <label>性别</label>
+                        <select name="gender">
+                            <option value="">请选择</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>出生年份</label>
+                        <input name="birth_date" placeholder="如2000" maxlength="4">
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-row">
+                        <label>城市</label>
+                        <input name="city" maxlength="20">
+                    </div>
+                    <div class="form-row">
+                        <label>城市级别</label>
+                        <select name="city_level">
+                            <option value="">请选择</option>
+                            <option value="一线">一线</option>
+                            <option value="新一线">新一线</option>
+                            <option value="二线">二线</option>
+                            <option value="三线">三线</option>
+                            <option value="四线及以下">四线及以下</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>学校</label>
+                    <input name="school" maxlength="50">
+                </div>
+                <div class="row-2">
+                    <div class="form-row">
+                        <label>专业</label>
+                        <input name="major" maxlength="30">
+                    </div>
+                    <div class="form-row">
+                        <label>学历</label>
+                        <select name="education">
+                            <option value="">请选择</option>
+                            <option value="本科">本科</option>
+                            <option value="硕士">硕士</option>
+                            <option value="博士">博士</option>
+                            <option value="大专">大专</option>
+                            <option value="高中">高中</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>毕业年份</label>
+                    <input name="graduate_year" placeholder="如2024" maxlength="4">
+                </div>
+                <div class="form-row">
+                    <label>微信号</label>
+                    <input name="wechat" maxlength="50">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🛠 工具能力（选填）</div>
+                <div class="row-2">
+                    <div class="form-row">
+                        <label>Excel水平</label>
+                        <select name="excel_level">
+                            <option value="">请选择</option>
+                            <option value="精通">精通</option>
+                            <option value="熟练">熟练</option>
+                            <option value="一般">一般</option>
+                            <option value="不会">不会</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>SPSS水平</label>
+                        <select name="spss_level">
+                            <option value="">请选择</option>
+                            <option value="精通">精通</option>
+                            <option value="熟练">熟练</option>
+                            <option value="一般">一般</option>
+                            <option value="不会">不会</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>语言能力</label>
+                    <input name="language_ability" placeholder="如英语六级、日语N2" maxlength="100">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎮 游戏偏好（选填，无相关经历可跳过）</div>
+                <div class="game-grid" id="gameGrid"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📝 游戏经历（选填）</div>
+                <div class="form-row">
+                    <label>关键游戏（你最熟悉的1-13款）</label>
+                    <div class="row-2" id="keyGames"></div>
+                </div>
+                <div class="form-row">
+                    <label>深度游戏（深度体验的1-3款）</label>
+                    <div class="row-2" id="deepGames"></div>
+                </div>
+                <div class="form-row">
+                    <label>熟练产品</label>
+                    <textarea name="proficient_products" placeholder="如：原神、王者荣耀、第五人格" maxlength="500"></textarea>
+                </div>
+                <div class="form-row">
+                    <label>熟悉产品</label>
+                    <textarea name="familiar_products" placeholder="如：明日方舟、阴阳师、英雄联盟" maxlength="500"></textarea>
+                </div>
+                <div class="form-row">
+                    <label>其他游戏经历</label>
+                    <textarea name="other_game_experience" placeholder="可补充其他相关经历" maxlength="1000"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">提交登记</button>
+            <div class="error" id="errMsg"></div>
+        </form>
+    </div>
+
+    <script>
+        const categories = [
+            ['category_moba', 'MOBA'],
+            ['category_mmorgp', 'MMORPG'],
+            ['category_openworld_rpg', '开放世界RPG'],
+            ['category_card_rpg', '卡牌RPG'],
+            ['category_tactical', '策略'],
+            ['category_shooter', '射击'],
+            ['category_strategy_slg', '策略SLG'],
+            ['category_action_fight', '动作格斗'],
+            ['category_sandbox_survival', '沙盒生存'],
+            ['category_autochess', '自走棋'],
+            ['category_casual_puzzle', '休闲益智'],
+            ['category_party', '派对'],
+            ['category_etc', '其他']
+        ];
+
+        const token = window.location.pathname.split('/').pop();
+
+        // Build game preference grid
+        const gameGrid = document.getElementById('gameGrid');
+        categories.forEach(([key, label]) => {
+            const div = document.createElement('label');
+            div.className = 'game-item';
+            div.innerHTML = `<input type="checkbox" name="${key}" value="是"> ${label}`;
+            gameGrid.appendChild(div);
+        });
+
+        // Build key game inputs (13)
+        const keyGames = document.getElementById('keyGames');
+        for (let i = 1; i <= 13; i++) {
+            const div = document.createElement('div');
+            div.className = 'form-row';
+            div.innerHTML = `<input name="key_game_${i}" placeholder="关键游戏${i}" maxlength="100">`;
+            keyGames.appendChild(div);
+        }
+
+        // Build deep game inputs (3)
+        const deepGames = document.getElementById('deepGames');
+        for (let i = 1; i <= 3; i++) {
+            const div = document.createElement('div');
+            div.className = 'form-row';
+            div.innerHTML = `<input name="deep_game_${i}" placeholder="深度游戏${i}" maxlength="100">`;
+            deepGames.appendChild(div);
+        }
+
+        // Validate token on load
+        fetch(`/api/public/register/${token}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.valid) {
+                    document.getElementById('invalidLink').style.display = 'block';
+                } else {
+                    document.getElementById('regForm').style.display = 'block';
+                    if (data.label) {
+                        document.getElementById('subtitle').textContent = `邀请码：${data.label}（已使用 ${data.use_count} 次）`;
+                    }
+                }
+            })
+            .catch(() => {
+                document.getElementById('invalidLink').style.display = 'block';
+            });
+
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errMsg = document.getElementById('errMsg');
+            const submitBtn = document.getElementById('submitBtn');
+            errMsg.textContent = '';
+            const fd = new FormData(e.target);
+            const data = {};
+            for (const [k, v] of fd.entries()) data[k] = v;
+
+            // Validate password
+            if (data.password !== data.password2) {
+                errMsg.textContent = '两次密码不一致';
+                return;
+            }
+            delete data.password2;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+            try {
+                const r = await fetch(`/api/public/register/${token}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const res = await r.json();
+                if (res.success) {
+                    document.getElementById('regForm').style.display = 'none';
+                    document.getElementById('successView').style.display = 'block';
+                    document.getElementById('accountInfo').textContent = `手机号：${data.phone}  密码：${data.password}`;
+                } else {
+                    errMsg.textContent = res.error || '提交失败';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '提交登记';
+                }
+            } catch (err) {
+                errMsg.textContent = '网络错误：' + err.message;
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交登记';
+            }
+        });
+    </script>
+</body>
+</html>

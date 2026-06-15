@@ -517,6 +517,18 @@ def init_db():
             )
         """)
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS talent_registration_tokens (
+                id SERIAL PRIMARY KEY,
+                token TEXT UNIQUE NOT NULL,
+                label TEXT,
+                created_by INTEGER,
+                status TEXT DEFAULT 'active',
+                use_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
+
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS demands (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
@@ -730,6 +742,11 @@ def apply_page():
     return render_template('index.html')
 
 
+@app.route('/register/<token>')
+def register_page(token):
+    return render_template('register.html')
+
+
 @app.route('/api/system/status', methods=['GET'])
 def system_status():
     conn = get_db()
@@ -937,6 +954,140 @@ def login():
         return jsonify(result)
     close_conn(conn)
     return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+
+
+
+
+# ---- Self Registration API ----
+@app.route('/api/talents/registration-tokens', methods=['GET'])
+def list_registration_tokens():
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("SELECT id, token, label, status, use_count, created_at FROM talent_registration_tokens ORDER BY id DESC")
+    else:
+        cursor.execute("SELECT id, token, label, status, use_count, created_at FROM talent_registration_tokens ORDER BY id DESC")
+    tokens = fetchall_dicts(cursor)
+    close_conn(conn)
+    return jsonify({'tokens': tokens})
+
+
+@app.route('/api/talents/registration-tokens', methods=['POST'])
+def create_registration_token():
+    import secrets
+    data = request.json or {}
+    token = secrets.token_urlsafe(16)
+    label = data.get('label', '')
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("INSERT INTO talent_registration_tokens (token, label) VALUES (%s, %s) RETURNING id", (token, label))
+        token_id = cursor.fetchone()[0]
+    else:
+        cursor.execute("INSERT INTO talent_registration_tokens (token, label) VALUES (?, ?)", (token, label))
+        token_id = cursor.lastrowid
+    conn.commit()
+    close_conn(conn)
+    base_url = request.host_url.rstrip('/')
+    link = f"{base_url}/register/{token}"
+    return jsonify({'id': token_id, 'token': token, 'label': label, 'link': link})
+
+
+@app.route('/api/talents/registration-tokens/<int:token_id>', methods=['DELETE'])
+def revoke_registration_token(token_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("UPDATE talent_registration_tokens SET status = 'revoked' WHERE id = %s", (token_id,))
+    else:
+        cursor.execute("UPDATE talent_registration_tokens SET status = 'revoked' WHERE id = ?", (token_id,))
+    conn.commit()
+    close_conn(conn)
+    return jsonify({'message': 'revoked'})
+
+
+@app.route('/api/public/register/<token>', methods=['GET'])
+def check_registration_token(token):
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("SELECT id, label, status, use_count FROM talent_registration_tokens WHERE token = %s", (token,))
+    else:
+        cursor.execute("SELECT id, label, status, use_count FROM talent_registration_tokens WHERE token = ?", (token,))
+    tk = fetchone_dict(cursor)
+    close_conn(conn)
+    if not tk:
+        return jsonify({'valid': False, 'error': 'Link not found'}), 404
+    if tk['status'] != 'active':
+        return jsonify({'valid': False, 'error': 'Link expired'}), 403
+    return jsonify({'valid': True, 'label': tk['label'] or '', 'use_count': tk['use_count']})
+
+
+@app.route('/api/public/register/<token>', methods=['POST'])
+def submit_registration(token):
+    data = request.json or {}
+    name = (data.get('name') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    password = (data.get('password') or '').strip()
+    if not name or not phone or not password:
+        return jsonify({'success': False, 'error': 'Name/phone/password required'}), 400
+    conn = get_db()
+    cursor = conn.cursor()
+    if DATABASE_URL:
+        cursor.execute("SELECT id FROM talent_registration_tokens WHERE token = %s AND status = 'active'", (token,))
+    else:
+        cursor.execute("SELECT id FROM talent_registration_tokens WHERE token = ? AND status = 'active'", (token,))
+    tk = cursor.fetchone()
+    if not tk:
+        close_conn(conn)
+        return jsonify({'success': False, 'error': 'Invalid or expired link'}), 403
+    if DATABASE_URL:
+        cursor.execute("SELECT id FROM users WHERE username = %s", (phone,))
+    else:
+        cursor.execute("SELECT id FROM users WHERE username = ?", (phone,))
+    if cursor.fetchone():
+        close_conn(conn)
+        return jsonify({'success': False, 'error': 'Phone already registered, please login directly'}), 400
+    if DATABASE_URL:
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, 'talent')", (phone, password))
+    else:
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, 'talent')", (phone, password))
+    talent_fields = [
+        'name', 'gender', 'birth_date', 'identity_tag', 'city', 'city_level', 'school', 'major', 'education', 'graduate_year',
+        'phone', 'wechat', 'project_count', 'avg_rating', 'month_rating', 'overall_summary', 'detailed_review', 'exam_score',
+        'basic_test', 'desktop_research', 'issue_list', 'insight_proposal', 'skills_debug', 'agent_debug', 'knowledge_base',
+        'interview_selection', 'online_interview', 'field_interview', 'questionnaire_design', 'questionnaire_analysis',
+        'lab_assist', 'lab_leader', 'data_warehouse', 'data_query', 'web_crawl', 'deep_assessment', 'commercial_research',
+        'excel_level', 'spss_level', 'language_ability',
+        'category_moba', 'category_mmorgp', 'category_openworld_rpg', 'category_card_rpg', 'category_tactical',
+        'category_shooter', 'category_strategy_slg', 'category_action_fight', 'category_sandbox_survival',
+        'category_autochess', 'category_casual_puzzle', 'category_party', 'category_etc',
+        'key_game_1', 'key_game_2', 'key_game_3', 'key_game_4', 'key_game_5', 'key_game_6', 'key_game_7', 'key_game_8',
+        'key_game_9', 'key_game_10', 'key_game_11', 'key_game_12', 'key_game_13',
+        'deep_game_1', 'deep_game_2', 'deep_game_3',
+        'proficient_products', 'familiar_products', 'other_game_experience'
+    ]
+    fields_to_insert = []
+    values_to_insert = []
+    for f in talent_fields:
+        v = data.get(f, '')
+        if v is not None and str(v).strip() != '':
+            fields_to_insert.append(f)
+            values_to_insert.append(str(v).strip())
+    if fields_to_insert:
+        placeholders = ','.join(['%s'] * len(fields_to_insert)) if DATABASE_URL else ','.join(['?'] * len(fields_to_insert))
+        cols_str = ','.join(fields_to_insert)
+        if DATABASE_URL:
+            cursor.execute(f"INSERT INTO talents ({cols_str}) VALUES ({placeholders})", tuple(values_to_insert))
+        else:
+            cursor.execute(f"INSERT INTO talents ({cols_str}) VALUES ({placeholders})", tuple(values_to_insert))
+    if DATABASE_URL:
+        cursor.execute("UPDATE talent_registration_tokens SET use_count = use_count + 1 WHERE token = %s", (token,))
+    else:
+        cursor.execute("UPDATE talent_registration_tokens SET use_count = use_count + 1 WHERE token = ?", (token,))
+    conn.commit()
+    close_conn(conn)
+    return jsonify({'success': True, 'message': 'Registration successful, please login with phone and password'})
 
 
 # ---- 人才管理 API ----
