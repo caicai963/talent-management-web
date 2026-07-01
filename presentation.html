@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人才标签管理系统 · 功能介绍</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary: #4a90d9;
+            --primary-dark: #357abd;
+            --success: #4CAF50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #333;
+            --text-muted: #888;
+            --border: #e8e8e8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            padding: 80px 40px 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(74,144,217,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(76,175,80,0.1) 0%, transparent 50%);
+            animation: heroFloat 8s ease-in-out infinite;
+        }
+        @keyframes heroFloat {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-2%, 1%); }
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+        .hero h1 { font-size: 52px; font-weight: 700; margin-bottom: 16px; letter-spacing: -1px; }
+        .hero h1 span { color: #4a90d9; }
+        .hero > .hero-content > p { font-size: 20px; color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.85);
+        }
+        .hero-badge .dot {
+            width: 8px; height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .nav-pills {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .nav-pill {
+            padding: 10px 24px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            color: rgba(255,255,255,0.75);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .nav-pill:hover, .nav-pill.active {
+            background: rgba(74,144,217,0.4);
+            border-color: rgba(74,144,217,0.6);
+            color: white;
+        }
+        .section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 36px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+        .section-title p { font-size: 16px; color: var(--text-muted); }
+        .section-title .line { width: 60px; height: 4px; background: var(--primary); margin: 16px auto 0; border-radius: 2px; }
+        .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .role-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px 28px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .role-card:hover { transform: translateY(-4px); box-shadow: 0 8px 40px rgba(0,0,0,0.1); }
+        .role-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 20px; }
+        .role-icon.admin { background: linear-gradient(135deg, #4a90d9, #357abd); }
+        .role-icon.demander { background: linear-gradient(135deg, #ff9800, #e68900); }
+        .role-icon.talent { background: linear-gradient(135deg, #4CAF50, #3d8b40); }
+        .role-card h3 { font-size: 20px; margin-bottom: 8px; }
+        .role-card > p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+        .role-card ul { list-style: none; font-size: 13px; color: #555; }
+        .role-card ul li { padding: 5px 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; gap: 8px; }
+        .role-card ul li::before { content: '✓'; color: var(--success); font-weight: bold; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+        .feature-card:nth-child(1)::before { background: #4a90d9; }
+        .feature-card:nth-child(2)::before { background: #ff9800; }
+        .feature-card:nth-child(3)::before { background: #4CAF50; }
+        .feature-card:nth-child(4)::before { background: #9c27b0; }
+        .feature-card:nth-child(5)::before { background: #00bcd4; }
+        .feature-card:nth-child(6)::before { background: #f44336; }
+        .feature-emoji { font-size: 36px; margin-bottom: 16px; }
+        .feature-card h3 { font-size: 17px; margin-bottom: 10px; }
+        .feature-card-link { cursor: pointer; text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; }
+        .feature-card-link:hover { transform: translateY(-4px); box-shadow: 0 8px 40px rgba(0,0,0,0.12); }
+        .feature-link-hint { margin-top: 14px; font-size: 13px; color: #4a90d9; font-weight: 600; opacity: 0; transition: opacity 0.2s; }
+        .feature-card-link:hover .feature-link-hint { opacity: 1; }
+        .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+        .feature-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #f0f4ff;
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+        .biz-table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+        .biz-table th { background: var(--primary); color: white; padding: 16px 20px; text-align: left; font-weight: 600; font-size: 14px; }
+        .biz-table td { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #555; }
+        .biz-table tr:last-child td { border-bottom: none; }
+        .biz-table tr:hover td { background: #f8fbff; }
+        .biz-badge { display: inline-block; padding: 2px 10px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+        .biz-badge.blue { background: #e3f2fd; color: #1565c0; }
+        .biz-badge.orange { background: #fff3e0; color: #e65100; }
+        .biz-badge.green { background: #e8f5e9; color: #2e7d32; }
+        .biz-badge.purple { background: #f3e5f5; color: #7b1fa2; }
+        .flow-container { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin: 0 auto; max-width: 1000px; }
+        .flow-step { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 120px; }
+        .flow-circle {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 700;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(74,144,217,0.3);
+        }
+        .flow-step h4 { font-size: 14px; margin-bottom: 4px; }
+        .flow-step p { font-size: 12px; color: var(--text-muted); }
+        .flow-arrow { font-size: 24px; color: #ccc; margin: 0 4px; flex-shrink: 0; }
+        .status-flow { display: flex; gap: 0; justify-content: center; flex-wrap: wrap; margin: 40px auto; max-width: 900px; }
+        .status-item { display: flex; align-items: center; flex: 1; min-width: 120px; }
+        .status-box { flex: 1; background: white; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px 10px; text-align: center; position: relative; }
+        .status-box .num { width: 24px; height: 24px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; margin: 0 auto 8px; }
+        .status-box .label { font-size: 12px; color: #888; }
+        .status-box .name { font-size: 13px; font-weight: 600; margin-top: 2px; }
+        .status-arrow { display: flex; align-items: center; color: #ccc; font-size: 20px; padding: 0 6px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .tech-item { background: white; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+        .tech-icon { font-size: 40px; margin-bottom: 12px; }
+        .tech-item h4 { font-size: 15px; margin-bottom: 4px; }
+        .tech-item p { font-size: 12px; color: var(--text-muted); }
+        .cta { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: white; text-align: center; padding: 80px 40px; }
+        .cta h2 { font-size: 36px; margin-bottom: 16px; }
+        .cta p { color: rgba(255,255,255,0.6); margin-bottom: 32px; font-size: 16px; }
+        .cta-btn { display: inline-block; padding: 14px 40px; background: var(--primary); color: white; border-radius: 100px; font-size: 16px; text-decoration: none; font-weight: 600; transition: background 0.2s; }
+        .cta-btn:hover { background: var(--primary-dark); }
+        .footer { background: #1a1a2e; color: rgba(255,255,255,0.4); text-align: center; padding: 30px; font-size: 13px; }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        .lightbox.show { display: flex; }
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 48px rgba(0,0,0,0.5);
+        }
+        .lightbox-hint {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .demo-gif-wrap {
+            cursor: zoom-in;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .demo-gif-wrap:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+        }
+        .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .overview-left h3 { font-size: 22px; margin-bottom: 16px; }
+        .overview-left > p { color: #666; margin-bottom: 20px; font-size: 15px; }
+        .overview-cards { display: flex; flex-direction: column; gap: 10px; }
+        .overview-card { display: flex; align-items: center; gap: 12px; background: #f8fbff; padding: 12px 16px; border-radius: 8px; }
+        .overview-card span { font-size: 22px; }
+        .overview-card div strong { font-size: 14px; }
+        .overview-card div span { color: #888; margin-left: 6px; font-size: 13px; }
+        .overview-right { background: linear-gradient(135deg, #1a1a2e, #0f3460); border-radius: 16px; padding: 40px; color: white; text-align: center; }
+        .overview-right .emoji { font-size: 80px; margin-bottom: 16px; }
+        .overview-right .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .overview-right .stat div:first-child { font-size: 36px; font-weight: 700; color: #4a90d9; }
+        .overview-right .stat div:last-child { font-size: 13px; opacity: 0.7; }
+        .overview-right .url-block { margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .overview-right .url-block div:first-child { font-size: 13px; opacity: 0.5; }
+        .overview-right .url-block div:last-child { font-size: 16px; font-weight: 600; margin-top: 4px; color: #4a90d9; }
+        .white-section { background: white; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .section { animation: fadeInUp 0.5s ease both; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .role-grid, .feature-grid, .tech-grid { grid-template-columns: 1fr; }
+            .section { padding: 60px 20px; }
+            .flow-container { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            .status-flow { flex-direction: column; }
+            .status-arrow { transform: rotate(90deg); justify-content: center; }
+            .overview-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="hero-content">
+        <h1>人才<span>标签</span>管理系统</h1>
+        <p>兼职人才全生命周期管理平台，覆盖从人才入库到项目完结的每一个环节</p>
+        <div class="hero-badge">
+            <span class="dot"></span>
+            已部署上线 · 稳定运行中
+        </div>
+        <div class="nav-pills">
+            <a class="nav-pill active" href="#overview">系统概览</a>
+            <a class="nav-pill" href="#roles">角色权限</a>
+            <a class="nav-pill" href="#features">功能模块</a>
+            <a class="nav-pill" href="#flow">使用流程</a>
+            <a class="nav-pill" href="#tech">技术架构</a>
+            <a class="nav-pill" href="#demo">功能演示</a>
+        </div>
+    </div>
+</div>
+
+<!-- Overview -->
+<div class="section" id="overview">
+    <div class="section-title">
+        <h2>系统概览</h2>
+        <p>一个平台，贯穿兼职人才管理的全部场景</p>
+        <div class="line"></div>
+    </div>
+    <div class="overview-grid">
+        <div class="overview-left">
+            <h3>解决什么问题</h3>
+            <p>传统兼职管理依赖 Excel 表格，存在信息分散、报价混乱、报名遗漏、通知不到位等问题。本系统将人才库、需求管理、报价计算、报名流程、企微通知全部线上化，管理员一键操作，流程可追溯。</p>
+            <h3>核心价值</h3>
+            <div class="overview-cards">
+                <div class="overview-card" style="background:#f8fbff;">
+                    <span>⚡</span>
+                    <div><strong>自动报价</strong><span>系统根据业务类型、档位、数量自动计算兼职工资+人力成本</span></div>
+                </div>
+                <div class="overview-card" style="background:#fff8f0;">
+                    <span>🔗</span>
+                    <div><strong>一键推送</strong><span>企微群消息自动发送，无需手动复制粘贴报名链接</span></div>
+                </div>
+
+                <div class="overview-card" style="background:#f8f0ff;">
+                    <span>📊</span>
+                    <div><strong>数据沉淀</strong><span>人才库长期积累，业务能力标签化，选人更精准</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="overview-right">
+            <div class="emoji">🏢</div>
+            <div class="stats-grid">
+                <div class="stat"><div>5</div><div>业务类型</div></div>
+                <div class="stat"><div>3</div><div>角色体系</div></div>
+                <div class="stat"><div>6</div><div>功能模块</div></div>
+                <div class="stat"><div>1</div><div>通知渠道</div></div>
+            </div>
+            <div class="url-block">
+                <div>访问地址</div>
+                <div>talent-management-web.onrender.com</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Roles -->
+<div class="section white-section" id="roles">
+    <div class="section-title">
+        <h2>角色权限</h2>
+        <p>三种角色，各司其职</p>
+        <div class="line"></div>
+    </div>
+    <div class="role-grid">
+        <div class="role-card">
+            <div class="role-icon admin">👑</div>
+            <h3>管理员 Admin</h3>
+            <p>系统最高权限，负责整体运营管理</p>
+            <ul>
+                <li>人才库增删改查</li>
+                <li>发布和管理所有需求</li>
+                <li>计算并确认报价</li>
+                <li>发送企微群通知</li>
+                <li>管理所有账号</li>
+                <li>生成兼职登记链接</li>
+            </ul>
+        </div>
+        <div class="role-card">
+            <div class="role-icon demander">📋</div>
+            <h3>需求方 Demander</h3>
+            <p>提出需求、确认报价、评价兼职</p>
+            <ul>
+                <li>发布和管理自己创建的需求</li>
+                <li>确认报价方案</li>
+                <li>查看和管理报名列表</li>
+                <li>给入选兼职打分评价</li>
+                <li>接收入选企微通知</li>
+            </ul>
+        </div>
+        <div class="role-card">
+            <div class="role-icon talent">🎮</div>
+            <h3>兼职 Talent</h3>
+            <p>通过链接报名，查询入选状态</p>
+            <ul>
+                <li>通过专属链接填写报名信息</li>
+                <li>提交后自动创建账号</li>
+                <li>查询自己的报名状态</li>
+                <li>接收企微入选通知</li>
+                <li>查看需求详情和执行时间</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="section" id="features">
+    <div class="section-title">
+        <h2>功能模块</h2>
+        <p>六大核心功能，覆盖完整业务闭环</p>
+        <div class="line"></div>
+    </div>
+    <div class="feature-grid">
+        <a class="feature-card feature-card-link" href="https://talent-management-web.onrender.com/?tab=list" target="_blank">
+            <div class="feature-emoji">👥</div>
+            <h3>人才库管理</h3>
+            <p>批量导入/导出 Excel，60+ 标签字段覆盖基础信息、业务能力、游戏品类、重点游戏等，搜索筛选一键定位。</p>
+            <span class="feature-tag">基础能力</span>
+            <div class="feature-link-hint">→ 访问</div>
+        </a>
+        <a class="feature-card feature-card-link" href="https://talent-management-web.onrender.com/?tab=demands" target="_blank">
+            <div class="feature-emoji">📝</div>
+            <h3>需求发布与报价</h3>
+            <p>选择业务类型和档位，系统自动计算兼职工资+人力成本，总报价一目了然，支持多种计薪规则。</p>
+            <span class="feature-tag">核心流程</span>
+            <div class="feature-link-hint">→ 访问</div>
+        </a>
+        <a class="feature-card feature-card-link" href="https://talent-management-web.onrender.com/?tab=register-links" target="_blank">
+            <div class="feature-emoji">🔗</div>
+            <h3>登记链接</h3>
+            <p>管理员生成专属登记链接发送给目标兼职，提交后自动创建账号，支持链接备注和撤销管理。</p>
+            <span class="feature-tag">招募入口</span>
+            <div class="feature-link-hint">→ 访问</div>
+        </a>
+        <div class="feature-card">
+            <div class="feature-emoji">📨</div>
+            <h3>企微群推送</h3>
+            <p>一键发送企微群消息，包含报名链接，消息格式自动拼接，支持失败自动降级到 Webhook URL。</p>
+            <span class="feature-tag">通知触达</span>
+        </div>
+        <a class="feature-card feature-card-link" href="https://talent-management-web.onrender.com/?tab=demands" target="_blank">
+            <div class="feature-emoji">⭐</div>
+            <h3>兼职评价</h3>
+            <p>需求完成后对入选兼职打 1-5 星，写评语，结果存档。需求方可在评价页面对兼职打分。</p>
+            <span class="feature-tag">质量闭环</span>
+            <div class="feature-link-hint">→ 访问</div>
+        </a>
+        <a class="feature-card feature-card-link" href="https://talent-management-web.onrender.com/?tab=stats" target="_blank">
+            <div class="feature-emoji">📊</div>
+            <h3>数据统计</h3>
+            <p>实时展示总人数、学历分布、身份分布、城市分布，管理员对人才大盘了然于心。</p>
+            <span class="feature-tag">决策支持</span>
+            <div class="feature-link-hint">→ 访问</div>
+        </a>
+    </div>
+</div>
+
+<!-- Biz Type -->
+<div class="section white-section" id="biz">
+    <div class="section-title">
+        <h2>业务类型与报价规则</h2>
+        <p>支持五种业务类型，自动匹配计薪公式</p>
+        <div class="line"></div>
+    </div>
+    <table class="biz-table">
+        <thead>
+            <tr>
+                <th>业务类型</th>
+                <th>档位示例</th>
+                <th>计薪方式</th>
+                <th>人力成本</th>
+                <th>说明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="biz-badge blue">甄别</span></td>
+                <td>5~10 / 10~20 / 20~30 / >30 mins</td>
+                <td>单价 × 样本数量</td>
+                <td>按 GMV 样本数查表 × 1200元</td>
+                <td>纯甄别任务</td>
+            </tr>
+            <tr>
+                <td><span class="biz-badge orange">甄别+外呼</span></td>
+                <td>5~10 / 10~20 / 20~30 / >30 mins</td>
+                <td>(单价+20元呼出费) × 数量</td>
+                <td>按样本数查表 × 1200元</td>
+                <td>甄别+电话呼出</td>
+            </tr>
+            <tr>
+                <td><span class="biz-badge green">电访</span></td>
+                <td>30mins内 / 30~60 / 60~90 / 90~120 mins</td>
+                <td>单价 × 场次</td>
+                <td>按 GMV 样本数查表 × 1200元</td>
+                <td>纯访谈任务</td>
+            </tr>
+            <tr>
+                <td><span class="biz-badge blue">电访+外呼</span></td>
+                <td>30mins内 / 30~60 / 60~90 / 90~120 mins</td>
+                <td>(单价+20元呼出费) × 数量</td>
+                <td>按样本数查表 × 1200元</td>
+                <td>访谈+呼出组合</td>
+            </tr>
+            <tr>
+                <td><span class="biz-badge purple">实验室执行</span></td>
+                <td>2H内 / 2~4小时 / 4~6小时</td>
+                <td>单价 × 场次</td>
+                <td>超时补贴+餐补+交通补贴</td>
+                <td>含用餐/交通/加班补贴</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Flow -->
+<div class="section" id="flow">
+    <div class="section-title">
+        <h2>使用流程</h2>
+        <p>从发布需求到项目完结，完整闭环</p>
+        <div class="line"></div>
+    </div>
+
+    <div style="margin-bottom:60px;">
+        <h3 style="text-align:center;font-size:18px;margin-bottom:32px;color:#1a1a2e;">需求全生命周期</h3>
+        <div class="status-flow">
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#4a90d9;">1</div>
+                    <div class="label">Step 1</div>
+                    <div class="name">发布需求</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#4a90d9;">2</div>
+                    <div class="label">Step 2</div>
+                    <div class="name">计算报价</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#ff9800;">3</div>
+                    <div class="label">Step 3</div>
+                    <div class="name">确认报价</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#ff9800;">4</div>
+                    <div class="label">Step 4</div>
+                    <div class="name">发企微招募</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#9c27b0;">5</div>
+                    <div class="label">Step 5</div>
+                    <div class="name">报名管理</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#4CAF50;">6</div>
+                    <div class="label">Step 6</div>
+                    <div class="name">入选通知</div>
+                </div>
+                <div class="status-arrow">→</div>
+            </div>
+            <div class="status-item">
+                <div class="status-box">
+                    <div class="num" style="background:#4CAF50;">7</div>
+                    <div class="label">Step 7</div>
+                    <div class="name">项目完结</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flow-container">
+        <div class="flow-step">
+            <div class="flow-circle">1</div>
+            <h4>发布需求</h4>
+            <p>填写产品代号、业务类型、档位、数量</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+            <div class="flow-circle">2</div>
+            <h4>计算报价</h4>
+            <p>系统自动算出兼职工资+人力成本</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+            <div class="flow-circle">3</div>
+            <h4>确认报价</h4>
+            <p>需求方确认报价方案</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+            <div class="flow-circle">4</div>
+            <h4>发企微群</h4>
+            <p>一键发送招募消息和报名链接</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+            <div class="flow-circle">5</div>
+            <h4>兼职报名</h4>
+            <p>候选人点链接填写信息</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+            <div class="flow-circle">6</div>
+            <h4>入选通知</h4>
+            <p>企微推送告知需求方</p>
+        </div>
+    </div>
+</div>
+
+<!-- Demo -->
+<div class="section white-section" id="demo">
+    <div class="section-title">
+        <h2>功能演示</h2>
+        <p>操作演示，一看就会</p>
+        <div class="line"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:32px;max-width:800px;margin:0 auto;">
+        <div style="text-align:center;">
+            <h4 style="margin-bottom:16px;font-size:18px;color:#333;">📝 创建需求</h4>
+            <div class="demo-gif-wrap" onclick="openLightbox(this)">
+                <img src="demo-create-demand.gif" alt="创建需求演示" style="width:100%;display:block;">
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:#888;">填写产品代号、业务类型、档位，系统自动算报价 &nbsp;<span style="color:#4a90d9;">（双击放大）</span></p>
+        </div>
+        <div style="text-align:center;">
+            <h4 style="margin-bottom:16px;font-size:18px;color:#333;">🔗 兼职报名 + 入选</h4>
+            <div class="demo-gif-wrap" onclick="openLightbox(this)">
+                <img src="demo-signup.gif" alt="兼职报名+入选演示" style="width:100%;display:block;">
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:#888;">兼职点链接报名，管理员选择入选并自动发通知 &nbsp;<span style="color:#4a90d9;">（双击放大）</span></p>
+        </div>
+        <div style="text-align:center;">
+            <h4 style="margin-bottom:16px;font-size:18px;color:#333;">✅ 项目完结 + 兼职评价</h4>
+            <div class="demo-gif-wrap" onclick="openLightbox(this)">
+                <img src="demo-finish-eval.gif" alt="项目完结及兼职评价演示" style="width:100%;display:block;">
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:#888;">完结项目并对入选兼职打星写评语，自动存档 &nbsp;<span style="color:#4a90d9;">（双击放大）</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-hint">点击任意处关闭</div>
+</div>
+</div>
+
+<!-- Tech -->
+<div class="section white-section" id="tech">
+    <div class="section-title">
+        <h2>技术架构</h2>
+        <p>轻量部署，稳定可靠</p>
+        <div class="line"></div>
+    </div>
+    <div class="tech-grid">
+        <div class="tech-item"><div class="tech-icon">🌐</div><h4>Flask</h4><p>Python 轻量后端</p></div>
+        <div class="tech-item"><div class="tech-icon">⚡</div><h4>Vue 3</h4><p>响应式前端框架</p></div>
+        <div class="tech-item"><div class="tech-icon">🗄️</div><h4>PostgreSQL</h4><p>Supabase 云数据库</p></div>
+        <div class="tech-item"><div class="tech-icon">🚀</div><h4>Render</h4><p>免费云端部署</p></div>
+        <div class="tech-item"><div class="tech-icon">💬</div><h4>企微 Webhook</h4><p>群消息自动推送</p></div>
+<div class="tech-item"><div class="tech-icon">📊</div><h4>SQLite</h4><p>本地开发数据库</p></div>
+        <div class="tech-item"><div class="tech-icon">🔗</div><h4>GitHub</h4><p>代码版本管理</p></div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+        <div style="display:inline-block;background:#f5f7fa;padding:16px 32px;border-radius:100px;font-size:14px;color:#666;">
+            <strong>仓库：</strong>github.com/caicai963/talent-management-web &nbsp;|&nbsp; <strong>版本：</strong>持续更新中
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+    <h2>开始使用</h2>
+    <p>访问系统地址，开始您的兼职管理数字化之旅</p>
+    <a class="cta-btn" href="https://talent-management-web.onrender.com" target="_blank">
+        🔗 talent-management-web.onrender.com
+    </a>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    人才标签管理系统 &nbsp;·&nbsp; Powered by Flask + Vue 3 &nbsp;·&nbsp; © 2026
+</div>
+
+<script>
+    document.querySelectorAll('.nav-pill').forEach(pill => {
+        pill.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+    const sections = document.querySelectorAll('.section, .cta, .hero');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                document.querySelectorAll('.nav-pill').forEach(p => {
+                    p.classList.toggle('active', p.getAttribute('href') === '#' + id);
+                });
+            }
+        });
+    }, { threshold: 0.3 });
+    sections.forEach(s => observer.observe(s));
+
+    function openLightbox(el) {
+        const img = el.querySelector('img');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLightbox();
+    });
+</script>
+
+</body>
+</html>
