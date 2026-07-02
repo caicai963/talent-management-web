@@ -2524,137 +2524,135 @@ def sync_survey_v2():
     import openpyxl
     import traceback
     try:
-        survey_path = os.path.join(os.path.dirname(__file__), '\u517c\u804c\u95ee\u5377.xlsx')
+
+        survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
         if not os.path.exists(survey_path):
-            # List files in directory for debugging
             files = os.listdir(os.path.dirname(__file__))
-            return '<h2>错误：找不到问卷文件</h2><p>目录文件: ' + ', '.join(files[:20]) + '</p>', 404
+            return '<h2>错误：找不到问卷文件</h2><p>目录: ' + ', '.join(files[:30]) + '</p>', 404
 
         wb = openpyxl.load_workbook(survey_path, data_only=True)
-    ws = wb['Sheet0']
-    rows = list(ws.iter_rows(min_row=1, values_only=True))
-    headers = [str(c) if c else '' for c in rows[0]]
+        ws = wb['Sheet0']
+        rows = list(ws.iter_rows(min_row=1, values_only=True))
+        headers = [str(c) if c else '' for c in rows[0]]
 
-    def v(row, col):
-        return str(row[col]).strip() if col < len(row) and row[col] else ''
+        def v(row, col):
+            return str(row[col]).strip() if col < len(row) and row[col] else ''
 
-    def ck(row, col):
-        return '\u662f' if col < len(row) and row[col] and str(row[col]).strip() else ''
+        def ck(row, col):
+            return '是' if col < len(row) and row[col] and str(row[col]).strip() else ''
 
-    cat_cols = {31:'category_moba',32:'category_tactical',33:'category_shooter',
-        34:'category_mmorgp',35:'category_card_rpg',36:'category_strategy_slg',
-        37:'category_action_fight',38:'category_sandbox_survival',
-        40:'category_casual_puzzle',42:'category_party',
-        44:'category_openworld_rpg',45:'category_autochess'}
-    key_cols = {48:'key_game_11',49:'key_game_12',50:'key_game_13',
-        51:'key_game_1',52:'key_game_2',53:'key_game_3',54:'key_game_4',
-        55:'key_game_5',56:'key_game_6',57:'key_game_7',58:'key_game_8',
-        59:'key_game_9',60:'key_game_10'}
-    deep_cols = {61:'deep_game_1',62:'deep_game_2',63:'deep_game_3'}
-    skill_cols = {67:'online_interview',68:'online_interview',69:'field_interview',
-        70:'data_query',71:'web_crawl'}
+        cat_cols = {31:'category_moba',32:'category_tactical',33:'category_shooter',
+            34:'category_mmorgp',35:'category_card_rpg',36:'category_strategy_slg',
+            37:'category_action_fight',38:'category_sandbox_survival',
+            40:'category_casual_puzzle',42:'category_party',
+            44:'category_openworld_rpg',45:'category_autochess'}
+        key_cols = {48:'key_game_11',49:'key_game_12',50:'key_game_13',
+            51:'key_game_1',52:'key_game_2',53:'key_game_3',54:'key_game_4',
+            55:'key_game_5',56:'key_game_6',57:'key_game_7',58:'key_game_8',
+            59:'key_game_9',60:'key_game_10'}
+        deep_cols = {61:'deep_game_1',62:'deep_game_2',63:'deep_game_3'}
+        skill_cols = {67:'online_interview',68:'online_interview',69:'field_interview',
+            70:'data_query',71:'web_crawl'}
 
-    FIELDS = ['name','gender','birth_date','identity_tag','city','city_level',
-        'school','major','education','graduate_year','phone','wechat',
-        'exam_score','detailed_review','category_moba','category_tactical',
-        'category_shooter','category_mmorgp','category_card_rpg','category_strategy_slg',
-        'category_action_fight','category_sandbox_survival','category_autochess',
-        'category_casual_puzzle','category_party','category_openworld_rpg','category_etc',
-        'key_game_1','key_game_2','key_game_3','key_game_4','key_game_5',
-        'key_game_6','key_game_7','key_game_8','key_game_9','key_game_10',
-        'key_game_11','key_game_12','key_game_13',
-        'deep_game_1','deep_game_2','deep_game_3',
-        'online_interview','field_interview','data_query','web_crawl']
+        FIELDS = ['name','gender','birth_date','identity_tag','city','city_level',
+            'school','major','education','graduate_year','phone','wechat',
+            'exam_score','detailed_review','category_moba','category_tactical',
+            'category_shooter','category_mmorgp','category_card_rpg','category_strategy_slg',
+            'category_action_fight','category_sandbox_survival','category_autochess',
+            'category_casual_puzzle','category_party','category_openworld_rpg','category_etc',
+            'key_game_1','key_game_2','key_game_3','key_game_4','key_game_5',
+            'key_game_6','key_game_7','key_game_8','key_game_9','key_game_10',
+            'key_game_11','key_game_12','key_game_13',
+            'deep_game_1','deep_game_2','deep_game_3',
+            'online_interview','field_interview','data_query','web_crawl']
 
-    conn = get_db()
-    cursor = conn.cursor()
-    updated = 0
-    inserted = 0
+        conn = get_db()
+        cursor = conn.cursor()
+        updated = 0
+        inserted = 0
 
-    for row in rows[1:]:
-        name = v(row, 12)
-        if not name:
-            continue
+        for row in rows[1:]:
+            name = v(row, 12)
+            if not name:
+                continue
 
-        data = {'name': name, 'gender': v(row,13), 'birth_date': v(row,14),
-            'phone': v(row,15), 'wechat': v(row,16), 'school': v(row,17),
-            'major': v(row,18), 'graduate_year': v(row,19), 'education': v(row,20),
-            'exam_score': v(row,10), 'detailed_review': v(row,73)}
+            data = {'name': name, 'gender': v(row,13), 'birth_date': v(row,14),
+                'phone': v(row,15), 'wechat': v(row,16), 'school': v(row,17),
+                'major': v(row,18), 'graduate_year': v(row,19), 'education': v(row,20),
+                'exam_score': v(row,10), 'detailed_review': v(row,73)}
 
-        # city
-        city = v(row, 26) or v(row, 6) or ''
-        province = v(row, 25)
-        if province and city:
-            data['city'] = province + city
-        else:
-            data['city'] = city or province
-
-        data['city_level'] = v(row, 27)
-
-        # identity
-        job = v(row, 22) or v(row, 23) or ''
-        if job and job not in ('\u517c\u804c',):
-            data['identity_tag'] = job
-
-        for c, f in cat_cols.items():
-            val = ck(row, c)
-            if val:
-                data[f] = val
-        for c, f in key_cols.items():
-            val = ck(row, c)
-            if val:
-                data[f] = val
-        for c, f in deep_cols.items():
-            val = v(row, c)
-            if val:
-                data[f] = val
-        for c, f in skill_cols.items():
-            val = ck(row, c)
-            if val and not data.get(f):
-                data[f] = headers[c].split('\uff1a')[-1] if '\uff1a' in headers[c] else headers[c]
-
-        try:
-            if DATABASE_URL:
-                cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
+            city = v(row, 26) or v(row, 6) or ''
+            province = v(row, 25)
+            if province and city:
+                data['city'] = province + city
             else:
-                cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
-            existing = fetchone_dict(cursor)
+                data['city'] = city or province
+            data['city_level'] = v(row, 27)
 
-            if existing:
-                sets, vals = [], []
-                for k in FIELDS:
-                    if k == 'name':
-                        continue
-                    new_v = str(data.get(k, '') or '').strip()
-                    old_v = str(existing.get(k, '') or '').strip()
-                    if not old_v and new_v:
+            job = v(row, 22) or v(row, 23) or ''
+            if job and job != '兼职':
+                data['identity_tag'] = job
+
+            for c, f in cat_cols.items():
+                val = ck(row, c)
+                if val:
+                    data[f] = val
+            for c, f in key_cols.items():
+                val = ck(row, c)
+                if val:
+                    data[f] = val
+            for c, f in deep_cols.items():
+                val = v(row, c)
+                if val:
+                    data[f] = val
+            for c, f in skill_cols.items():
+                val = ck(row, c)
+                if val and not data.get(f):
+                    data[f] = headers[c].split('：')[-1] if '：' in headers[c] else headers[c]
+
+            try:
+                if DATABASE_URL:
+                    cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
+                else:
+                    cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
+                existing = fetchone_dict(cursor)
+
+                if existing:
+                    sets, vals = [], []
+                    for k in FIELDS:
+                        if k == 'name':
+                            continue
+                        new_v = str(data.get(k, '') or '').strip()
+                        old_v = str(existing.get(k, '') or '').strip()
+                        if not old_v and new_v:
+                            if DATABASE_URL:
+                                sets.append(f"{k} = %s")
+                            else:
+                                sets.append(f"{k} = ?")
+                            vals.append(new_v)
+                    if sets:
+                        vals.append(name)
                         if DATABASE_URL:
-                            sets.append(f"{k} = %s")
+                            cursor.execute(f"UPDATE talents SET {', '.join(sets)} WHERE name = %s", vals)
                         else:
-                            sets.append(f"{k} = ?")
-                        vals.append(new_v)
-                if sets:
-                    vals.append(name)
-                    if DATABASE_URL:
-                        cursor.execute(f"UPDATE talents SET {', '.join(sets)} WHERE name = %s", vals)
-                    else:
-                        cursor.execute(f"UPDATE talents SET {', '.join(sets)} WHERE name = ?", vals)
-                    updated += 1
-            else:
-                keys = [k for k in FIELDS if data.get(k)]
-                if keys:
-                    ph = ['%s'] * len(keys) if DATABASE_URL else ['?'] * len(keys)
-                    vals = [data[k] for k in keys]
-                    if DATABASE_URL:
-                        cursor.execute(f"INSERT INTO talents ({', '.join(keys)}) VALUES ({', '.join(ph)})", vals)
-                    else:
-                        cursor.execute(f"INSERT INTO talents ({', '.join(keys)}) VALUES ({', '.join(ph)})", vals)
-                    inserted += 1
-        except Exception as e:
-            pass
+                            cursor.execute(f"UPDATE talents SET {', '.join(sets)} WHERE name = ?", vals)
+                        updated += 1
+                else:
+                    keys = [k for k in FIELDS if data.get(k)]
+                    if keys:
+                        ph = ['%s'] * len(keys) if DATABASE_URL else ['?'] * len(keys)
+                        vals = [data[k] for k in keys]
+                        if DATABASE_URL:
+                            cursor.execute(f"INSERT INTO talents ({', '.join(keys)}) VALUES ({', '.join(ph)})", vals)
+                        else:
+                            cursor.execute(f"INSERT INTO talents ({', '.join(keys)}) VALUES ({', '.join(ph)})", vals)
+                        inserted += 1
+            except Exception:
+                pass
 
-    close_conn(conn)
-    return '<h2>问卷同步完成</h2><p>更新 ' + str(updated) + ' 人（补充缺失字段）<br>新增 ' + str(inserted) + ' 人<br>总计 ' + str(updated+inserted) + '</p>'
+        close_conn(conn)
+        return '<h2>问卷同步完成</h2><p>更新 ' + str(updated) + ' 人（补充缺失字段）<br>新增 ' + str(inserted) + ' 人<br>总计 ' + str(updated+inserted) + '</p>'
+
     except Exception as e:
         return '<h2>同步失败</h2><pre>' + traceback.format_exc() + '</pre>', 500
 
