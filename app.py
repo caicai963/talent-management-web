@@ -2554,7 +2554,7 @@ def sync_survey_v2():
         inserted = 0
         err_count = 0
 
-        for row in rows[1:]:
+        for idx, row in enumerate(rows[1:], start=2):
             name = v(row, 12)
             if not name:
                 continue
@@ -2641,12 +2641,15 @@ def sync_survey_v2():
 
             except Exception:
                 err_count += 1
+                if err_count <= 3:
+                    import traceback
+                    print('Row ' + str(idx) + ' ' + name + ': ' + traceback.format_exc())
 
         close_conn(conn)
-        return '<h2>同步完成</h2><p>更新: ' + str(updated) + ' 人<br>新增: ' + str(inserted) + ' 人<br>错误: ' + str(err_count) + '</p>'
+        return '<h2>同步完成</h2><p>更新: ' + str(updated) + ' 人<br>新增: ' + str(inserted) + ' 人<br>错误: ' + str(err_count) + ' 人</p>'
 
     except Exception as e:
-        return '<h2>失败</h2><pre>' + traceback.format_exc() + '</pre>', 500
+        return '<h2>失败</h2><pre>' + str(type(e).__name__) + ': ' + str(e) + '</pre>', 500
 
 
 if __name__ == '__main__':
