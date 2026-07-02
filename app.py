@@ -2536,13 +2536,58 @@ def sync_survey_v2():
 def sync_survey_run():
     import os, openpyxl
     try:
-        # Step 1: Connect
+        path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
+        wb = openpyxl.load_workbook(path, data_only=True)
+        ws = wb['Sheet0']
+        rows = list(ws.iter_rows(min_row=1, values_only=True))
+
+        def v(row, col):
+            return str(row[col]).strip() if col < len(row) and row[col] else ''
+
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM talents")
-        count = cursor.fetchone()[0]
+        updated_city = 0
+        updated_edu = 0
+        updated_id = 0
+
+        for row in rows[1:]:
+            name = v(row, 12)
+            if not name:
+                continue
+
+            # City
+            cv = v(row, 26) or v(row, 6) or ''
+            pv = v(row, 25)
+            if pv and cv:
+                cv = pv + cv
+            if cv:
+                if DATABASE_URL:
+                    cursor.execute("UPDATE talents SET city = %s WHERE name = %s AND (city IS NULL OR city = '')", (cv, name))
+                else:
+                    cursor.execute("UPDATE talents SET city = ? WHERE name = ? AND (city IS NULL OR city = '')", (cv, name))
+                updated_city += 1
+
+            # Education
+            edu = v(row, 20)
+            if edu:
+                if DATABASE_URL:
+                    cursor.execute("UPDATE talents SET education = %s WHERE name = %s AND (education IS NULL OR education = '')", (edu, name))
+                else:
+                    cursor.execute("UPDATE talents SET education = ? WHERE name = ? AND (education IS NULL OR education = '')", (edu, name))
+                updated_edu += 1
+
+            # Identity
+            jv = v(row, 22) or v(row, 23)
+            if jv and jv.strip() not in ('兼职', ''):
+                if DATABASE_URL:
+                    cursor.execute("UPDATE talents SET identity_tag = %s WHERE name = %s AND (identity_tag IS NULL OR identity_tag = '兼职' OR identity_tag = '')", (jv.strip(), name))
+                else:
+                    cursor.execute("UPDATE talents SET identity_tag = ? WHERE name = ? AND (identity_tag IS NULL OR identity_tag = '兼职' OR identity_tag = '')", (jv.strip(), name))
+                updated_id += 1
+
         close_conn(conn)
-        return '<h2>数据库连接成功</h2><p>talents表共 ' + str(count) + ' 人</p>'
+        return '<h2>同步完成</h2><p>城市: ' + str(updated_city) + ' 人<br>学历: ' + str(updated_edu) + ' 人<br>身份: ' + str(updated_id) + ' 人</p>'
+
     except Exception as e:
         return '<h2>失败</h2><p>' + str(e) + '</p>', 500
 
