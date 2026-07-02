@@ -2525,51 +2525,128 @@ def health():
 
 @app.route('/admin/sync-survey', methods=['GET'])
 def sync_survey_v2():
-    import os
-    import traceback
+    import os, traceback, openpyxl
     try:
         survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
-        result = '<h2>步骤1：文件检查</h2>'
-        result += '<p>路径: ' + survey_path + '</p>'
-        result += '<p>存在: ' + str(os.path.exists(survey_path)) + '</p>'
-
-        if not os.path.exists(survey_path):
-            files = os.listdir(os.path.dirname(__file__))
-            result += '<p>目录文件: ' + ', '.join(files) + '</p>'
-            return result
-
-        result += '<h2>步骤2：读取Excel</h2>'
-        import openpyxl
         wb = openpyxl.load_workbook(survey_path, data_only=True)
-        result += '<p>Sheet名: ' + str(wb.sheetnames) + '</p>'
-
         ws = wb['Sheet0']
-        rows = list(ws.iter_rows(min_row=1, max_row=3, values_only=True))
-        result += '<p>前3行读取成功，列数: ' + str(len(rows[0])) + '</p>'
-        result += '<p>第1行第12列(姓名): ' + str(rows[1][12] if len(rows)>1 else 'N/A') + '</p>'
+        rows = list(ws.iter_rows(min_row=1, values_only=True))
 
-        result += '<h2>步骤3：开始同步</h2>'
+        def v(row, col):
+            return str(row[col]).strip() if col < len(row) and row[col] else ''
+
+        def ck(row, col):
+            return '是' if col < len(row) and row[col] and str(row[col]).strip() else ''
+
+        cat_map = {31:'category_moba',32:'category_tactical',33:'category_shooter',
+            34:'category_mmorgp',35:'category_card_rpg',36:'category_strategy_slg',
+            37:'category_action_fight',38:'category_sandbox_survival',
+            40:'category_casual_puzzle',42:'category_party',
+            44:'category_openworld_rpg',45:'category_autochess'}
+        key_map = {48:'key_game_11',49:'key_game_12',50:'key_game_13',
+            51:'key_game_1',52:'key_game_2',53:'key_game_3',54:'key_game_4',
+            55:'key_game_5',56:'key_game_6',57:'key_game_7',58:'key_game_8',
+            59:'key_game_9',60:'key_game_10'}
+
         conn = get_db()
         cursor = conn.cursor()
         updated = 0
+        inserted = 0
+        err_count = 0
+
         for row in rows[1:]:
-            name = str(row[12]).strip() if len(row) > 12 and row[12] else ''
+            name = v(row, 12)
             if not name:
                 continue
-            if DATABASE_URL:
-                cursor.execute("SELECT name FROM talents WHERE name = %s", (name,))
-            else:
-                cursor.execute("SELECT name FROM talents WHERE name = ?", (name,))
-            if fetchone_dict(cursor):
-                updated += 1
+
+            try:
+                # Build data dict
+                data = {}
+                data['name'] = name
+                data['gender'] = v(row, 13)
+                data['birth_date'] = v(row, 14)
+                data['phone'] = v(row, 15)
+                data['wechat'] = v(row, 16)
+                data['school'] = v(row, 17)
+                data['major'] = v(row, 18)
+                data['graduate_year'] = v(row, 19)
+                data['education'] = v(row, 20)
+                if v(row, 10): data['exam_score'] = v(row, 10)
+                if v(row, 73): data['detailed_review'] = v(row, 73)
+
+                # City
+                cv = v(row, 26)
+                pv = v(row, 25)
+                if cv:
+                    data['city'] = (pv + cv) if pv else cv
+                elif pv:
+                    data['city'] = pv
+                if v(row, 27): data['city_level'] = v(row, 27)
+
+                # Identity (exclude 兼职)
+                jv = v(row, 22) or v(row, 23)
+                if jv and jv.strip() != '兼职':
+                    data['identity_tag'] = jv.strip()
+
+                # Games
+                for c, f in cat_map.items():
+                    if ck(row, c): data[f] = '是'
+                for c, f in key_map.items():
+                    if ck(row, c): data[f] = '是'
+                for c in [61, 62, 63]:
+                    val = v(row, c)
+                    if val:
+                        data['deep_game_' + str(c - 60)] = val
+                for c in [67, 69]:
+                    if ck(row, c): data['online_interview' if c == 67 else 'field_interview'] = '是'
+                for c in [70, 71]:
+                    if ck(row, c): data['data_query' if c == 70 else 'web_crawl'] = '是'
+
+                # Check if exists
+                if DATABASE_URL:
+                    cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
+                else:
+                    cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
+                existing = fetchone_dict(cursor)
+
+                if existing:
+                    # Update empty fields only
+                    sets = []
+                    vals = []
+                    for k, new_v in data.items():
+                        if k == 'name': continue
+                        old_v = str(existing.get(k, '') or '').strip()
+                        if not old_v and new_v:
+                            if DATABASE_URL:
+                                sets.append(k + " = %s")
+                            else:
+                                sets.append(k + " = ?")
+                            vals.append(new_v)
+                    if sets:
+                        vals.append(name)
+                        q = "UPDATE talents SET " + ", ".join(sets) + " WHERE name = "
+                        q += "%s" if DATABASE_URL else "?"
+                        cursor.execute(q, vals)
+                        updated += 1
+                else:
+                    # Insert new
+                    keys = [k for k, v in data.items() if v and k != 'name']
+                    if keys:
+                        all_keys = ['name'] + keys
+                        all_vals = [name] + [data[k] for k in keys]
+                        ph = ['%s'] * len(all_keys) if DATABASE_URL else ['?'] * len(all_keys)
+                        q = "INSERT INTO talents (" + ", ".join(all_keys) + ") VALUES (" + ", ".join(ph) + ")"
+                        cursor.execute(q, all_vals)
+                        inserted += 1
+
+            except Exception:
+                err_count += 1
 
         close_conn(conn)
-        result += '<p>测试匹配: 前2行中有 ' + str(updated) + ' 人在数据库中</p>'
-        result += '<p>测试通过，可以正式同步！</p>'
-        return result
+        return '<h2>同步完成</h2><p>更新: ' + str(updated) + ' 人<br>新增: ' + str(inserted) + ' 人<br>错误: ' + str(err_count) + '</p>'
 
     except Exception as e:
-        return '<h2>错误</h2><pre>' + traceback.format_exc() + '</pre>', 500
+        return '<h2>失败</h2><pre>' + traceback.format_exc() + '</pre>', 500
 
 
 if __name__ == '__main__':
