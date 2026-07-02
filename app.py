@@ -2525,131 +2525,61 @@ def health():
 
 @app.route('/admin/sync-survey', methods=['GET'])
 def sync_survey_v2():
-    import os, traceback, openpyxl
+    import os, openpyxl
     try:
-        survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
-        wb = openpyxl.load_workbook(survey_path, data_only=True)
+        path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
+        wb = openpyxl.load_workbook(path, data_only=True)
+        ws = wb['Sheet0']
+        rows = list(ws.iter_rows(min_row=1, values_only=True))
+        total = len(rows) - 1
+        return '<h2>读取成功</h2><p>共 ' + str(total) + ' 行数据</p><p><a href="/admin/sync-survey2">点此开始同步</a></p>'
+    except Exception as e:
+        return '<h2>失败</h2><p>' + str(e) + '</p>', 500
+
+
+@app.route('/admin/sync-survey2', methods=['GET'])
+def sync_survey_run():
+    import os, openpyxl
+    try:
+        path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
+        wb = openpyxl.load_workbook(path, data_only=True)
         ws = wb['Sheet0']
         rows = list(ws.iter_rows(min_row=1, values_only=True))
 
         def v(row, col):
             return str(row[col]).strip() if col < len(row) and row[col] else ''
 
-        def ck(row, col):
-            return '是' if col < len(row) and row[col] and str(row[col]).strip() else ''
-
-        cat_map = {31:'category_moba',32:'category_tactical',33:'category_shooter',
-            34:'category_mmorgp',35:'category_card_rpg',36:'category_strategy_slg',
-            37:'category_action_fight',38:'category_sandbox_survival',
-            40:'category_casual_puzzle',42:'category_party',
-            44:'category_openworld_rpg',45:'category_autochess'}
-        key_map = {48:'key_game_11',49:'key_game_12',50:'key_game_13',
-            51:'key_game_1',52:'key_game_2',53:'key_game_3',54:'key_game_4',
-            55:'key_game_5',56:'key_game_6',57:'key_game_7',58:'key_game_8',
-            59:'key_game_9',60:'key_game_10'}
-
         conn = get_db()
         cursor = conn.cursor()
         updated = 0
-        inserted = 0
-        err_count = 0
 
-        for idx, row in enumerate(rows[1:], start=2):
+        for row in rows[1:]:
             name = v(row, 12)
             if not name:
                 continue
-
-            try:
-                # Build data dict
-                data = {}
-                data['name'] = name
-                data['gender'] = v(row, 13)
-                data['birth_date'] = v(row, 14)
-                data['phone'] = v(row, 15)
-                data['wechat'] = v(row, 16)
-                data['school'] = v(row, 17)
-                data['major'] = v(row, 18)
-                data['graduate_year'] = v(row, 19)
-                data['education'] = v(row, 20)
-                if v(row, 10): data['exam_score'] = v(row, 10)
-                if v(row, 73): data['detailed_review'] = v(row, 73)
-
-                # City
-                cv = v(row, 26)
-                pv = v(row, 25)
-                if cv:
-                    data['city'] = (pv + cv) if pv else cv
-                elif pv:
-                    data['city'] = pv
-                if v(row, 27): data['city_level'] = v(row, 27)
-
-                # Identity (exclude 兼职)
-                jv = v(row, 22) or v(row, 23)
-                if jv and jv.strip() != '兼职':
-                    data['identity_tag'] = jv.strip()
-
-                # Games
-                for c, f in cat_map.items():
-                    if ck(row, c): data[f] = '是'
-                for c, f in key_map.items():
-                    if ck(row, c): data[f] = '是'
-                for c in [61, 62, 63]:
-                    val = v(row, c)
-                    if val:
-                        data['deep_game_' + str(c - 60)] = val
-                for c in [67, 69]:
-                    if ck(row, c): data['online_interview' if c == 67 else 'field_interview'] = '是'
-                for c in [70, 71]:
-                    if ck(row, c): data['data_query' if c == 70 else 'web_crawl'] = '是'
-
-                # Check if exists
-                if DATABASE_URL:
-                    cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
-                else:
-                    cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
-                existing = fetchone_dict(cursor)
-
-                if existing:
-                    # Update empty fields only
-                    sets = []
-                    vals = []
-                    for k, new_v in data.items():
-                        if k == 'name': continue
-                        old_v = str(existing.get(k, '') or '').strip()
-                        if not old_v and new_v:
-                            if DATABASE_URL:
-                                sets.append(k + " = %s")
-                            else:
-                                sets.append(k + " = ?")
-                            vals.append(new_v)
-                    if sets:
-                        vals.append(name)
-                        q = "UPDATE talents SET " + ", ".join(sets) + " WHERE name = "
-                        q += "%s" if DATABASE_URL else "?"
-                        cursor.execute(q, vals)
+            if DATABASE_URL:
+                cursor.execute("SELECT name FROM talents WHERE name = %s", (name,))
+            else:
+                cursor.execute("SELECT name FROM talents WHERE name = ?", (name,))
+            if fetchone_dict(cursor):
+                # Update city if empty
+                city = v(row, 26) or v(row, 6) or ''
+                province = v(row, 25)
+                if province and city:
+                    city = province + city
+                if city:
+                    if DATABASE_URL:
+                        cursor.execute("UPDATE talents SET city = %s WHERE name = %s AND (city IS NULL OR city = '')", (city, name))
+                    else:
+                        cursor.execute("UPDATE talents SET city = ? WHERE name = ? AND (city IS NULL OR city = '')", (city, name))
+                    if cursor.rowcount > 0:
                         updated += 1
-                else:
-                    # Insert new
-                    keys = [k for k, v in data.items() if v and k != 'name']
-                    if keys:
-                        all_keys = ['name'] + keys
-                        all_vals = [name] + [data[k] for k in keys]
-                        ph = ['%s'] * len(all_keys) if DATABASE_URL else ['?'] * len(all_keys)
-                        q = "INSERT INTO talents (" + ", ".join(all_keys) + ") VALUES (" + ", ".join(ph) + ")"
-                        cursor.execute(q, all_vals)
-                        inserted += 1
-
-            except Exception:
-                err_count += 1
-                if err_count <= 3:
-                    import traceback
-                    print('Row ' + str(idx) + ' ' + name + ': ' + traceback.format_exc())
 
         close_conn(conn)
-        return '<h2>同步完成</h2><p>更新: ' + str(updated) + ' 人<br>新增: ' + str(inserted) + ' 人<br>错误: ' + str(err_count) + ' 人</p>'
+        return '<h2>城市同步</h2><p>更新了 ' + str(updated) + ' 人的城市信息</p>'
 
     except Exception as e:
-        return '<h2>失败</h2><pre>' + str(type(e).__name__) + ': ' + str(e) + '</pre>', 500
+        return '<h2>失败</h2><p>' + str(e) + '</p>', 500
 
 
 if __name__ == '__main__':
