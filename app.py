@@ -2536,43 +2536,13 @@ def sync_survey_v2():
 def sync_survey_run():
     import os, openpyxl
     try:
-        path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
-        wb = openpyxl.load_workbook(path, data_only=True)
-        ws = wb['Sheet0']
-        rows = list(ws.iter_rows(min_row=1, values_only=True))
-
-        def v(row, col):
-            return str(row[col]).strip() if col < len(row) and row[col] else ''
-
+        # Step 1: Connect
         conn = get_db()
         cursor = conn.cursor()
-        updated = 0
-
-        for row in rows[1:]:
-            name = v(row, 12)
-            if not name:
-                continue
-            if DATABASE_URL:
-                cursor.execute("SELECT name FROM talents WHERE name = %s", (name,))
-            else:
-                cursor.execute("SELECT name FROM talents WHERE name = ?", (name,))
-            if fetchone_dict(cursor):
-                # Update city if empty
-                city = v(row, 26) or v(row, 6) or ''
-                province = v(row, 25)
-                if province and city:
-                    city = province + city
-                if city:
-                    if DATABASE_URL:
-                        cursor.execute("UPDATE talents SET city = %s WHERE name = %s AND (city IS NULL OR city = '')", (city, name))
-                    else:
-                        cursor.execute("UPDATE talents SET city = ? WHERE name = ? AND (city IS NULL OR city = '')", (city, name))
-                    if cursor.rowcount > 0:
-                        updated += 1
-
+        cursor.execute("SELECT COUNT(*) FROM talents")
+        count = cursor.fetchone()[0]
         close_conn(conn)
-        return '<h2>城市同步</h2><p>更新了 ' + str(updated) + ' 人的城市信息</p>'
-
+        return '<h2>数据库连接成功</h2><p>talents表共 ' + str(count) + ' 人</p>'
     except Exception as e:
         return '<h2>失败</h2><p>' + str(e) + '</p>', 500
 
