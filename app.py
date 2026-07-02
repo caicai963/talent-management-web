@@ -2522,11 +2522,15 @@ def init_wecom_settings():
 def sync_survey_v2():
     """同步兼职问卷数据 - 精确列索引匹配"""
     import openpyxl
-    survey_path = os.path.join(os.path.dirname(__file__), '\u517c\u804c\u95ee\u5377.xlsx')
-    if not os.path.exists(survey_path):
-        return '<h2>错误：找不到问卷文件</h2>', 404
+    import traceback
+    try:
+        survey_path = os.path.join(os.path.dirname(__file__), '\u517c\u804c\u95ee\u5377.xlsx')
+        if not os.path.exists(survey_path):
+            # List files in directory for debugging
+            files = os.listdir(os.path.dirname(__file__))
+            return '<h2>错误：找不到问卷文件</h2><p>目录文件: ' + ', '.join(files[:20]) + '</p>', 404
 
-    wb = openpyxl.load_workbook(survey_path, data_only=True)
+        wb = openpyxl.load_workbook(survey_path, data_only=True)
     ws = wb['Sheet0']
     rows = list(ws.iter_rows(min_row=1, values_only=True))
     headers = [str(c) if c else '' for c in rows[0]]
@@ -2651,6 +2655,8 @@ def sync_survey_v2():
 
     close_conn(conn)
     return '<h2>问卷同步完成</h2><p>更新 ' + str(updated) + ' 人（补充缺失字段）<br>新增 ' + str(inserted) + ' 人<br>总计 ' + str(updated+inserted) + '</p>'
+    except Exception as e:
+        return '<h2>同步失败</h2><pre>' + traceback.format_exc() + '</pre>', 500
 
 
 if __name__ == '__main__':
