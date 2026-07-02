@@ -2525,7 +2525,51 @@ def health():
 
 @app.route('/admin/sync-survey', methods=['GET'])
 def sync_survey_v2():
-    return '<h2>路由正常</h2><p>正在同步...</p>'
+    import os
+    import traceback
+    try:
+        survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
+        result = '<h2>步骤1：文件检查</h2>'
+        result += '<p>路径: ' + survey_path + '</p>'
+        result += '<p>存在: ' + str(os.path.exists(survey_path)) + '</p>'
+
+        if not os.path.exists(survey_path):
+            files = os.listdir(os.path.dirname(__file__))
+            result += '<p>目录文件: ' + ', '.join(files) + '</p>'
+            return result
+
+        result += '<h2>步骤2：读取Excel</h2>'
+        import openpyxl
+        wb = openpyxl.load_workbook(survey_path, data_only=True)
+        result += '<p>Sheet名: ' + str(wb.sheetnames) + '</p>'
+
+        ws = wb['Sheet0']
+        rows = list(ws.iter_rows(min_row=1, max_row=3, values_only=True))
+        result += '<p>前3行读取成功，列数: ' + str(len(rows[0])) + '</p>'
+        result += '<p>第1行第12列(姓名): ' + str(rows[1][12] if len(rows)>1 else 'N/A') + '</p>'
+
+        result += '<h2>步骤3：开始同步</h2>'
+        conn = get_db()
+        cursor = conn.cursor()
+        updated = 0
+        for row in rows[1:]:
+            name = str(row[12]).strip() if len(row) > 12 and row[12] else ''
+            if not name:
+                continue
+            if DATABASE_URL:
+                cursor.execute("SELECT name FROM talents WHERE name = %s", (name,))
+            else:
+                cursor.execute("SELECT name FROM talents WHERE name = ?", (name,))
+            if fetchone_dict(cursor):
+                updated += 1
+
+        close_conn(conn)
+        result += '<p>测试匹配: 前2行中有 ' + str(updated) + ' 人在数据库中</p>'
+        result += '<p>测试通过，可以正式同步！</p>'
+        return result
+
+    except Exception as e:
+        return '<h2>错误</h2><pre>' + traceback.format_exc() + '</pre>', 500
 
 
 if __name__ == '__main__':
