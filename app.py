@@ -1274,6 +1274,150 @@ def import_talents():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/admin/sync-survey', methods=['POST'])
+def sync_survey():
+    """同步兼职问卷数据到数据库（一次性迁移）"""
+    import openpyxl
+    survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
+    if not os.path.exists(survey_path):
+        return jsonify({'error': '问卷文件不存在'}), 404
+
+    wb = openpyxl.load_workbook(survey_path, data_only=True)
+    ws = wb['Sheet0']
+    headers = [cell.value for cell in ws[1]]
+
+    def get_val(row_data, key_suffix):
+        for h, v in zip(headers, row_data):
+            if h and (h == key_suffix or h.endswith(':' + key_suffix)):
+                return str(v).strip() if v else ''
+        return ''
+
+    def get_q(row_data, q):
+        for h, v in zip(headers, row_data):
+            if h and h == q and v:
+                return '是'
+        return ''
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    category_map = {
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:MOBA类（英雄联盟、王者荣耀等）': 'category_moba',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:战术竞技类（PUBG、和平精英等）': 'category_tactical',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:射击类（穿越火线、CODM等）': 'category_shooter',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:MMORPG（逆水寒、梦幻西游等）': 'category_mmorgp',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:卡牌RPG类（阴阳师、崩坏：星穹铁道等）': 'category_card_rpg',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:策略/SLG类（文明、率土之滨等）': 'category_strategy_slg',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:动作/格斗类（只狼、崩坏3等）': 'category_action_fight',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:沙盒/生存类（我的世界、明日之后等）': 'category_sandbox_survival',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:休闲益智类（羊了个羊、消消乐等）': 'category_casual_puzzle',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:休闲竞技/派对类（蛋仔派对、鹅鸭杀等）': 'category_party',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:开放世界RPG（塞尔达传说、原神等）': 'category_openworld_rpg',
+        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:自走棋类（金铲铲之战、多多自走棋等）': 'category_autochess',
+    }
+
+    key_game_map = {
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:明日之后': 'key_game_11',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:萤火突击': 'key_game_12',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:三角洲行动': 'key_game_13',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:逆水寒': 'key_game_1',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:燕云十六声': 'key_game_2',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:一梦江湖': 'key_game_3',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:阴阳师': 'key_game_4',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:金铲铲': 'key_game_5',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:蛋仔派对': 'key_game_6',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:无尽冬日': 'key_game_7',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:率土之滨': 'key_game_8',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:王者荣耀': 'key_game_9',
+        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:英雄联盟': 'key_game_10',
+    }
+
+    skill_map = {
+        'Q15.请问您具备以下哪些执行能力？:一对一用户访谈': 'online_interview',
+        'Q15.请问您具备以下哪些执行能力？:一对多用户座谈会': 'online_interview',
+        'Q15.请问您具备以下哪些执行能力？:街头拦访': 'field_interview',
+        'Q15.请问您具备以下哪些执行能力？:基础数据分析（数据清洗、描述统计等）': 'data_query',
+        'Q15.请问您具备以下哪些执行能力？:进阶数据分析（数据建模，数据爬取等）': 'web_crawl',
+    }
+
+    updated = 0
+    inserted = 0
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        name = get_val(row, '真实姓名：')
+        if not name:
+            continue
+
+        data = {
+            'name': name,
+            'gender': get_val(row, '性别：'),
+            'birth_date': get_val(row, '出生年份：'),
+            'phone': get_val(row, '手机号：'),
+            'wechat': get_val(row, '微信号：'),
+            'school': get_val(row, '学校：'),
+            'major': get_val(row, '专业：'),
+            'graduate_year': get_val(row, '年级：'),
+            'education': get_val(row, '在读学历（本科/硕士/博士）：'),
+            'city': get_val(row, '市'),
+            'city_level': get_val(row, '市-城市级别'),
+            'exam_score': get_val(row, '得分'),
+            'deep_game_1': get_val(row, '游戏1'),
+            'deep_game_2': get_val(row, '游戏2'),
+            'deep_game_3': get_val(row, '游戏3'),
+            'detailed_review': get_val(row, '实践经历'),
+        }
+        for q, field in category_map.items():
+            data[field] = get_q(row, q)
+        for q, field in key_game_map.items():
+            data[field] = get_q(row, q)
+        for q, field in skill_map.items():
+            if get_q(row, q) and not data.get(field):
+                data[field] = q.split('：')[1] if '：' in q else q
+
+        # Check if exists
+        if DATABASE_URL:
+            cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
+        else:
+            cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
+        existing = fetchone_dict(cursor)
+
+        if existing:
+            # Update missing fields only
+            set_parts = []
+            values = []
+            for k, v in data.items():
+                if k == 'name':
+                    continue
+                db_val = str(existing.get(k, '') or '').strip()
+                if not db_val and v:
+                    if DATABASE_URL:
+                        set_parts.append(f"{k} = %s")
+                    else:
+                        set_parts.append(f"{k} = ?")
+                    values.append(v)
+            if set_parts:
+                values.append(name)
+                if DATABASE_URL:
+                    sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = %s"
+                else:
+                    sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = ?"
+                cursor.execute(sql, values)
+                updated += 1
+        else:
+            # Insert new
+            fields = [k for k, v in data.items() if v]
+            placeholders = ['%s'] * len(fields) if DATABASE_URL else ['?'] * len(fields)
+            values = [data[k] for k in fields]
+            if DATABASE_URL:
+                cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
+            else:
+                cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
+            inserted += 1
+
+    close_conn(conn)
+    return jsonify({'success': True, 'updated': updated, 'inserted': inserted, 'total': updated + inserted})
+
+
 @app.route('/api/talents/export', methods=['GET'])
 def export_talents():
     conn = get_db()
