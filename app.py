@@ -1274,7 +1274,7 @@ def import_talents():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/admin/sync-survey', methods=['POST'])
+@app.route('/admin/sync-survey', methods=['GET', 'POST'])
 def sync_survey():
     """同步兼职问卷数据到数据库（一次性迁移）"""
     import openpyxl
