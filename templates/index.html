@@ -1655,6 +1655,9 @@
 
                 const filterIdentity = ref('');
 
+                const sortField = ref('id');
+                const sortOrder = ref('desc');
+
                 const pagination = ref({ page: 1, per_page: 20, total: 0, total_pages: 0 });
 
 
@@ -1829,6 +1832,9 @@
 
                             search: searchQuery.value,
 
+                            sort: sortField.value,
+                            order: sortOrder.value,
+
                             filters: JSON.stringify({
 
                                 education: filterEducation.value,
@@ -1861,6 +1867,19 @@
 
                     }
 
+                };
+
+
+
+                const toggleSort = () => {
+                    if (sortField.value === 'avg_rating') {
+                        sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc';
+                    } else {
+                        sortField.value = 'avg_rating';
+                        sortOrder.value = 'desc';
+                    }
+                    pagination.value.page = 1;
+                    loadTalents();
                 };
 
 
