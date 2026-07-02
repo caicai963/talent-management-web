@@ -1278,17 +1278,21 @@ def import_talents():
 def sync_survey():
     """同步兼职问卷数据到数据库（一次性迁移）"""
     import openpyxl
+    from flask import Response
+
     survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
     if not os.path.exists(survey_path):
-        return jsonify({'error': '问卷文件不存在'}), 404
+        return '<h2>错误：找不到问卷文件</h2>', 404
 
     wb = openpyxl.load_workbook(survey_path, data_only=True)
     ws = wb['Sheet0']
-    headers = [cell.value for cell in ws[1]]
+    headers = [str(cell.value) if cell.value else '' for cell in ws[1]]
 
     def get_val(row_data, key_suffix):
         for h, v in zip(headers, row_data):
-            if h and (h == key_suffix or h.endswith(':' + key_suffix)):
+            if not h:
+                continue
+            if key_suffix in h:
                 return str(v).strip() if v else ''
         return ''
 
@@ -1342,30 +1346,34 @@ def sync_survey():
 
     updated = 0
     inserted = 0
+    errors = []
+    log_lines = []
 
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        name = get_val(row, '真实姓名：')
+    for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        name = get_val(row, '真实姓名')
         if not name:
             continue
 
         data = {
             'name': name,
-            'gender': get_val(row, '性别：'),
-            'birth_date': get_val(row, '出生年份：'),
-            'phone': get_val(row, '手机号：'),
-            'wechat': get_val(row, '微信号：'),
-            'school': get_val(row, '学校：'),
-            'major': get_val(row, '专业：'),
-            'graduate_year': get_val(row, '年级：'),
-            'education': get_val(row, '在读学历（本科/硕士/博士）：'),
-            'city': get_val(row, '市'),
-            'city_level': get_val(row, '市-城市级别'),
-            'exam_score': get_val(row, '得分'),
-            'deep_game_1': get_val(row, '游戏1'),
-            'deep_game_2': get_val(row, '游戏2'),
-            'deep_game_3': get_val(row, '游戏3'),
-            'detailed_review': get_val(row, '实践经历'),
+            'gender': get_val(row, '性别'),
+            'birth_date': get_val(row, '出生年份'),
+            'phone': get_val(row, '手机号'),
+            'wechat': get_val(row, '微信号'),
+            'school': get_val(row, '学校'),
+            'major': get_val(row, '专业'),
+            'graduate_year': get_val(row, '年级'),
+            'education': get_val(row, '在读学历'),
+            'identity_tag': get_val(row, '职业'),
+            'city': get_val(row, '城市'),
         }
+        if not data['city']:
+            data['city'] = get_val(row, '市')
+        if not data['city']:
+            data['city'] = get_val(row, '常住')
+        if not data['city_level']:
+            data['city_level'] = get_val(row, '城市级别')
+
         for q, field in category_map.items():
             data[field] = get_q(row, q)
         for q, field in key_game_map.items():
@@ -1374,48 +1382,69 @@ def sync_survey():
             if get_q(row, q) and not data.get(field):
                 data[field] = q.split('：')[1] if '：' in q else q
 
-        # Check if exists
-        if DATABASE_URL:
-            cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
-        else:
-            cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
-        existing = fetchone_dict(cursor)
+        data['deep_game_1'] = get_val(row, '游戏1')
+        data['deep_game_2'] = get_val(row, '游戏2')
+        data['deep_game_3'] = get_val(row, '游戏3')
+        data['exam_score'] = get_val(row, '得分')
+        data['detailed_review'] = get_val(row, '实践经历')
 
-        if existing:
-            # Update missing fields only
-            set_parts = []
-            values = []
-            for k, v in data.items():
-                if k == 'name':
-                    continue
-                db_val = str(existing.get(k, '') or '').strip()
-                if not db_val and v:
-                    if DATABASE_URL:
-                        set_parts.append(f"{k} = %s")
-                    else:
-                        set_parts.append(f"{k} = ?")
-                    values.append(v)
-            if set_parts:
-                values.append(name)
-                if DATABASE_URL:
-                    sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = %s"
-                else:
-                    sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = ?"
-                cursor.execute(sql, values)
-                updated += 1
-        else:
-            # Insert new
-            fields = [k for k, v in data.items() if v]
-            placeholders = ['%s'] * len(fields) if DATABASE_URL else ['?'] * len(fields)
-            values = [data[k] for k in fields]
+        try:
             if DATABASE_URL:
-                cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
+                cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
             else:
-                cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
-            inserted += 1
+                cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
+            existing = fetchone_dict(cursor)
+
+            if existing:
+                set_parts = []
+                values = []
+                for k, v in data.items():
+                    if k == 'name':
+                        continue
+                    db_val = str(existing.get(k, '') or '').strip()
+                    if not db_val and v:
+                        if DATABASE_URL:
+                            set_parts.append(f"{k} = %s")
+                        else:
+                            set_parts.append(f"{k} = ?")
+                        values.append(v)
+                if set_parts:
+                    values.append(name)
+                    if DATABASE_URL:
+                        sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = %s"
+                    else:
+                        sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = ?"
+                    cursor.execute(sql, values)
+                    updated += 1
+            else:
+                fields = [k for k, v in data.items() if v]
+                if not fields:
+                    continue
+                placeholders = ['%s'] * len(fields) if DATABASE_URL else ['?'] * len(fields)
+                values = [data[k] for k in fields]
+                if DATABASE_URL:
+                    cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
+                else:
+                    cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
+                inserted += 1
+                log_lines.append(f'+ {name}: {data.get("school", "")} | {data.get("city", "")}')
+        except Exception as e:
+            errors.append(f'{name}: {str(e)}')
 
     close_conn(conn)
-    return jsonify({'success': True, 'updated': updated, 'inserted': inserted, 'total': updated + inserted})
+
+    html = f'''<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>问卷同步结果</title>
+<style>body{{font-family:sans-serif;padding:20px}}h2{{color:#4a90d9}} .ok{{color:green}}.err{{color:red}}table{{border-collapse:collapse;margin-top:16px}}td,th{{border:1px solid #ddd;padding:6px 12px;text-align:left}}</style>
+</head><body>
+<h2>问卷同步完成</h2>
+<p><span class="ok">更新 {updated} 人</span>（补充缺失字段），<span class="ok">新增 {inserted} 人</span></p>
+<p>总计处理：{updated + inserted} 人</p>
+'''
+    if errors:
+        html += f'<p class="err">错误 {len(errors)} 条：{"; ".join(errors[:5])}</p>'
+    html += '</body></html>'
+    return html
 
 
 @app.route('/api/talents/export', methods=['GET'])
