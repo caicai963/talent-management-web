@@ -2518,11 +2518,6 @@ def init_wecom_settings():
             close_conn(conn)
 
 
-@app.route('/health', methods=['GET'])
-def health():
-    return 'ok'
-
-
 @app.route('/admin/sync-survey', methods=['GET'])
 def sync_survey_v2():
     import os, openpyxl
