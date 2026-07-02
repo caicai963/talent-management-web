@@ -713,6 +713,12 @@ def register_page(token):
     return render_template('index.html', default_tab='register')
 
 
+@app.route('/register/<token>')
+def register_page(token):
+    return render_template('register.html')
+
+
+
 
 @app.route('/admin/register-links')
 def admin_register_links():
@@ -1078,13 +1084,6 @@ def get_talents():
     count_query = "SELECT COUNT(*) FROM talents WHERE 1=1"
     params = []
     count_params = []
-    sort_field = request.args.get('sort', 'id')
-    sort_order = request.args.get('order', 'desc')
-    allowed_sort_fields = ['id', 'name', 'avg_rating', 'month_rating', 'project_count']
-    if sort_field not in allowed_sort_fields:
-        sort_field = 'id'
-    if sort_order not in ('asc', 'desc'):
-        sort_order = 'desc'
 
     if search:
         if DATABASE_URL:
@@ -1120,12 +1119,10 @@ def get_talents():
     total = cursor.fetchone()[0]
 
     # data with pagination
-    numeric_sort_fields = ['avg_rating', 'month_rating', 'project_count']
-    order_clause = f"CAST({sort_field} AS REAL) {sort_order}" if sort_field in numeric_sort_fields else f"{sort_field} {sort_order}"
     if DATABASE_URL:
-        base_query += f" ORDER BY {order_clause} NULLS LAST LIMIT %s OFFSET %s"
+        base_query += " ORDER BY id DESC LIMIT %s OFFSET %s"
     else:
-        base_query += f" ORDER BY {order_clause} LIMIT ? OFFSET ?"
+        base_query += " ORDER BY id DESC LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
     cursor.execute(base_query, params)
     rows = fetchall_dicts(cursor)
@@ -1272,179 +1269,6 @@ def import_talents():
         return jsonify({'message': msg, 'count': imported, 'errors': errors[:10]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-@app.route('/admin/sync-survey', methods=['GET', 'POST'])
-def sync_survey():
-    """同步兼职问卷数据到数据库（一次性迁移）"""
-    import openpyxl
-    from flask import Response
-
-    survey_path = os.path.join(os.path.dirname(__file__), '兼职问卷.xlsx')
-    if not os.path.exists(survey_path):
-        return '<h2>错误：找不到问卷文件</h2>', 404
-
-    wb = openpyxl.load_workbook(survey_path, data_only=True)
-    ws = wb['Sheet0']
-    headers = [str(cell.value) if cell.value else '' for cell in ws[1]]
-
-    def get_val(row_data, key_suffix):
-        for h, v in zip(headers, row_data):
-            if not h:
-                continue
-            if key_suffix in h:
-                return str(v).strip() if v else ''
-        return ''
-
-    def get_q(row_data, q):
-        for h, v in zip(headers, row_data):
-            if h and h == q and v:
-                return '是'
-        return ''
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    category_map = {
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:MOBA类（英雄联盟、王者荣耀等）': 'category_moba',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:战术竞技类（PUBG、和平精英等）': 'category_tactical',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:射击类（穿越火线、CODM等）': 'category_shooter',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:MMORPG（逆水寒、梦幻西游等）': 'category_mmorgp',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:卡牌RPG类（阴阳师、崩坏：星穹铁道等）': 'category_card_rpg',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:策略/SLG类（文明、率土之滨等）': 'category_strategy_slg',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:动作/格斗类（只狼、崩坏3等）': 'category_action_fight',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:沙盒/生存类（我的世界、明日之后等）': 'category_sandbox_survival',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:休闲益智类（羊了个羊、消消乐等）': 'category_casual_puzzle',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:休闲竞技/派对类（蛋仔派对、鹅鸭杀等）': 'category_party',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:开放世界RPG（塞尔达传说、原神等）': 'category_openworld_rpg',
-        'Q8.请问您近一年最常玩的游戏（包括PC/主机/手游等平台）有哪些？:自走棋类（金铲铲之战、多多自走棋等）': 'category_autochess',
-    }
-
-    key_game_map = {
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:明日之后': 'key_game_11',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:萤火突击': 'key_game_12',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:三角洲行动': 'key_game_13',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:逆水寒': 'key_game_1',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:燕云十六声': 'key_game_2',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:一梦江湖': 'key_game_3',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:阴阳师': 'key_game_4',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:金铲铲': 'key_game_5',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:蛋仔派对': 'key_game_6',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:无尽冬日': 'key_game_7',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:率土之滨': 'key_game_8',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:王者荣耀': 'key_game_9',
-        'Q9.以下游戏中，您玩过两个月及以上的游戏有哪些？:英雄联盟': 'key_game_10',
-    }
-
-    skill_map = {
-        'Q15.请问您具备以下哪些执行能力？:一对一用户访谈': 'online_interview',
-        'Q15.请问您具备以下哪些执行能力？:一对多用户座谈会': 'online_interview',
-        'Q15.请问您具备以下哪些执行能力？:街头拦访': 'field_interview',
-        'Q15.请问您具备以下哪些执行能力？:基础数据分析（数据清洗、描述统计等）': 'data_query',
-        'Q15.请问您具备以下哪些执行能力？:进阶数据分析（数据建模，数据爬取等）': 'web_crawl',
-    }
-
-    updated = 0
-    inserted = 0
-    errors = []
-    log_lines = []
-
-    for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
-        name = get_val(row, '真实姓名')
-        if not name:
-            continue
-
-        data = {
-            'name': name,
-            'gender': get_val(row, '性别'),
-            'birth_date': get_val(row, '出生年份'),
-            'phone': get_val(row, '手机号'),
-            'wechat': get_val(row, '微信号'),
-            'school': get_val(row, '学校'),
-            'major': get_val(row, '专业'),
-            'graduate_year': get_val(row, '年级'),
-            'education': get_val(row, '在读学历'),
-            'identity_tag': get_val(row, '职业'),
-            'city': get_val(row, '城市'),
-        }
-        if not data['city']:
-            data['city'] = get_val(row, '市')
-        if not data['city']:
-            data['city'] = get_val(row, '常住')
-        if not data['city_level']:
-            data['city_level'] = get_val(row, '城市级别')
-
-        for q, field in category_map.items():
-            data[field] = get_q(row, q)
-        for q, field in key_game_map.items():
-            data[field] = get_q(row, q)
-        for q, field in skill_map.items():
-            if get_q(row, q) and not data.get(field):
-                data[field] = q.split('：')[1] if '：' in q else q
-
-        data['deep_game_1'] = get_val(row, '游戏1')
-        data['deep_game_2'] = get_val(row, '游戏2')
-        data['deep_game_3'] = get_val(row, '游戏3')
-        data['exam_score'] = get_val(row, '得分')
-        data['detailed_review'] = get_val(row, '实践经历')
-
-        try:
-            if DATABASE_URL:
-                cursor.execute("SELECT * FROM talents WHERE name = %s", (name,))
-            else:
-                cursor.execute("SELECT * FROM talents WHERE name = ?", (name,))
-            existing = fetchone_dict(cursor)
-
-            if existing:
-                set_parts = []
-                values = []
-                for k, v in data.items():
-                    if k == 'name':
-                        continue
-                    db_val = str(existing.get(k, '') or '').strip()
-                    if not db_val and v:
-                        if DATABASE_URL:
-                            set_parts.append(f"{k} = %s")
-                        else:
-                            set_parts.append(f"{k} = ?")
-                        values.append(v)
-                if set_parts:
-                    values.append(name)
-                    if DATABASE_URL:
-                        sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = %s"
-                    else:
-                        sql = f"UPDATE talents SET {', '.join(set_parts)} WHERE name = ?"
-                    cursor.execute(sql, values)
-                    updated += 1
-            else:
-                fields = [k for k, v in data.items() if v]
-                if not fields:
-                    continue
-                placeholders = ['%s'] * len(fields) if DATABASE_URL else ['?'] * len(fields)
-                values = [data[k] for k in fields]
-                if DATABASE_URL:
-                    cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
-                else:
-                    cursor.execute(f"INSERT INTO talents ({', '.join(fields)}) VALUES ({', '.join(placeholders)})", values)
-                inserted += 1
-                log_lines.append(f'+ {name}: {data.get("school", "")} | {data.get("city", "")}')
-        except Exception as e:
-            errors.append(f'{name}: {str(e)}')
-
-    close_conn(conn)
-
-    html = f'''<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>问卷同步结果</title>
-<style>body{{font-family:sans-serif;padding:20px}}h2{{color:#4a90d9}} .ok{{color:green}}.err{{color:red}}table{{border-collapse:collapse;margin-top:16px}}td,th{{border:1px solid #ddd;padding:6px 12px;text-align:left}}</style>
-</head><body>
-<h2>问卷同步完成</h2>
-<p><span class="ok">更新 {updated} 人</span>（补充缺失字段），<span class="ok">新增 {inserted} 人</span></p>
-<p>总计处理：{updated + inserted} 人</p>
-'''
-    if errors:
-        html += f'<p class="err">错误 {len(errors)} 条：{"; ".join(errors[:5])}</p>'
-    html += '</body></html>'
-    return html
 
 
 @app.route('/api/talents/export', methods=['GET'])
