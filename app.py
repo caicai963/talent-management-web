@@ -713,12 +713,6 @@ def register_page(token):
     return render_template('index.html', default_tab='register')
 
 
-@app.route('/register/<token>')
-def register_page(token):
-    return render_template('register.html')
-
-
-
 
 @app.route('/admin/register-links')
 def admin_register_links():
