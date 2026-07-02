@@ -700,17 +700,12 @@ def manual_init():
 
 @app.route('/')
 def index():
-    tab = request.args.get('tab', '')
-    return render_template('index.html', default_tab=tab)
+    return render_template('index.html')
 
 @app.route('/apply')
 def apply_page():
     """报名页面入口，企微等外部浏览器直接打开此路径"""
-    return render_template('index.html', default_tab='')
-
-@app.route('/register/<token>')
-def register_page(token):
-    return render_template('index.html', default_tab='register')
+    return render_template('index.html')
 
 
 @app.route('/register/<token>')
