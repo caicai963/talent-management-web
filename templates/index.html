@@ -360,6 +360,10 @@
 
                     <button class="btn-warning" @click="exportTalents">????Excel</button>
 
+                    <button class="btn-primary" @click="toggleSort" :style="{ background: sortField === 'avg_rating' ? '#ff9800' : '#4a90d9' }">
+                        {{ sortField === 'avg_rating' ? (sortOrder === 'desc' ? '???' : '??') : '??????' }}
+                    </button>
+
                 </div>
 
 
@@ -394,6 +398,8 @@
 
                                 <th>?????</th>
 
+                                <th>?????</th>
+
                                 <th>???????</th>
 
                                 <th>????</th>
@@ -406,13 +412,10 @@
 
                             <tr v-if="loading">
 
-                                <td colspan="13" class="loading">??????...</td>
-
+                                <td colspan="14" class="loading">??????...</td>
                             </tr>
-
                             <tr v-else-if="talents.length === 0">
-
-                                <td colspan="13" class="empty-state">????????</td>
+                                <td colspan="14" class="empty-state">????????</td>
 
                             </tr>
 
@@ -437,6 +440,8 @@
                                 <td>{{ talent.education || '-' }}</td>
 
                                 <td>{{ talent.graduate_year || '-' }}</td>
+
+                                <td v-if="currentUser.role !== 'demander'">{{ talent.avg_rating || '-' }}</td>
 
                                 <td v-if="currentUser.role !== 'demander'">{{ talent.phone || '-' }}</td>
 
@@ -1734,6 +1739,9 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
                 const filterIdentity = ref('');
 
+                const sortField = ref('id');
+                const sortOrder = ref('desc');
+
                 const pagination = ref({ page: 1, per_page: 20, total: 0, total_pages: 0 });
 
 
@@ -1905,13 +1913,11 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
                     try {
 
                         const params = {
-
                             page: pagination.value.page,
-
                             per_page: pagination.value.per_page,
-
                             search: searchQuery.value,
-
+                            sort: sortField.value,
+                            order: sortOrder.value,
                             filters: JSON.stringify({
 
                                 education: filterEducation.value,
@@ -1944,6 +1950,19 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
                     }
 
+                };
+
+
+
+                const toggleSort = () => {
+                    if (sortField.value === 'avg_rating') {
+                        sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc';
+                    } else {
+                        sortField.value = 'avg_rating';
+                        sortOrder.value = 'desc';
+                    }
+                    pagination.value.page = 1;
+                    loadTalents();
                 };
 
 
@@ -2607,6 +2626,8 @@ return {
                     handleLogin, handleLogout,
 
                     talents, loading, searchQuery, filterEducation, filterIdentity,
+
+                    sortField, sortOrder, toggleSort,
 
                     pagination, visiblePages, loadTalents, debouncedSearch, changePage,
 

@@ -1084,6 +1084,13 @@ def get_talents():
     count_query = "SELECT COUNT(*) FROM talents WHERE 1=1"
     params = []
     count_params = []
+    sort_field = request.args.get('sort', 'id')
+    sort_order = request.args.get('order', 'desc')
+    allowed_sort_fields = ['id', 'name', 'avg_rating', 'month_rating', 'project_count']
+    if sort_field not in allowed_sort_fields:
+        sort_field = 'id'
+    if sort_order not in ('asc', 'desc'):
+        sort_order = 'desc'
 
     if search:
         if DATABASE_URL:
@@ -1119,10 +1126,12 @@ def get_talents():
     total = cursor.fetchone()[0]
 
     # data with pagination
+    numeric_sort_fields = ['avg_rating', 'month_rating', 'project_count']
+    order_clause = f"CAST({sort_field} AS REAL) {sort_order}" if sort_field in numeric_sort_fields else f"{sort_field} {sort_order}"
     if DATABASE_URL:
-        base_query += " ORDER BY id DESC LIMIT %s OFFSET %s"
+        base_query += f" ORDER BY {order_clause} NULLS LAST LIMIT %s OFFSET %s"
     else:
-        base_query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+        base_query += f" ORDER BY {order_clause} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
     cursor.execute(base_query, params)
     rows = fetchall_dicts(cursor)
